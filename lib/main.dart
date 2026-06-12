@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:library_management/authScreens/signup_screen.dart';
+import 'package:library_management/screens/welcome_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,9 +14,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
+        fontFamily: 'Inter',
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: SignupScreen(),
+      home: WelcomeScreen(),
     );
   }
 }
