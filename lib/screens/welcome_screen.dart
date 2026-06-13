@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:library_management/app_colors.dart';
+import 'package:library_management/authScreens/signup_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -18,16 +19,16 @@ class WelcomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.asset('assets/images/library_logo.png'),
-                      SizedBox(height: 25),
+                      SizedBox(height: 40),
                       Text(
-                        'My Library Pro',
+                        'MY LIBRARY PRO',
                         style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight(800),
+                          fontSize: 32,
+                          fontWeight: FontWeight(900),
                           color: AppColors.heading,
                         ),
                       ),
-                      SizedBox(height: 5),
+                      SizedBox(height: 8),
                       Text(
                         'Your Library Organised',
                         style: TextStyle(
@@ -40,7 +41,30 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 56),
-                ElevatedButton(onPressed: () {}, child: Text("Let's Start")),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return SignupScreen();
+                        },
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text("Let's Start", style: TextStyle(fontSize: 16)),
+                      SizedBox(width: 10),
+                      Icon(Icons.arrow_right_alt),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
