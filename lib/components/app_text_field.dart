@@ -8,12 +8,18 @@ class AppTextField extends StatefulWidget {
     this.obscureTxt = false,
     this.validator,
     this.textEditingController,
+    this.keyboardType,
+    this.textInputAction,
+    this.autofillHints,
   });
 
   final String hintTxt;
   final bool obscureTxt;
   final String? Function(String?)? validator;
   final TextEditingController? textEditingController;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final Iterable<String>? autofillHints;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -33,12 +39,21 @@ class _AppTextFieldState extends State<AppTextField> {
       controller: widget.textEditingController,
       validator: widget.validator,
       obscureText: _obscurePassword,
+      keyboardType: widget.keyboardType,
+      textInputAction: widget.textInputAction,
+      autofillHints: widget.autofillHints,
       decoration: InputDecoration(
         hintText: widget.hintTxt,
-        hintStyle: TextStyle(fontSize: 19, fontWeight: FontWeight(500)),
+        hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w500,
+          color: AppColors.caption,
+        ),
         filled: true,
         fillColor: AppColors.card,
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
         border: UnderlineInputBorder(
           borderSide: BorderSide(
             color: const Color.fromARGB(255, 234, 231, 231),
@@ -62,8 +77,8 @@ class _AppTextFieldState extends State<AppTextField> {
         suffixIcon: widget.obscureTxt
             ? IconButton(
                 icon: _obscurePassword
-                    ? Icon(Icons.visibility_outlined)
-                    : Icon(Icons.visibility_off_outlined),
+                    ? const Icon(Icons.visibility_outlined)
+                    : const Icon(Icons.visibility_off_outlined),
                 onPressed: () {
                   setState(() {
                     _obscurePassword = !_obscurePassword;

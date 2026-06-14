@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:library_management/app_colors.dart';
 import 'package:library_management/authScreens/signup_screen.dart';
+import 'package:library_management/components/app_button.dart';
+import 'package:library_management/components/app_logo_header.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -8,66 +9,43 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-            child: Column(
-              children: [
-                Expanded(
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final horizontalPadding = (constraints.maxWidth * 0.06)
+                .clamp(20.0, 32.0)
+                .toDouble();
+            final logoSize = (constraints.maxHeight * 0.3)
+                .clamp(150.0, 200.0)
+                .toDouble();
+
+            return Center(
+              child: SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    24,
+                    horizontalPadding,
+                    24,
+                  ),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset('assets/images/library_logo.png'),
-                      SizedBox(height: 40),
-                      Text(
-                        'MY LIBRARY PRO',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight(900),
-                          color: AppColors.heading,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Your Library Organised',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight(500),
-                          color: AppColors.heading,
+                      Expanded(child: AppLogoHeader(logoSize: logoSize)),
+                      SizedBox(
+                        width: double.infinity,
+                        child: AppButton(
+                          screenChange: SignupScreen(),
+                          buttonText: "Let's Start",
+                          buttonRoutes: true,
+                          buttonIcon: true,
                         ),
                       ),
                     ],
                   ),
                 ),
-                SizedBox(height: 56),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return SignupScreen();
-                        },
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.secondary,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text("Let's Start", style: TextStyle(fontSize: 16)),
-                      SizedBox(width: 10),
-                      Icon(Icons.arrow_right_alt),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
