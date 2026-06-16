@@ -3,6 +3,7 @@ import 'package:library_management/app_colors.dart';
 import 'package:library_management/authScreens/signup_screen.dart';
 import 'package:library_management/components/app_logo_header.dart';
 import 'package:library_management/components/app_text_field.dart';
+import 'package:library_management/screens/library_profile_screen.dart';
 import 'package:library_management/validator/form_validators.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -32,13 +33,18 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _submitSignip() {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    // if (!_formKey.currentState!.validate()) {
+    //   return;
+    // }
 
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Account details look good.')));
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => LibraryProfileScreen()),
+    );
   }
 
   @override
@@ -80,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         subHeading: 'Reach to your Account',
                       ),
                       const SizedBox(height: 64),
-                      _SignupForm(
+                      _SigninForm(
                         emailController: _emailController,
                         passwordController: _passwordController,
                         onSubmit: _submitSignip,
@@ -97,8 +103,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-class _SignupForm extends StatelessWidget {
-  const _SignupForm({
+class _SigninForm extends StatelessWidget {
+  const _SigninForm({
     required this.emailController,
     required this.passwordController,
     required this.onSubmit,
@@ -146,7 +152,7 @@ class _SignupForm extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            child: const Text('Sign Up'),
+            child: const Text('Sign In'),
           ),
         ),
         const SizedBox(height: 18),

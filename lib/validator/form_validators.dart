@@ -51,4 +51,90 @@ class FormValidators {
     }
     return null;
   }
+
+  //LIBRARY NAME SCREEN
+
+  // Library Name
+  static String? libraryNameValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter library name';
+    }
+
+    if (value.trim().length < 3) {
+      return 'Library name must be at least 3 characters';
+    }
+
+    return null;
+  }
+
+  // WhatsApp Number
+  static String? whatsappValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter WhatsApp number';
+    }
+
+    final phone = value.trim();
+
+    if (!RegExp(r'^[6-9]\d{9}$').hasMatch(phone)) {
+      return 'Please enter a valid 10-digit number';
+    }
+
+    return null;
+  }
+
+  // Tag Line
+  static String? tagLineValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter a tag line';
+    }
+
+    if (value.trim().length < 5) {
+      return 'Tag line is too short';
+    }
+
+    if (value.trim().length > 80) {
+      return 'Tag line cannot exceed 80 characters';
+    }
+
+    return null;
+  }
+
+  // City
+  static String? cityValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter city';
+    }
+
+    if (!RegExp(r"^[a-zA-Z ]+$").hasMatch(value.trim())) {
+      return 'City name can contain only letters';
+    }
+
+    return null;
+  }
+
+  // State
+  static String? stateValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter state';
+    }
+
+    if (!RegExp(r"^[a-zA-Z ]+$").hasMatch(value.trim())) {
+      return 'State name can contain only letters';
+    }
+
+    return null;
+  }
+
+  // PIN Code
+  static String? pinCodeValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter PIN code';
+    }
+
+    if (!RegExp(r'^\d{6}$').hasMatch(value.trim())) {
+      return 'Please enter a valid 6-digit PIN code';
+    }
+
+    return null;
+  }
 }
