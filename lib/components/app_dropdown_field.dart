@@ -1,28 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:library_management/app_colors.dart';
 
-class AppDropdownField extends StatelessWidget {
+class AppDropdownField extends StatefulWidget {
   const AppDropdownField({
     super.key,
     required this.hintTxt,
     required this.items,
     required this.value,
     required this.onChanged,
+    required this.validator,
   });
 
   final String hintTxt;
   final List<String> items;
   final String? value;
   final ValueChanged<String?> onChanged;
+  final String? Function(String?)? validator;
 
+  @override
+  State<AppDropdownField> createState() => _AppDropdownFieldState();
+}
+
+class _AppDropdownFieldState extends State<AppDropdownField> {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
-      initialValue: value,
+      validator: widget.validator,
+      initialValue: widget.value,
       isExpanded: true,
-      onChanged: onChanged,
+      onChanged: widget.onChanged,
       decoration: InputDecoration(
-        hintText: hintTxt,
+        hintText: widget.hintTxt,
         hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
           fontWeight: FontWeight.w500,
           color: AppColors.caption,
@@ -52,7 +60,7 @@ class AppDropdownField extends StatelessWidget {
           ),
         ),
       ),
-      items: items.map((item) {
+      items: widget.items.map((item) {
         return DropdownMenuItem<String>(value: item, child: Text(item));
       }).toList(),
     );

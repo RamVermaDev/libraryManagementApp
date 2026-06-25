@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/authScreens/signup_screen.dart';
 import 'package:library_management/components/app_logo_header.dart';
@@ -6,14 +7,14 @@ import 'package:library_management/components/app_text_field.dart';
 import 'package:library_management/controllers/user_controller.dart';
 import 'package:library_management/validator/form_validators.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   // static const double _maxContentWidth = 420;
   static const double _fieldGap = 8;
 
@@ -49,6 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await _userController.signIn(
         context: context,
+        ref: ref,
         email: _emailController.text,
         password: _passwordController.text,
       );

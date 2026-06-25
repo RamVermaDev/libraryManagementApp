@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/components/app_dropdown_field.dart';
 import 'package:library_management/components/app_text_field.dart';
+import 'package:library_management/controllers/library_controller.dart';
 import 'package:library_management/indian_state.dart';
 import 'package:library_management/validator/form_validators.dart';
 
-class LibraryProfileScreen extends StatefulWidget {
+class LibraryProfileScreen extends ConsumerStatefulWidget {
   const LibraryProfileScreen({super.key});
 
   @override
-  State<LibraryProfileScreen> createState() => _LibraryProfileScreenState();
+  ConsumerState<LibraryProfileScreen> createState() =>
+      _LibraryProfileScreenState();
 }
 
-class _LibraryProfileScreenState extends State<LibraryProfileScreen> {
+class _LibraryProfileScreenState extends ConsumerState<LibraryProfileScreen> {
   static const double _fieldGap = 8;
+
+  bool _isLoading = false;
+  final _libraryController = LibraryController();
 
   final _formKey = GlobalKey<FormState>();
   final _libraryName = TextEditingController();
   final _whatsappNumber = TextEditingController();
   final _tagLine = TextEditingController();
   final _city = TextEditingController();
-  final _state = TextEditingController();
   final _pinCode = TextEditingController();
 
   String? selectedState;
@@ -31,9 +36,34 @@ class _LibraryProfileScreenState extends State<LibraryProfileScreen> {
     _whatsappNumber.dispose();
     _tagLine.dispose();
     _city.dispose();
-    _state.dispose();
     _pinCode.dispose();
     super.dispose();
+  }
+
+  Future<void> _submitLibrary() async {
+    if (!_formKey.currentState!.validate() || selectedState == null) return;
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _libraryController.createLibrary(
+        context: context,
+        ref: ref,
+        libraryName: _libraryName.text,
+        tagLine: _tagLine.text,
+        whatsappNumber: _whatsappNumber.text,
+        city: _city.text,
+        state: selectedState!,
+        pinCode: _pinCode.text,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -81,9 +111,9 @@ class _LibraryProfileScreenState extends State<LibraryProfileScreen> {
                         whatsappNumber: _whatsappNumber,
                         tagLine: _tagLine,
                         city: _city,
-                        state: _state,
                         pinCode: _pinCode,
-                        onSubmit: () {},
+                        loading: _isLoading,
+                        onSubmit: _submitLibrary,
                         selectedState: selectedState,
                         onStateChanged: (value) {
                           setState(() {
@@ -108,10 +138,10 @@ class _LibraryProfileForm extends StatelessWidget {
     required this.libraryName,
     required this.whatsappNumber,
     required this.city,
-    required this.state,
     required this.pinCode,
     required this.tagLine,
     required this.onSubmit,
+    required this.loading,
 
     required this.selectedState,
     required this.onStateChanged,
@@ -120,9 +150,9 @@ class _LibraryProfileForm extends StatelessWidget {
   final TextEditingController whatsappNumber;
   final TextEditingController tagLine;
   final TextEditingController city;
-  final TextEditingController state;
   final TextEditingController pinCode;
   final VoidCallback onSubmit;
+  final bool loading;
 
   final String? selectedState;
   final List<String> states = IndianState.indianStates;
@@ -168,6 +198,12 @@ class _LibraryProfileForm extends StatelessWidget {
           value: selectedState,
           items: states,
           onChanged: onStateChanged,
+          validator: (value) {
+            if (value == null) {
+              return 'Please select the State';
+            }
+            return null;
+          },
         ),
         SizedBox(height: _LibraryProfileScreenState._fieldGap),
         AppTextField(
@@ -180,8 +216,9 @@ class _LibraryProfileForm extends StatelessWidget {
         const SizedBox(height: 20),
         SizedBox(
           height: 52,
+          width: 200,
           child: ElevatedButton(
-            onPressed: onSubmit,
+            onPressed: loading ? null : onSubmit,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.secondary,
               foregroundColor: Colors.white,
@@ -189,7 +226,9 @@ class _LibraryProfileForm extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            child: const Text('Save'),
+            child: loading
+                ? Center(child: CircularProgressIndicator())
+                : const Text('Save'),
           ),
         ),
         const SizedBox(height: 10),

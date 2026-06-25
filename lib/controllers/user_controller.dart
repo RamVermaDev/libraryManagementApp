@@ -1,11 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_notification.dart';
 import 'package:library_management/authScreens/login_screen.dart';
 import 'package:library_management/global_varaible.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:library_management/models/user_model.dart';
-import 'package:library_management/screens/main_screen.dart';
+import 'package:library_management/provider/token_provider.dart';
+import 'package:library_management/provider/user_provider.dart';
+import 'package:library_management/screens/library_profile_screen.dart';
 import 'package:library_management/services/manage_http_response.dart';
 
 class UserController {
@@ -61,6 +66,7 @@ class UserController {
 
   Future<void> signIn({
     required BuildContext context,
+    required WidgetRef ref,
     required String email,
     required String password,
   }) async {
@@ -89,11 +95,18 @@ class UserController {
         response: response,
         context: context,
         onSuccess: () {
+          print(response.body);
+          final userJson = jsonEncode(jsonDecode(response.body)['user']);
+          ref.read(userProvider.notifier).setUser(userJson);
+          final token = jsonDecode(response.body)['token'];
+          ref.read(tokenProvider.notifier).setToken(token);
+          print(ref.read(tokenProvider));
+
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
               builder: (context) {
-                return MainScreen();
+                return LibraryProfileScreen();
                 //--------here i Have to check if already library or not
                 //---- count library number and if user select one then save that
                 //----if one library that directly to home page
@@ -101,7 +114,7 @@ class UserController {
             ),
             (route) => false,
           );
-          showSnackBar(context, 'You are Signed In');
+          AppNotification.show(context, message: 'Signed In');
         },
       );
     } catch (e, stackTrace) {
