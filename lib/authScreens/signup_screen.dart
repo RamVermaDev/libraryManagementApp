@@ -3,6 +3,7 @@ import 'package:library_management/app_colors.dart';
 import 'package:library_management/authScreens/login_screen.dart';
 import 'package:library_management/components/app_logo_header.dart';
 import 'package:library_management/components/app_text_field.dart';
+import 'package:library_management/controllers/user_controller.dart';
 import 'package:library_management/validator/form_validators.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -15,6 +16,9 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   // static const double _maxContentWidth = 420;
   static const double _fieldGap = 8;
+
+  bool _isLoading = false;
+  final _authController = UserController();
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
@@ -31,14 +35,37 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  void _submitSignup() {
+  Future<void> _submitSignup() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Account details look good.')));
+    print(_nameController.text);
+
+    setState(() {
+      _isLoading = true;
+    });
+    print("Loading Started");
+    try {
+      print("Entered signup()");
+      await _authController.signup(
+        context: context,
+        name: _nameController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      print("End signup()");
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+
+    //ScaffoldMessenger.of(
+    //context,
+    //).showSnackBar(const SnackBar(content: Text('Account details look good.')));
   }
 
   @override
@@ -86,6 +113,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         passwordController: _passwordController,
                         confirmPasswordController: _confirmPasswordController,
                         onSubmit: _submitSignup,
+                        loading: _isLoading,
                       ),
                     ],
                   ),
@@ -106,13 +134,15 @@ class _SignupForm extends StatelessWidget {
     required this.passwordController,
     required this.confirmPasswordController,
     required this.onSubmit,
+    required this.loading,
   });
 
   final TextEditingController nameController;
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final TextEditingController confirmPasswordController;
-  final VoidCallback onSubmit;
+  final Future<void> Function() onSubmit;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +193,7 @@ class _SignupForm extends StatelessWidget {
         SizedBox(
           height: 52,
           child: ElevatedButton(
-            onPressed: onSubmit,
+            onPressed: loading ? null : onSubmit,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.secondary,
               foregroundColor: Colors.white,
@@ -171,7 +201,9 @@ class _SignupForm extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            child: const Text('Sign Up'),
+            child: loading
+                ? Center(child: CircularProgressIndicator())
+                : const Text('Sign Up'),
           ),
         ),
         const SizedBox(height: 18),
