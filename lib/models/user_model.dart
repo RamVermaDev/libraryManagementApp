@@ -8,6 +8,7 @@ class UserModel {
   final bool isEmailVerified;
   final String role;
   final String status;
+  final List<String> libraries;
 
   const UserModel({
     required this.id,
@@ -17,6 +18,7 @@ class UserModel {
     required this.isEmailVerified,
     required this.role,
     required this.status,
+    required this.libraries,
   });
 
   Map<String, dynamic> toMap() {
@@ -28,6 +30,7 @@ class UserModel {
       "isEmailVerified": isEmailVerified,
       "role": role,
       "status": status,
+      "libraries": libraries,
     };
   }
 
@@ -42,6 +45,7 @@ class UserModel {
       isEmailVerified: map["isEmailVerified"] ?? false,
       role: map["role"] ?? "user",
       status: map["status"] ?? "active",
+      libraries: List<String>.from(map['libraries'] ?? []),
     );
   }
 
