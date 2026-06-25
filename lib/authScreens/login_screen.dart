@@ -3,7 +3,7 @@ import 'package:library_management/app_colors.dart';
 import 'package:library_management/authScreens/signup_screen.dart';
 import 'package:library_management/components/app_logo_header.dart';
 import 'package:library_management/components/app_text_field.dart';
-import 'package:library_management/screens/library_profile_screen.dart';
+import 'package:library_management/controllers/user_controller.dart';
 import 'package:library_management/validator/form_validators.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -16,6 +16,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   // static const double _maxContentWidth = 420;
   static const double _fieldGap = 8;
+
+  bool _isLoading = false;
+  final _userController = UserController();
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
@@ -32,19 +35,30 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _submitSignip() {
-    // if (!_formKey.currentState!.validate()) {
-    //   return;
-    // }
+  Future<void> _submitSignin() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Account details look good.')));
+    setState(() {
+      _isLoading = true;
+    });
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => LibraryProfileScreen()),
-    );
+    print(_emailController.text);
+
+    try {
+      await _userController.signIn(
+        context: context,
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -89,7 +103,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       _SigninForm(
                         emailController: _emailController,
                         passwordController: _passwordController,
-                        onSubmit: _submitSignip,
+                        onSubmit: _submitSignin,
+                        loading: _isLoading,
                       ),
                     ],
                   ),
@@ -108,11 +123,13 @@ class _SigninForm extends StatelessWidget {
     required this.emailController,
     required this.passwordController,
     required this.onSubmit,
+    required this.loading,
   });
 
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final VoidCallback onSubmit;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +161,7 @@ class _SigninForm extends StatelessWidget {
         SizedBox(
           height: 52,
           child: ElevatedButton(
-            onPressed: onSubmit,
+            onPressed: loading ? null : onSubmit,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.secondary,
               foregroundColor: Colors.white,
@@ -152,7 +169,9 @@ class _SigninForm extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            child: const Text('Sign In'),
+            child: loading
+                ? Center(child: CircularProgressIndicator())
+                : const Text('Sign In'),
           ),
         ),
         const SizedBox(height: 18),
