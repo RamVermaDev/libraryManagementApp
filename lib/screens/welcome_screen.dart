@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:library_management/authScreens/signup_screen.dart';
+import 'package:library_management/authScreens/login_screen.dart';
 import 'package:library_management/components/app_button.dart';
 import 'package:library_management/components/app_logo_header.dart';
 
@@ -34,7 +34,7 @@ class WelcomeScreen extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: AppButton(
-                          screenChange: SignupScreen(),
+                          screenChange: LoginScreen(),
                           buttonText: "Let's Start",
                           buttonRoutes: true,
                           buttonIcon: true,
