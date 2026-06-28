@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
-  const AppBarWidget({super.key, required this.title});
+  const AppBarWidget({super.key, required this.title, this.isAction = true});
 
   final String title;
+  final bool isAction;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -17,12 +18,9 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       actions: [
-        IconButton(
-          onPressed: () {
-            // Add Library
-          },
-          icon: const Icon(Icons.add),
-        ),
+        ...(isAction
+            ? [IconButton(onPressed: () {}, icon: const Icon(Icons.add))]
+            : []),
       ],
     );
   }

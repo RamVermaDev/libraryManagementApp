@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:library_management/app_colors.dart';
 import 'package:library_management/drawer/drawerWidgets/app_bar_widget.dart';
+import 'package:library_management/drawer/drawerWidgets/drawer_button_widget.dart';
+import 'package:library_management/drawer/drawer_screen/profile/edit_profile_screen.dart';
+import 'package:library_management/drawer/drawer_screen/profile/profile_tile.dart';
+import 'package:library_management/provider/user_provider.dart';
 
-class MyProfileScreen extends StatelessWidget {
+class MyProfileScreen extends ConsumerWidget {
   const MyProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(userProvider);
+
     return Scaffold(
       appBar: const AppBarWidget(title: 'My Profile'),
       body: SingleChildScrollView(
@@ -17,20 +25,22 @@ class MyProfileScreen extends StatelessWidget {
             const CircleAvatar(
               radius: 50,
               backgroundColor: Color(0xFFD0E6FF),
-              child: Icon(Icons.person, size: 60, color: Colors.blue),
+              child: Icon(Icons.person, size: 60, color: AppColors.secondary),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
 
-            const Text(
-              'Ramendra Verma',
+            Text(
+              // name will update from backend
+              user != null ? user.name : 'Ramnedra',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
 
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
 
             Text(
-              'ram@gmail.com',
+              //email from backend
+              user != null ? user.email : 'gmail.com',
               style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
             ),
 
@@ -39,7 +49,7 @@ class MyProfileScreen extends StatelessWidget {
             Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(18),
@@ -49,9 +59,6 @@ class MyProfileScreen extends StatelessWidget {
                     Divider(),
 
                     ProfileTile(title: "Email", value: "ram@gmail.com"),
-                    Divider(),
-
-                    ProfileTile(title: "Role", value: "Library Owner"),
                     Divider(),
 
                     ProfileTile(title: "Status", value: "Active"),
@@ -68,44 +75,27 @@ class MyProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 30),
 
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.edit),
-                label: const Text("Edit Profile"),
+            DrawerButtonWidget(
+              buttonText: 'Edit Profile',
+              buttonIcon: Icons.edit,
+              buttonRoutes: true,
+              screenChange: EditProfileScreen(),
+            ),
+
+            SizedBox(height: 15),
+
+            InkWell(
+              onTap: () {},
+              child: Text(
+                'Change Password',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.primary,
+                ),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class ProfileTile extends StatelessWidget {
-  final String title;
-  final String value;
-
-  const ProfileTile({super.key, required this.title, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-          ),
-        ],
       ),
     );
   }
