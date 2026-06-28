@@ -30,9 +30,11 @@ class LibraryModel {
   });
 
   factory LibraryModel.fromMap(Map<String, dynamic> map) {
+    final owner = map['ownerId'];
+
     return LibraryModel(
-      id: map['_id'],
-      ownerId: map['ownerId'],
+      id: map['_id'] ?? map['id'],
+      ownerId: owner is Map ? owner['_id'] : owner,
       libraryName: map['libraryName'] ?? '',
       tagLine: map['tagLine'] ?? '',
       whatsappNumber: map['whatsappNumber'] ?? '',

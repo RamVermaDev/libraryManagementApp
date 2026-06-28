@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:library_management/auth_gate.dart';
 import 'package:library_management/drawer/drawer_screen/available_seat_screen.dart';
 import 'package:library_management/drawer/drawer_screen/enrolement_fee_screen.dart';
 import 'package:library_management/drawer/drawer_screen/library/my_library_screen.dart';
@@ -7,7 +8,6 @@ import 'package:library_management/drawer/drawer_screen/profile/my_profile_scree
 import 'package:library_management/drawer/drawer_screen/plan_setup_screen.dart';
 import 'package:library_management/drawer/drawer_screen/program_setup_screen.dart';
 import 'package:library_management/drawer/drawer_screen/subscription_screen.dart';
-import 'package:library_management/screens/main_screen.dart';
 
 void main() {
   runApp(ProviderScope(child: const MyApp()));
@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Inter',
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: MainScreen(),
+      home: const AuthGate(),
     );
   }
 }

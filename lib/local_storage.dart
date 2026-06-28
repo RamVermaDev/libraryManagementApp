@@ -15,7 +15,9 @@ class LocalStorage {
   static Future<void> clearLogin() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.clear();
+    await prefs.remove('token');
+    await prefs.remove('user');
+    await prefs.remove('isLoggedIn');
   }
 
   static Future<String?> getToken() async {

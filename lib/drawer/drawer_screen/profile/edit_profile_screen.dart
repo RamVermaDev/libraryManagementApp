@@ -1,27 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
+import 'package:library_management/controllers/user_controller.dart';
 import 'package:library_management/drawer/drawerWidgets/app_bar_widget.dart';
-import 'package:library_management/drawer/drawerWidgets/drawer_button_widget.dart';
 import 'package:library_management/drawer/drawerWidgets/drawer_text_form_field.dart';
-import 'package:library_management/drawer/drawer_screen/profile/my_profile_screen.dart';
+import 'package:library_management/provider/user_provider.dart';
+import 'package:library_management/validator/form_validators.dart';
 
-class EditProfileScreen extends StatefulWidget {
+class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
 
   @override
-  State<EditProfileScreen> createState() => _EditProfileScreenState();
+  ConsumerState<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
+class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
+  final UserController _userController = UserController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _emailController;
 
-  final TextEditingController _nameController = TextEditingController(
-    text: "Ramendra Verma",
-  );
+  bool _isLoading = false;
 
-  final TextEditingController _emailController = TextEditingController(
-    text: "ram@gmail.com",
-  );
+  @override
+  void initState() {
+    super.initState();
+    final user = ref.read(userProvider);
+    _nameController = TextEditingController(text: user?.name ?? '');
+    _emailController = TextEditingController(text: user?.email ?? '');
+  }
 
   @override
   void dispose() {
@@ -32,6 +39,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Future<void> saveProfile() async {
+      if (!_formKey.currentState!.validate()) return;
+
+      setState(() {
+        _isLoading = true;
+      });
+
+      await _userController.updateProfile(
+        context: context,
+        ref: ref,
+        name: _nameController.text,
+        email: _emailController.text,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+    }
+
     return Scaffold(
       appBar: const AppBarWidget(title: "Edit Profile", isAction: false),
 
@@ -85,9 +113,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 controller: _nameController,
                 lable: 'Full Name',
                 prefixIcon: Icons.person_outline,
-                validator: (value) {
-                  return null;
-                },
+                validator: FormValidators.nameValidator,
                 keyboardType: TextInputType.text,
               ),
 
@@ -97,18 +123,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 controller: _emailController,
                 lable: 'Email Adress',
                 prefixIcon: Icons.email_outlined,
-                validator: (value) => null,
+                validator: FormValidators.emailValidator,
                 keyboardType: TextInputType.emailAddress,
               ),
 
               const SizedBox(height: 30),
 
-              DrawerButtonWidget(
-                screenChange: MyProfileScreen(),
-                buttonText: 'Save Changes',
-                buttonRoutes: false,
-                buttonIcon: Icons.save,
-                pop: true,
+              SizedBox(
+                height: 50,
+                width: double.infinity,
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: Colors.white,
+                    textStyle: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  onPressed: _isLoading ? null : saveProfile,
+                  icon: _isLoading
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.save),
+                  label: Text(_isLoading ? 'Saving...' : 'Save Changes'),
+                ),
               ),
             ],
           ),

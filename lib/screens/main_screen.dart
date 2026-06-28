@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/drawer/drawer_layout.dart';
-import 'package:library_management/provider/user_provider.dart';
 import 'package:library_management/screens/income_screen.dart';
 import 'package:library_management/screens/students_screen.dart';
 import 'package:library_management/screens/todo_screen.dart';
@@ -20,7 +19,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userName = ref.watch(userProvider);
     return Scaffold(
       //Appbar
       appBar: AppBar(

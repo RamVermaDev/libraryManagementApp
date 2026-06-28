@@ -7,6 +7,7 @@ import 'package:library_management/authScreens/login_screen.dart';
 import 'package:library_management/global_varaible.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:library_management/local_storage.dart';
 import 'package:library_management/models/user_model.dart';
 import 'package:library_management/provider/token_provider.dart';
 import 'package:library_management/provider/user_provider.dart';
@@ -97,19 +98,32 @@ class UserController {
       manageHttpResponse(
         response: response,
         context: context,
-        onSuccess: () {
+        onSuccess: () async {
           print(response.body);
 
-          final user = jsonDecode(response.body)['user'];
+          //getting data from backend
+          final data = jsonDecode(response.body);
 
+          //seperating user and token
+          final user = data['user'];
+          final token = data['token'];
           final userJson = jsonEncode(user);
+
+          //saving data to local storage
+          await LocalStorage.saveLogin(token: token, userJson: userJson);
+
+          //update riverpod
           ref.read(userProvider.notifier).setUser(userJson);
-          final token = jsonDecode(response.body)['token'];
           ref.read(tokenProvider.notifier).setToken(token);
+
           print(ref.read(tokenProvider));
+          final localdata = await LocalStorage.getUser();
+          print('data from localtorage $localdata');
 
           //check libraries number
           final libraries = ref.read(userProvider)!.libraries;
+
+          if (!context.mounted) return;
 
           Navigator.pushAndRemoveUntil(
             context,
@@ -131,6 +145,138 @@ class UserController {
     } catch (e, stackTrace) {
       debugPrint("Signup Error: $e");
       debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  Future<void> updateProfile({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String name,
+    required String email,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+      if (token == null || token.isEmpty) {
+        showSnackBar(context, "Authentication required");
+        return;
+      }
+
+      final response = await http.put(
+        Uri.parse('$uri/api/profile'),
+        body: jsonEncode({'name': name.trim(), 'email': email.trim()}),
+        headers: <String, String>{
+          "Content-Type": 'application/json; charset=UTF-8',
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (!context.mounted) return;
+
+      manageHttpResponse(
+        response: response,
+        context: context,
+        onSuccess: () async {
+          final data = jsonDecode(response.body);
+          final userJson = jsonEncode(data['user']);
+
+          await LocalStorage.saveLogin(token: token, userJson: userJson);
+          ref.read(userProvider.notifier).setUser(userJson);
+
+          if (!context.mounted) return;
+
+          Navigator.pop(context);
+          AppNotification.show(context, message: 'Profile Updated');
+        },
+      );
+    } catch (e, stackTrace) {
+      debugPrint("Update Profile Error: $e");
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  Future<bool> sendEmailVerificationOtp({
+    required BuildContext context,
+    required WidgetRef ref,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+      if (token == null || token.isEmpty) {
+        showSnackBar(context, "Authentication required");
+        return false;
+      }
+
+      final response = await http.post(
+        Uri.parse('$uri/api/verify-email'),
+        headers: <String, String>{
+          "Content-Type": 'application/json; charset=UTF-8',
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (!context.mounted) return false;
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        AppNotification.show(context, message: 'OTP sent to your email');
+        return true;
+      }
+
+      showSnackBar(context, getMessageFromResponse(response));
+      return false;
+    } catch (e, stackTrace) {
+      debugPrint("Send Email OTP Error: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      if (context.mounted) {
+        showSnackBar(context, "Unable to send OTP");
+      }
+      return false;
+    }
+  }
+
+  Future<bool> verifyEmailOtp({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String otp,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+      if (token == null || token.isEmpty) {
+        showSnackBar(context, "Authentication required");
+        return false;
+      }
+
+      final response = await http.post(
+        Uri.parse('$uri/api/otp-verify'),
+        body: jsonEncode({'otp': otp.trim()}),
+        headers: <String, String>{
+          "Content-Type": 'application/json; charset=UTF-8',
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (!context.mounted) return false;
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        final userJson = jsonEncode(data['user']);
+
+        await LocalStorage.saveLogin(token: token, userJson: userJson);
+        ref.read(userProvider.notifier).setUser(userJson);
+
+        if (context.mounted) {
+          AppNotification.show(context, message: 'Email Verified');
+        }
+        return true;
+      }
+
+      showSnackBar(context, getMessageFromResponse(response));
+      return false;
+    } catch (e, stackTrace) {
+      debugPrint("Verify Email OTP Error: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      if (context.mounted) {
+        showSnackBar(context, "Unable to verify OTP");
+      }
+      return false;
     }
   }
 }
