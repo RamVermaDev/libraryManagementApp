@@ -39,7 +39,7 @@ class StudentsScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 20),
                 MembershipContainer(
-                  icon: Icons.dangerous,
+                  icon: Icons.warning_amber,
                   title: "Who's Membership are Expiring ?",
                   cardTitle: 'Expiring',
                   dayNumber: ['[ 1 -  3 ]', '[ 3 -  6 ]', '[ 7 -  10 ]'],
@@ -52,7 +52,7 @@ class StudentsScreen extends StatelessWidget {
                 MembershipContainer(
                   title: "Who's Membership are Expired ?",
                   conatinerColor: AppColors.badgeError,
-                  icon: Icons.calculate,
+                  icon: Icons.block,
                   cardTitle: 'Expired',
                   dayNumber: ['[ 1 -  3 ]', '[ 3 -  6 ]', '[ 7 -  10 ]'],
                   dayCount: [5, 7, 10],
@@ -64,7 +64,7 @@ class StudentsScreen extends StatelessWidget {
                 Row(
                   children: [
                     IconButtonStudent(
-                      icon: Icons.commit,
+                      icon: Icons.payment,
                       text: 'Due Amount',
                       onTap: () {
                         Navigator.push(
@@ -81,7 +81,7 @@ class StudentsScreen extends StatelessWidget {
                     ),
                     SizedBox(width: 12),
                     IconButtonStudent(
-                      icon: Icons.follow_the_signs,
+                      icon: Icons.schedule,
                       text: 'Follow Up',
                       onTap: () {},
                     ),

@@ -4,14 +4,12 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   const AppBarWidget({
     super.key,
     required this.title,
-    this.isAction = true,
-    this.actionIcon = Icons.add,
+    this.actionIcon,
     this.onActionPressed,
   });
 
   final String title;
-  final bool isAction;
-  final IconData actionIcon;
+  final IconData? actionIcon;
   final VoidCallback? onActionPressed;
 
   @override
@@ -26,7 +24,7 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       actions: [
-        ...(isAction
+        ...(actionIcon != null
             ? [IconButton(onPressed: onActionPressed, icon: Icon(actionIcon))]
             : []),
       ],

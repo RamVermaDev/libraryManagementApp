@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:library_management/screens/studentScreens/add_student_screen.dart';
 
 class AddMemberButton extends StatelessWidget {
   const AddMemberButton({super.key});
@@ -6,6 +7,16 @@ class AddMemberButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return AddStudentScreen();
+            },
+          ),
+        );
+      },
       child: Container(
         height: 55,
         padding: EdgeInsets.fromLTRB(12, 4, 12, 4),

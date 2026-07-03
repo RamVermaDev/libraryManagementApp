@@ -48,6 +48,8 @@ class AppColors {
   static const Color info = Color(0xFF3B82F6);
   static const Color infoLight = Color(0xFFEAF3FF);
 
+  static const Color backgrounScreen = Color(0xFFF9F9F9);
+
   // ==========================================================
   // PRIMARY SHADES
   // ==========================================================

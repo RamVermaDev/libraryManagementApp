@@ -61,7 +61,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     }
 
     return Scaffold(
-      appBar: const AppBarWidget(title: "Edit Profile", isAction: false),
+      appBar: const AppBarWidget(title: "Edit Profile"),
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:library_management/screens/studentScreens/widgets/membership_card.dart';
+import 'package:library_management/screens/studentScreens/widgets/card/membership_card.dart';
 
 class MembershipContainer extends StatelessWidget {
   const MembershipContainer({
@@ -13,6 +13,7 @@ class MembershipContainer extends StatelessWidget {
     required this.cardConatinaerColor,
     required this.cardTextColor,
     this.titleColor,
+    this.isLoading = false,
   });
   final IconData icon;
   final String title;
@@ -23,6 +24,7 @@ class MembershipContainer extends StatelessWidget {
   final Color cardTextColor;
   final Color conatinerColor;
   final String cardTitle;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +58,7 @@ class MembershipContainer extends StatelessWidget {
                 icon: icon,
                 containerColor: cardConatinaerColor,
                 containerTextColor: cardTextColor,
+                isLoading: isLoading,
               ),
               SizedBox(width: 2),
               MembershipCard(
@@ -65,6 +68,7 @@ class MembershipContainer extends StatelessWidget {
                 icon: icon,
                 containerColor: cardConatinaerColor,
                 containerTextColor: cardTextColor,
+                isLoading: isLoading,
               ),
               SizedBox(width: 2),
               MembershipCard(
@@ -74,6 +78,7 @@ class MembershipContainer extends StatelessWidget {
                 icon: icon,
                 containerColor: cardConatinaerColor,
                 containerTextColor: cardTextColor,
+                isLoading: isLoading,
               ),
             ],
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/authScreens/signup_screen.dart';
@@ -54,6 +55,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         email: _emailController.text,
         password: _passwordController.text,
       );
+      TextInput.finishAutofillContext();
     } finally {
       if (mounted) {
         setState(() {
@@ -93,22 +95,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 child: Form(
                   key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      AppLogoHeader(
-                        logoSize: logoSize,
-                        heading: 'Login',
-                        subHeading: 'Reach to your Account',
-                      ),
-                      const SizedBox(height: 64),
-                      _SigninForm(
-                        emailController: _emailController,
-                        passwordController: _passwordController,
-                        onSubmit: _submitSignin,
-                        loading: _isLoading,
-                      ),
-                    ],
+                  child: AutofillGroup(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        AppLogoHeader(
+                          logoSize: logoSize,
+                          heading: 'Login',
+                          subHeading: 'Reach to your Account',
+                        ),
+                        const SizedBox(height: 64),
+                        _SigninForm(
+                          emailController: _emailController,
+                          passwordController: _passwordController,
+                          onSubmit: _submitSignin,
+                          loading: _isLoading,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -154,8 +158,8 @@ class _SigninForm extends StatelessWidget {
           hintTxt: 'Password',
           textEditingController: passwordController,
           obscureTxt: true,
-          textInputAction: TextInputAction.next,
-          autofillHints: const [AutofillHints.newPassword],
+          textInputAction: TextInputAction.done,
+          autofillHints: const [AutofillHints.password],
           validator: FormValidators.passwordValidator,
         ),
 

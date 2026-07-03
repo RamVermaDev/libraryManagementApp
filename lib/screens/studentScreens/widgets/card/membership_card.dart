@@ -10,6 +10,7 @@ class MembershipCard extends StatelessWidget {
     required this.dayCount,
     required this.containerColor,
     required this.containerTextColor,
+    required this.isLoading,
   });
   final String title;
   final String daysNumber;
@@ -17,6 +18,7 @@ class MembershipCard extends StatelessWidget {
   final IconData icon;
   final Color containerTextColor;
   final Color containerColor;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -32,34 +34,37 @@ class MembershipCard extends StatelessWidget {
         ),
 
         child: InkWell(
-          onTap: () {},
+          onTap: isLoading ? null : () {},
           child: Padding(
-            padding: EdgeInsetsGeometry.all(12),
+            padding: EdgeInsetsGeometry.fromLTRB(8, 12, 8, 16),
             child: Column(
               children: [
                 Icon(icon),
-                SizedBox(height: 12),
+                SizedBox(height: 4),
                 Text(
                   title,
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
                 ),
                 Text(daysNumber),
-                SizedBox(height: 20),
+                SizedBox(height: 16),
                 Container(
-                  width: 30,
-                  height: 30,
+                  width: 32,
+                  height: 32,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(4),
                     color: containerColor,
                   ),
                   alignment: Alignment.center,
-                  child: Text(
-                    dayCount.toString(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: containerTextColor,
-                    ),
-                  ),
+                  child: isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : Text(
+                          dayCount.toString(),
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: containerTextColor,
+                          ),
+                        ),
                 ),
               ],
             ),

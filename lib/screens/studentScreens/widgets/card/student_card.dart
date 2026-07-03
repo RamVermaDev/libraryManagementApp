@@ -46,7 +46,7 @@ class StudentCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.background,
               border: Border.all(width: 1),
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),

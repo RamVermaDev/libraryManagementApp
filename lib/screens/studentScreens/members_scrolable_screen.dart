@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/drawer/drawerWidgets/app_bar_widget.dart';
+import 'package:library_management/screens/studentScreens/student_detailed_screen.dart';
 import 'package:library_management/screens/studentScreens/widgets/card/due_student_card.dart';
 import 'package:library_management/screens/studentScreens/widgets/card/expired_student_card.dart';
 import 'package:library_management/screens/studentScreens/widgets/card/student_card.dart';
@@ -39,7 +40,16 @@ class MembersScrolableScreen extends StatelessWidget {
               ),
 
               StudentCard(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return StudentDetailedScreen(studentNumber: 1);
+                      },
+                    ),
+                  );
+                },
                 studentName: 'Student Name',
                 studentNumber: 3,
                 lableOne: 'Expire on',
