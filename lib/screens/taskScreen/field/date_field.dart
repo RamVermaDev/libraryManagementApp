@@ -1,16 +1,26 @@
 import 'package:flutter/material.dart';
 
-class DateFiled extends StatefulWidget {
-  const DateFiled({super.key, required this.onDateChanged});
+class DateField extends StatefulWidget {
+  const DateField({super.key, required this.onDateChanged, this.selectedDate});
 
   final ValueChanged<DateTime?> onDateChanged;
+  final DateTime? selectedDate;
 
   @override
-  State<DateFiled> createState() => _DateFiledState();
+  State<DateField> createState() => _DateFieldState();
 }
 
-class _DateFiledState extends State<DateFiled> {
+class _DateFieldState extends State<DateField> {
   DateTime? _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.selectedDate != null) {
+      _selectedDate = widget.selectedDate;
+    }
+  }
 
   String get _formattedDate {
     if (_selectedDate == null) {

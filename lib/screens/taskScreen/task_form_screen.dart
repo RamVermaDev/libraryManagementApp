@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/controllers/task_controller.dart';
-import 'package:library_management/provider/library_provider.dart';
-import 'package:library_management/screens/taskScreen/field/date_filed.dart';
+import 'package:library_management/models/task_model.dart';
+import 'package:library_management/screens/taskScreen/field/date_field.dart';
 import 'package:library_management/screens/taskScreen/field/task_text_field.dart';
 import 'package:library_management/screens/taskScreen/field/task_urgency.dart';
 import 'package:library_management/screens/taskScreen/field/title_text.dart';
 
-class AddTaskScreen extends ConsumerStatefulWidget {
-  const AddTaskScreen({super.key});
+class TaskFormScreen extends ConsumerStatefulWidget {
+  const TaskFormScreen({super.key, this.task});
+
+  final TaskModel? task;
+
+  bool get isEditing => task != null;
 
   @override
-  ConsumerState<AddTaskScreen> createState() => _AddTaskScreenState();
+  ConsumerState<TaskFormScreen> createState() => _TaskFormScreenState();
 }
 
-class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
+class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _titleController = TextEditingController();
@@ -24,6 +28,17 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
   String _urgency = 'low';
 
   final _taskController = TaskController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.task != null) {
+      _titleController.text = widget.task!.title;
+      _descriptionController.text = widget.task!.description;
+      _selectedDate = widget.task!.dueDate;
+      _urgency = widget.task!.urgency;
+    }
+  }
 
   @override
   void dispose() {
@@ -42,26 +57,43 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
       return;
     }
 
-    final libraries = ref.read(libraryProvider);
-    if (libraries.isEmpty) {
-      debugPrint('No library found in provider');
-      return;
+    //will change it
+
+    // final libraries = ref.read(libraryProvider);
+    // if (libraries.isEmpty) {
+    //   debugPrint('No library found in provider');
+    //   return;
+    // }
+    //final library = libraries[0];
+
+    //if (library.id == null) return;
+
+    //print(library.id!);
+
+    if (widget.isEditing) {
+      await _taskController.editTask(
+        context: context,
+        ref: ref,
+        taskId: widget.task!.id!,
+        libraryId: widget.task!.libraryId,
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim(),
+        dueDate: _selectedDate!,
+        urgency: _urgency,
+      );
+    } else {
+      await _taskController.addTask(
+        context: context,
+        ref: ref,
+        //i will do it later
+        //libraryId: library.id!,
+        libraryId: '6a422593f2ed24f734e41864',
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim(),
+        dueDate: _selectedDate!,
+        urgency: _urgency,
+      );
     }
-    final library = libraries[0];
-
-    if (library.id == null) return;
-
-    print(library.id!);
-
-    await _taskController.addTask(
-      context: context,
-      ref: ref,
-      libraryId: library.id!,
-      title: _titleController.text.trim(),
-      description: _descriptionController.text.trim(),
-      dueDate: _selectedDate!,
-      urgency: _urgency,
-    );
   }
 
   @override
@@ -73,8 +105,8 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: const Text(
-          'Add Task',
+        title: Text(
+          widget.isEditing ? 'Update Task' : 'Add Task',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
@@ -87,6 +119,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
         child: Form(
           key: _formKey,
           child: _TaskForm(
+            isEditing: widget.isEditing,
             titleController: _titleController,
             descriptionController: _descriptionController,
             onDateChanged: (date) {
@@ -99,6 +132,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                 _urgency = value;
               });
             },
+            date: _selectedDate,
           ),
         ),
       ),
@@ -114,6 +148,8 @@ class _TaskForm extends StatelessWidget {
     required this.onSubmit,
     required this.selectedUrgency,
     required this.onChange,
+    required this.isEditing,
+    this.date,
   });
 
   final TextEditingController titleController;
@@ -122,6 +158,8 @@ class _TaskForm extends StatelessWidget {
   final VoidCallback onSubmit;
   final String selectedUrgency;
   final ValueChanged<String> onChange;
+  final bool isEditing;
+  final DateTime? date;
 
   @override
   Widget build(BuildContext context) {
@@ -155,7 +193,7 @@ class _TaskForm extends StatelessWidget {
           controller: descriptionController,
           minLines: 4,
           maxLines: 6,
-          textInputAction: TextInputAction.newline,
+          textInputAction: TextInputAction.done,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
               return 'Enter task description';
@@ -170,7 +208,9 @@ class _TaskForm extends StatelessWidget {
         const TitleText(title: 'Due date'),
         const SizedBox(height: 8),
 
-        DateFiled(onDateChanged: onDateChanged),
+        isEditing
+            ? DateField(onDateChanged: onDateChanged, selectedDate: date)
+            : DateField(onDateChanged: onDateChanged),
         const SizedBox(height: 20),
 
         const TitleText(title: 'Urgency'),
@@ -184,7 +224,7 @@ class _TaskForm extends StatelessWidget {
           height: 54,
           child: FilledButton(
             onPressed: onSubmit,
-            child: const Text('Add Task'),
+            child: Text(isEditing ? 'Update Task' : 'Add Task'),
           ),
         ),
       ],
