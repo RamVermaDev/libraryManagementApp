@@ -4,7 +4,8 @@ import 'package:library_management/app_colors.dart';
 import 'package:library_management/drawer/drawer_layout.dart';
 import 'package:library_management/screens/income_screen.dart';
 import 'package:library_management/screens/studentScreens/students_screen.dart';
-import 'package:library_management/screens/todo_screen.dart';
+import 'package:library_management/screens/taskScreen/add_task_screen.dart';
+import 'package:library_management/screens/taskScreen/task_screen.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -14,7 +15,7 @@ class MainScreen extends ConsumerStatefulWidget {
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
-  final screens = [StudentsScreen(), TodoScreen(), IncomeScreen()];
+  final screens = [StudentsScreen(), TaskScreen(), IncomeScreen()];
 
   int _selectedIndex = 0;
 
@@ -32,7 +33,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         actions: [
           IconButton(
             onPressed: () {
-              // Add Library
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    return AddTaskScreen();
+                  },
+                ),
+              );
             },
             icon: const Icon(Icons.add),
           ),
