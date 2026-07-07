@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:library_management/app_colors.dart';
 
-class TotalMemberButton extends StatelessWidget {
-  const TotalMemberButton({super.key});
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+class ActiveMemberButton extends StatelessWidget {
+  const ActiveMemberButton({
+    super.key,
+    required this.activeStudent,
+    required this.isLoading,
+  });
+
+  final int activeStudent;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +21,7 @@ class TotalMemberButton extends StatelessWidget {
         height: 60,
         padding: EdgeInsets.fromLTRB(30, 4, 30, 4),
         decoration: BoxDecoration(
-          color: AppColors.totalButton,
+          color: AppColors.activeButton,
           borderRadius: BorderRadius.circular(4),
         ),
         child: Row(
@@ -20,7 +29,7 @@ class TotalMemberButton extends StatelessWidget {
             Icon(Icons.people, color: Colors.white, size: 25),
             SizedBox(width: 12),
             Text(
-              'Total Members',
+              'Active Members',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.1,
@@ -31,14 +40,19 @@ class TotalMemberButton extends StatelessWidget {
             Expanded(
               child: Container(
                 alignment: Alignment.centerRight,
-                child: Text(
-                  '100',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child: isLoading
+                    ? SizedBox(
+                        width: 30,
+                        child: SpinKitWave(color: Colors.white, size: 20),
+                      )
+                    : Text(
+                        activeStudent.toString(),
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
             ),
           ],

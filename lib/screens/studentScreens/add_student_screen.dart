@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
+import 'package:library_management/controllers/student_controller.dart';
 import 'package:library_management/drawer/drawerWidgets/app_bar_widget.dart';
 import 'package:library_management/screens/studentScreens/field/amount_display_field.dart';
 import 'package:library_management/screens/studentScreens/field/end_student_date_field.dart';
@@ -7,21 +9,22 @@ import 'package:library_management/screens/studentScreens/field/payement_menu_dr
 import 'package:library_management/screens/studentScreens/field/plan_menu_dropdown.dart';
 import 'package:library_management/screens/studentScreens/field/program_menu_dropdown.dart';
 import 'package:library_management/screens/studentScreens/field/start_student_date_field.dart';
-import 'package:library_management/screens/studentScreens/field/student_dropdown_field.dart';
 import 'package:library_management/screens/studentScreens/field/student_text_form_field.dart';
-import 'package:library_management/screens/studentScreens/field/title_for_dropdown.dart';
 import 'package:library_management/screens/studentScreens/sample/plan_data.dart';
 import 'package:library_management/screens/studentScreens/sample/plan_data_list.dart';
 
-class AddStudentScreen extends StatefulWidget {
+class AddStudentScreen extends ConsumerStatefulWidget {
   const AddStudentScreen({super.key});
 
   @override
-  State<AddStudentScreen> createState() => _AddStudentScreenState();
+  ConsumerState<AddStudentScreen> createState() => _AddStudentScreenState();
 }
 
-class _AddStudentScreenState extends State<AddStudentScreen> {
+class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  final _studentController = StudentController();
+  final libraryId = '6a422593f2ed24f734e41864';
 
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -39,6 +42,41 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
 
   //plan selected data
   PlanData planSelected = planDataList[0];
+
+  Future<void> _addStudent() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final amount = planSelected.price.toDouble();
+
+    final discount = double.tryParse(_discountController.text.trim()) ?? 0;
+
+    final pending = double.tryParse(_pendingController.text.trim()) ?? 0;
+
+    final finalAmount = amount - discount;
+    final paidAmount = finalAmount - pending;
+    // We will add your actual library provider here
+
+    await _studentController.addStudent(
+      context: context,
+      ref: ref,
+      libraryId: libraryId,
+      name: _nameController.text.trim(),
+      phone: _phoneController.text.trim(),
+      idProof: _idProofController.text.trim().isEmpty
+          ? null
+          : _idProofController.text.trim(),
+      planId: planSelected.name,
+      programDays: selectedProgramDays,
+      startDate: startDate,
+      expireDate: expireDate,
+      amount: amount,
+      discount: discount,
+      paidAmount: paidAmount,
+      paymentMode: paidAmount > 0 ? payementMode : null,
+    );
+  }
 
   void _calculateExpireDate() {
     expireDate = startDate.add(Duration(days: selectedProgramDays));
@@ -111,12 +149,26 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
                   },
                 ),
                 TextButton(
-                  onPressed: () {
-                    print('Start Date: $startDate');
-                    print('End Date: $expireDate');
-                    print('Payement: $payementMode');
-                    print('Plan: ${planSelected.name}');
-                  },
+                  onPressed: _addStudent,
+                  // onPressed: () {
+                  //   final name = _nameController.text;
+                  //   final phone = _phoneController.text;
+                  //   final discount = _discountController.text;
+                  //   final pendimg = _pendingController.text;
+                  //   final id = _idProofController.text;
+                  //   final amount = planSelected.price;
+                  //   print('Student Name: $name');
+                  //   print('Student phone: $phone');
+                  //   print('Student ID: $id');
+                  //   print('Student amount: $amount');
+                  //   print('Student discount: $discount');
+                  //   print('Student pending: $pendimg');
+                  //   print('Start Date: $startDate');
+                  //   print('End Date: $expireDate');
+                  //   print('Payement: $payementMode');
+                  //   print('Plan: ${planSelected.name}');
+                  //   print('Program: $selectedProgramDays');
+                  // },
                   child: Text('Checking'),
                 ),
               ],
@@ -194,25 +246,6 @@ class _StudentForm extends StatelessWidget {
           keyboardType: TextInputType.number,
           textInputAction: TextInputAction.next,
           maxLength: 10,
-        ),
-        SizedBox(height: _height),
-        Row(
-          children: [
-            Expanded(flex: 1, child: TitleForDropdown(title: 'Gender')),
-            SizedBox(width: 10),
-            Expanded(
-              flex: 2,
-              child: StudentDropdownField<String>(
-                value: "Male",
-                prefixIcon: Icons.person,
-                items: const [
-                  DropdownMenuItem(value: "Male", child: Text("Male")),
-                  DropdownMenuItem(value: "Female", child: Text("Female")),
-                ],
-                onChanged: (_) {},
-              ),
-            ),
-          ],
         ),
 
         SizedBox(height: _height),

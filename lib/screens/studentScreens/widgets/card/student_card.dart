@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:library_management/app_colors.dart';
+import 'package:library_management/screens/studentScreens/memberScrolable/member_actions.dart';
+import 'package:library_management/screens/studentScreens/memberScrolable/member_information.dart';
 import 'package:library_management/screens/studentScreens/widgets/card/info_row.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -11,7 +13,7 @@ class StudentCard extends StatelessWidget {
     this.studentNumber = 0,
     required this.studentName,
     required this.lableOne,
-    required this.valueOne,
+    required this.expireDate,
     required this.lableTwo,
     required this.valueTwo,
     this.cardItemsColor = AppColors.activeButtonText,
@@ -21,7 +23,7 @@ class StudentCard extends StatelessWidget {
   final int studentNumber;
   final String studentName;
   final String lableOne;
-  final String valueOne;
+  final DateTime? expireDate;
   final String lableTwo;
   final String valueTwo;
   final Color cardItemsColor;
@@ -81,39 +83,13 @@ class StudentCard extends StatelessWidget {
                   ),
                   SizedBox(width: 20),
 
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          studentName,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        InfoRow(label: lableOne, value: valueOne),
-
-                        InfoRow(label: lableTwo, value: valueTwo),
-                      ],
-                    ),
+                  MemberInformation(
+                    memberName: studentName,
+                    expireDate: expireDate,
+                    plan: valueTwo,
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
 
-                    children: [
-                      Center(
-                        child: IconButton(
-                          onPressed: () {
-                            makePhoneCall("7905615826");
-                          },
-                          icon: Icon(Icons.call, size: 30),
-                          color: cardItemsColor,
-                        ),
-                      ),
-                    ],
-                  ),
+                  MemberActions(onCall: () {}, onMessage: () {}),
                 ],
               ),
             ),

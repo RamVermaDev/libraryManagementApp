@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:library_management/app_colors.dart';
 
-class MembershipCard extends StatelessWidget {
-  const MembershipCard({
+class MembershipsCard extends StatelessWidget {
+  const MembershipsCard({
     super.key,
     required this.icon,
     required this.title,
@@ -56,7 +57,10 @@ class MembershipCard extends StatelessWidget {
                   ),
                   alignment: Alignment.center,
                   child: isLoading
-                      ? Center(child: CircularProgressIndicator())
+                      ? SizedBox(
+                          width: 30,
+                          child: SpinKitWave(color: Colors.white, size: 15),
+                        )
                       : Text(
                           dayCount.toString(),
                           style: TextStyle(

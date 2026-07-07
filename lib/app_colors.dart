@@ -167,6 +167,29 @@ class AppColors {
   static const Color seatOccupied = Color(0xFFEF4444);
 
   static const Color container = Color.fromARGB(67, 211, 188, 255);
+
+  static const backgrounds = Color(0xFFF9FAFE);
+  static const cards = Color(0xFFFFFFFF);
+
+  static const headings = Color(0xFF111936);
+  static const darkText = Color(0xFF252936);
+  static const bodyText = Color(0xFF53617D);
+  static const iconMuted = Color(0xFF8192B8);
+
+  static const primarys = Color(0xFF4F73E8);
+  static const primarySoft = Color(0xFFF2F5FF);
+
+  static const membership = Color(0xFFF4F7FF);
+
+  static const green = Color(0xFF42A447);
+  static const whatsapp = Color(0xFF52C96B);
+  static const purple = Color(0xFF9364E8);
+
+  static const red = Color(0xFFED424A);
+  static const redSoft = Color(0xFFFFE8EB);
+
+  static const dividers = Color(0xFFE5E9F2);
+  static const border = Color(0xFFF0F2F7);
 }
 
 

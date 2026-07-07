@@ -32,7 +32,7 @@ class IconButtonStudent extends StatelessWidget {
               Text(
                 text,
                 style: TextStyle(
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                   letterSpacing: 0.1,
                   color: Colors.white,
                   fontSize: 18,

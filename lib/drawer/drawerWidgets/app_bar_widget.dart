@@ -21,8 +21,11 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: const Color(0xFFD0E6FF),
       elevation: 0,
       surfaceTintColor: Colors.transparent,
-      centerTitle: true,
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+      //centerTitle: true,
+      title: Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
+      ),
       actions: [
         ...(actionIcon != null
             ? [IconButton(onPressed: onActionPressed, icon: Icon(actionIcon))]

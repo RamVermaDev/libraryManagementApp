@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:library_management/screens/studentScreens/widgets/card/membership_card.dart';
+import 'package:library_management/screens/studentScreens/widgets/card/memberships_card.dart';
 
 class MembershipContainer extends StatelessWidget {
   const MembershipContainer({
@@ -26,6 +26,7 @@ class MembershipContainer extends StatelessWidget {
   final String cardTitle;
   final bool isLoading;
 
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -51,7 +52,7 @@ class MembershipContainer extends StatelessWidget {
           SizedBox(height: 12),
           Row(
             children: [
-              MembershipCard(
+              MembershipsCard(
                 title: cardTitle,
                 daysNumber: dayNumber[0],
                 dayCount: dayCount[0],
@@ -61,7 +62,7 @@ class MembershipContainer extends StatelessWidget {
                 isLoading: isLoading,
               ),
               SizedBox(width: 2),
-              MembershipCard(
+              MembershipsCard(
                 title: cardTitle,
                 daysNumber: dayNumber[1],
                 dayCount: dayCount[1],
@@ -71,7 +72,7 @@ class MembershipContainer extends StatelessWidget {
                 isLoading: isLoading,
               ),
               SizedBox(width: 2),
-              MembershipCard(
+              MembershipsCard(
                 title: cardTitle,
                 daysNumber: dayNumber[2],
                 dayCount: dayCount[2],
