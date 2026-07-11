@@ -29,7 +29,7 @@ class MembershipCard extends StatelessWidget {
         25 * scale,
       ),
       decoration: BoxDecoration(
-        color: AppColors.membership,
+        color: AppColors.primarySoft,
         borderRadius: BorderRadius.circular(20 * scale),
       ),
       child: Column(

@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/controllers/student_summary_controller.dart';
 import 'package:library_management/provider/student_summary_provider.dart';
-import 'package:library_management/screens/studentScreens/memberScrolable/members_scrolable_screen.dart';
-import 'package:library_management/screens/studentScreens/widgets/total_student_button.dart';
+import 'package:library_management/screens/studentScreens/memberScrolable/member_screen.dart';
+import 'package:library_management/screens/studentScreens/memberScrolable/members.dart';
+import 'package:library_management/screens/studentScreens/memberScrolable/members_screen_args.dart';
+import 'package:library_management/screens/studentsScreen/total_student_button.dart';
 import 'package:library_management/screens/studentScreens/widgets/add_member_button.dart';
 import 'package:library_management/screens/studentScreens/widgets/icon_button_student.dart';
-import 'package:library_management/screens/studentScreens/widgets/membership_container.dart';
-import 'package:library_management/screens/studentScreens/widgets/active_member_button.dart';
+import 'package:library_management/screens/studentsScreen/membership_container.dart';
+import 'package:library_management/screens/studentsScreen/active_member_button.dart';
 
 class StudentsScreen extends ConsumerStatefulWidget {
   const StudentsScreen({super.key});
@@ -91,6 +93,54 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
                 ),
                 SizedBox(height: 20),
                 MembershipContainer(
+                  onTapeOne: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return MembersScreen(
+                            args: MembersScreenArgs(
+                              initialStatus: MemberStatus.expiring,
+                              initialDayFilter: MemberDayFilter.oneToThree,
+                            ),
+                            appBarTitle: 'Expiring Member',
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  onTapeTwo: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return MembersScreen(
+                            args: MembersScreenArgs(
+                              initialStatus: MemberStatus.expiring,
+                              initialDayFilter: MemberDayFilter.fourToSix,
+                            ),
+                            appBarTitle: 'Expiring Member',
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  onTapeThree: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return MembersScreen(
+                            args: MembersScreenArgs(
+                              initialStatus: MemberStatus.expiring,
+                              initialDayFilter: MemberDayFilter.sevenToTen,
+                            ),
+                            appBarTitle: 'Expiring Member',
+                          );
+                        },
+                      ),
+                    );
+                  },
                   icon: Icons.warning_amber,
                   title: "Who's Membership are Expiring ?",
                   cardTitle: 'Expiring',
@@ -102,13 +152,61 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
                   ],
                   cardConatinaerColor: AppColors.warning,
                   cardTextColor: AppColors.activeButtonText,
-                  conatinerColor: AppColors.container,
+                  conatinerColor: AppColors.primarySoft,
                   isLoading: isLoading,
                 ),
                 SizedBox(height: 20),
                 MembershipContainer(
+                  onTapeOne: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return MembersScreen(
+                            args: MembersScreenArgs(
+                              initialStatus: MemberStatus.expired,
+                              initialDayFilter: MemberDayFilter.oneToThree,
+                            ),
+                            appBarTitle: 'Expiring Member',
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  onTapeTwo: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return MembersScreen(
+                            args: MembersScreenArgs(
+                              initialStatus: MemberStatus.expired,
+                              initialDayFilter: MemberDayFilter.fourToSix,
+                            ),
+                            appBarTitle: 'Expiring Member',
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  onTapeThree: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return MembersScreen(
+                            args: MembersScreenArgs(
+                              initialStatus: MemberStatus.expired,
+                              initialDayFilter: MemberDayFilter.sevenToTen,
+                            ),
+                            appBarTitle: 'Expiring Member',
+                          );
+                        },
+                      ),
+                    );
+                  },
                   title: "Who's Membership are Expired ?",
-                  conatinerColor: AppColors.badgeError,
+                  conatinerColor: AppColors.error,
                   icon: Icons.block,
                   cardTitle: 'Expired',
                   dayNumber: ['[ 1-3 Days ]', '[ 4-6 Days ]', '[ 7-10 Days ]'],
@@ -128,18 +226,7 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
                     IconButtonStudent(
                       icon: Icons.payment,
                       text: 'Due Amount',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return MembersScrolableScreen(
-                                appBarTitle: 'Active Members',
-                              );
-                            },
-                          ),
-                        );
-                      },
+                      onTap: () {},
                     ),
                     SizedBox(width: 12),
                     IconButtonStudent(

@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 
 class DateField extends StatefulWidget {
-  const DateField({super.key, required this.onDateChanged, this.selectedDate});
+  const DateField({
+    super.key,
+    required this.onDateChanged,
+    this.selectedDate,
+    this.hight,
+    this.color,
+  });
 
   final ValueChanged<DateTime?> onDateChanged;
   final DateTime? selectedDate;
+
+  final double? hight;
+  final Color? color;
 
   @override
   State<DateField> createState() => _DateFieldState();
@@ -55,10 +64,10 @@ class _DateFieldState extends State<DateField> {
       onTap: _selectDate,
       borderRadius: BorderRadius.circular(4),
       child: Container(
-        height: 54,
+        height: widget.hight ?? 54,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: widget.color ?? Colors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: const Color(0xFFE5E7EB)),
         ),

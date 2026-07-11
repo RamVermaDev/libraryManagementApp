@@ -1,43 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:library_management/drawer/drawerWidgets/app_bar_widget.dart';
-import 'package:library_management/screens/studentScreens/memberDetailed/action_card.dart';
-import 'package:library_management/screens/studentScreens/memberDetailed/admission_card.dart';
-import 'package:library_management/screens/studentScreens/memberDetailed/membership_card.dart';
-import 'package:library_management/screens/studentScreens/memberDetailed/payement_card.dart';
+import 'package:library_management/models/student_model.dart';
+import 'package:library_management/screens/studentScreens/memberDetailScreen/action_card.dart';
+import 'package:library_management/screens/studentScreens/memberDetailScreen/admission_card.dart';
+import 'package:library_management/screens/studentScreens/memberDetailScreen/membership_card.dart';
+import 'package:library_management/screens/studentScreens/memberDetailScreen/payement_card.dart';
 import 'package:library_management/screens/studentScreens/memberDetailScreen/profile_card.dart';
 
 class MemberDetailedScreen extends StatelessWidget {
-  const MemberDetailedScreen({
-    super.key,
-    this.img,
-    required this.studentNumber,
-    required this.studentName,
-    this.gender,
-    required this.phone,
-    required this.idProof,
-    required this.totalAmount,
-    required this.totalDiscount,
-    required this.totalPending,
-    required this.joinDate,
-    required this.expireDate,
-    required this.plan,
-    required this.program,
-  });
+  const MemberDetailedScreen({super.key, required this.member});
 
-  final String? img;
-  final int studentNumber;
-  final String studentName;
-  final String? gender;
-  final String phone;
-  final String? idProof;
-  final String totalAmount;
-  final String totalDiscount;
-  final String totalPending;
-
-  final DateTime? joinDate;
-  final DateTime? expireDate;
-  final String plan;
-  final int? program;
+  final StudentModel member;
 
   //FORMATE DATES
   String _formattedDate(givenDate) {
@@ -76,26 +49,30 @@ class MemberDetailedScreen extends StatelessWidget {
 
                     ProfileCard(
                       scale: scale,
-                      name: studentName,
-                      phone: phone,
-                      id: idProof,
-                      number: studentNumber,
+                      name: member.name,
+                      phone: member.phone,
+                      id: member.idProof,
+                      number: 1,
                     ),
 
                     SizedBox(height: 18 * scale),
 
                     // CALL, WHATSAPP, MESSAGE, & RENEW
-                    ActionCard(scale: scale, phone: phone, message: 'Hi'),
+                    ActionCard(
+                      scale: scale,
+                      phone: member.phone,
+                      message: 'Hi',
+                    ),
 
                     SizedBox(height: 24 * scale),
 
                     //JOIN-DATE, EXPIRE-DATE, PLAN & PROGRAM
                     MembershipCard(
                       scale: scale,
-                      joinDate: _formattedDate(joinDate),
-                      expireDate: _formattedDate(expireDate),
-                      plan: plan,
-                      program: '${program.toString()} Days',
+                      joinDate: _formattedDate(member.joiningDate),
+                      expireDate: _formattedDate(member.currentExpireDate),
+                      plan: member.currentPlan,
+                      program: '${member.currentProgramDays.toString()} Days',
                     ),
 
                     SizedBox(height: 24 * scale),
@@ -103,9 +80,9 @@ class MemberDetailedScreen extends StatelessWidget {
                     //AMOUNT, PENDING, & DISCOUNT
                     PaymentCard(
                       scale: scale,
-                      amount: totalAmount,
-                      discount: totalDiscount,
-                      pending: totalPending,
+                      amount: member.totalPaid.toInt().toString(),
+                      discount: member.totalDiscount.toInt().toString(),
+                      pending: member.totalPending.toInt().toString(),
                     ),
 
                     SizedBox(height: 18 * scale),

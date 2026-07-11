@@ -21,7 +21,7 @@ class MembershipRow extends StatelessWidget {
       children: [
         SizedBox(
           width: 28 * scale,
-          child: Icon(icon, size: 24 * scale, color: AppColors.primarys),
+          child: Icon(icon, size: 24 * scale, color: AppColors.primary),
         ),
 
         SizedBox(width: 14 * scale),
@@ -30,7 +30,7 @@ class MembershipRow extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: AppColors.bodyText,
+              color: AppColors.body,
               fontSize: 16 * scale,
               fontWeight: FontWeight.w500,
             ),
@@ -46,7 +46,7 @@ class MembershipRow extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.right,
             style: TextStyle(
-              color: AppColors.darkText,
+              color: AppColors.heading,
               fontSize: 16 * scale,
               fontWeight: FontWeight.w500,
             ),

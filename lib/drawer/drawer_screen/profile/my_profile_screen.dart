@@ -43,7 +43,7 @@ class MyProfileScreen extends ConsumerWidget {
             const CircleAvatar(
               radius: 50,
               backgroundColor: Color(0xFFD0E6FF),
-              child: Icon(Icons.person, size: 60, color: AppColors.secondary),
+              child: Icon(Icons.person, size: 60, color: AppColors.accent),
             ),
 
             const SizedBox(height: 10),

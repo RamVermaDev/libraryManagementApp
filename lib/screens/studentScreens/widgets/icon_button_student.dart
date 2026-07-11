@@ -21,7 +21,7 @@ class IconButtonStudent extends StatelessWidget {
           height: 55,
           padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
           decoration: BoxDecoration(
-            color: AppColors.activeButton,
+            color: AppColors.warning,
             borderRadius: BorderRadius.circular(4),
           ),
           child: Row(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/screens/studentScreens/memberDetailScreen/card_decoration.dart';
-import 'package:library_management/screens/studentScreens/memberDetailed/action_item.dart';
+import 'package:library_management/screens/studentScreens/memberDetailScreen/action_item.dart';
 import 'package:library_management/services/external_app_service.dart';
 
 class ActionCard extends StatelessWidget {
@@ -28,7 +28,7 @@ class ActionCard extends StatelessWidget {
               scale: scale,
               icon: Icons.phone_outlined,
               label: 'Call',
-              color: AppColors.primarys,
+              color: AppColors.primary,
               onTap: () async {
                 await ExternalAppService.makePhoneCall(phone);
               },

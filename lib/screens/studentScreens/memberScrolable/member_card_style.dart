@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:library_management/screens/studentScreens/memberScrolable/member_color.dart';
-import 'package:library_management/screens/studentScreens/memberScrolable/todelete.dart';
+import 'package:library_management/screens/studentScreens/memberScrolable/members.dart';
 
 class MemberCardStyle {
   final Color background;
@@ -48,6 +48,14 @@ class MemberCardStyle {
           border: MembersColors.border,
           accent: MembersColors.primary,
           avatarBackground: MembersColors.primarySoft,
+        );
+
+      case MemberStatus.pending:
+        return const MemberCardStyle(
+          background: MembersColors.pendingSoft,
+          border: Color(0xFFDDE4EC),
+          accent: MembersColors.pending,
+          avatarBackground: Color(0xFFE5EAF0),
         );
     }
   }

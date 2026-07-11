@@ -22,7 +22,7 @@ Future<void> showLogoutConfirmationDialog({
             child: const Text('Cancel'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.secondary),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
             onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text('Logout'),
           ),

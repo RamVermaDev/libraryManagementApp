@@ -19,6 +19,7 @@ class StudentModel {
   // Financial summary
   final double totalPaid;
   final double totalPending;
+  final double totalDiscount;
   final DateTime? lastPaymentDate;
 
   // Other
@@ -41,6 +42,7 @@ class StudentModel {
     this.currentExpireDate,
     this.totalPaid = 0,
     this.totalPending = 0,
+    this.totalDiscount = 0,
     this.lastPaymentDate,
     this.notes,
     this.createdAt,
@@ -74,6 +76,7 @@ class StudentModel {
 
       totalPaid: (map['totalPaid'] ?? 0).toDouble(),
       totalPending: (map['totalPending'] ?? 0).toDouble(),
+      totalDiscount: (map['totalDiscount'] ?? 0).toDouble(),
 
       lastPaymentDate: _parseDate(map['lastPaymentDate']),
 
@@ -97,6 +100,7 @@ class StudentModel {
       'currentExpireDate': currentExpireDate?.toIso8601String(),
       'totalPaid': totalPaid,
       'totalPending': totalPending,
+      'totalDiscount': totalDiscount,
       'lastPaymentDate': lastPaymentDate?.toIso8601String(),
       'notes': notes,
     };

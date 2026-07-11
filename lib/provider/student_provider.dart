@@ -1,43 +1,134 @@
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:library_management/models/student_model.dart';
+import 'package:library_management/provider/student_state.dart';
 
-final studentProvider =
-    StateNotifierProvider<StudentNotifier, List<StudentModel>>((ref) {
-      return StudentNotifier();
-    });
+final studentProvider = StateNotifierProvider<StudentNotifier, StudentState>((
+  ref,
+) {
+  return StudentNotifier();
+});
 
-class StudentNotifier extends StateNotifier<List<StudentModel>> {
-  StudentNotifier() : super([]);
+class StudentNotifier extends StateNotifier<StudentState> {
+  StudentNotifier() : super(const StudentState());
 
-  // Set all students after fetching from backend
-  void setStudents(List<StudentModel> students) {
-    state = students;
+  // =========================
+  // ALL STUDENTS
+  // =========================
+
+  void setAllStudents(List<StudentModel> students) {
+    state = state.copyWith(allStudents: students);
   }
 
-  void addStudents(List<StudentModel> students) {
-    state = [...state, ...students];
+  void addMoreAllStudents(List<StudentModel> students) {
+    state = state.copyWith(allStudents: [...state.allStudents, ...students]);
   }
 
-  // Add one newly created student
-  void addStudent(StudentModel student) {
-    state = [student, ...state];
+  // =========================
+  // ACTIVE STUDENTS
+  // =========================
+
+  void setActiveStudents(List<StudentModel> students) {
+    state = state.copyWith(activeStudents: students);
   }
 
-  // Update one student
-  void updateStudent(StudentModel updatedStudent) {
-    state = [
-      for (final student in state)
-        if (student.id == updatedStudent.id) updatedStudent else student,
-    ];
+  void addMoreActiveStudents(List<StudentModel> students) {
+    state = state.copyWith(
+      activeStudents: [...state.activeStudents, ...students],
+    );
   }
 
-  // Delete one student
-  void deleteStudent(String studentId) {
-    state = state.where((student) => student.id != studentId).toList();
+  //PENDING STUDENT
+  void setPendingStudents(List<StudentModel> students) {
+    state = state.copyWith(pendingStudents: students);
   }
 
-  // Clear all students
-  void clearStudents() {
-    state = [];
+  void addMorePendingStudents(List<StudentModel> students) {
+    state = state.copyWith(
+      activeStudents: [...state.pendingStudents, ...students],
+    );
+  }
+
+  // =========================
+  // EXPIRING 1 - 3 DAYS
+  // =========================
+
+  void setExpiring1To3Days(List<StudentModel> students) {
+    state = state.copyWith(expiring1To3Days: students);
+  }
+
+  void addMoreExpiring1To3Days(List<StudentModel> students) {
+    state = state.copyWith(
+      expiring1To3Days: [...state.expiring1To3Days, ...students],
+    );
+  }
+
+  // =========================
+  // EXPIRING 4 - 7 DAYS
+  // =========================
+
+  void setExpiring4To7Days(List<StudentModel> students) {
+    state = state.copyWith(expiring4To7Days: students);
+  }
+
+  void addMoreExpiring4To7Days(List<StudentModel> students) {
+    state = state.copyWith(
+      expiring4To7Days: [...state.expiring4To7Days, ...students],
+    );
+  }
+
+  // =========================
+  // EXPIRING 8 - 10 DAYS
+  // =========================
+
+  void setExpiring8To10Days(List<StudentModel> students) {
+    state = state.copyWith(expiring8To10Days: students);
+  }
+
+  void addMoreExpiring8To10Days(List<StudentModel> students) {
+    state = state.copyWith(
+      expiring8To10Days: [...state.expiring8To10Days, ...students],
+    );
+  }
+
+  // =========================
+  // EXPIRED 1 - 3 DAYS
+  // =========================
+
+  void setExpired1To3Days(List<StudentModel> students) {
+    state = state.copyWith(expired1To3Days: students);
+  }
+
+  void addMoreExpired1To3Days(List<StudentModel> students) {
+    state = state.copyWith(
+      expired1To3Days: [...state.expired1To3Days, ...students],
+    );
+  }
+
+  // =========================
+  // EXPIRED 4 - 7 DAYS
+  // =========================
+
+  void setExpired4To7Days(List<StudentModel> students) {
+    state = state.copyWith(expired4To7Days: students);
+  }
+
+  void addMoreExpired4To7Days(List<StudentModel> students) {
+    state = state.copyWith(
+      expired4To7Days: [...state.expired4To7Days, ...students],
+    );
+  }
+
+  // =========================
+  // EXPIRED 8 - 10 DAYS
+  // =========================
+
+  void setExpired8To10Days(List<StudentModel> students) {
+    state = state.copyWith(expired8To10Days: students);
+  }
+
+  void addMoreExpired8To10Days(List<StudentModel> students) {
+    state = state.copyWith(
+      expired8To10Days: [...state.expired8To10Days, ...students],
+    );
   }
 }

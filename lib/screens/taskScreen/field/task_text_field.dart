@@ -14,6 +14,7 @@ class TaskTextField extends StatelessWidget {
     this.textInputAction,
     this.onChanged,
     this.enabled = true,
+    this.fillColor,
   });
 
   final String hintText;
@@ -30,6 +31,7 @@ class TaskTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
 
   final bool enabled;
+  final Color? fillColor;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +46,7 @@ class TaskTextField extends StatelessWidget {
       keyboardType: keyboardType,
       textInputAction: textInputAction,
 
-      decoration: inputDecoration(hintText: hintText),
+      decoration: inputDecoration(hintText: hintText, fillColor: fillColor),
     );
   }
 }

@@ -36,7 +36,7 @@ class ActionItem extends StatelessWidget {
                 child: Text(
                   label,
                   style: TextStyle(
-                    color: AppColors.bodyText,
+                    color: AppColors.body,
                     fontSize: 14 * scale,
                     fontWeight: FontWeight.w500,
                   ),

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/drawer/drawer_layout.dart';
-import 'package:library_management/screens/income_screen.dart';
-import 'package:library_management/screens/studentScreens/students_screen.dart';
+import 'package:library_management/screens/revenueScreen/revenue_screen.dart';
+import 'package:library_management/screens/studentsScreen/students_screen.dart';
 import 'package:library_management/screens/taskScreen/task_form_screen.dart';
 import 'package:library_management/screens/taskScreen/task_screen.dart';
 
@@ -15,7 +15,7 @@ class MainScreen extends ConsumerStatefulWidget {
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
-  final screens = [StudentsScreen(), TaskScreen(), IncomeScreen()];
+  final screens = [StudentsScreen(), TaskScreen(), RevenueAnalyticsScreen()];
 
   int _selectedIndex = 0;
 
@@ -52,7 +52,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
       //Bottom Navigator
       bottomNavigationBar: NavigationBar(
-        backgroundColor: AppColors.bottomBar,
+        backgroundColor: AppColors.surface,
         selectedIndex: _selectedIndex,
         onDestinationSelected: (value) {
           setState(() {

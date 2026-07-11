@@ -12,6 +12,7 @@ class MembershipsCard extends StatelessWidget {
     required this.containerColor,
     required this.containerTextColor,
     required this.isLoading,
+    required this.onTap,
   });
   final String title;
   final String daysNumber;
@@ -20,6 +21,7 @@ class MembershipsCard extends StatelessWidget {
   final Color containerTextColor;
   final Color containerColor;
   final bool isLoading;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class MembershipsCard extends StatelessWidget {
         ),
 
         child: InkWell(
-          onTap: isLoading ? null : () {},
+          onTap: isLoading ? null : onTap,
           child: Padding(
             padding: EdgeInsetsGeometry.fromLTRB(8, 12, 8, 16),
             child: Column(

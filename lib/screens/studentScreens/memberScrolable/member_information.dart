@@ -7,11 +7,13 @@ class MemberInformation extends StatelessWidget {
     required this.memberName,
     required this.expireDate,
     required this.plan,
+    required this.statusColor,
   });
 
   final String memberName;
   final DateTime? expireDate;
   final String plan;
+  final Color statusColor;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +28,7 @@ class MemberInformation extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: MembersColors.heading,
-            fontSize: 16,
+            fontSize: 17,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -38,8 +40,9 @@ class MemberInformation extends StatelessWidget {
           'Expire on : ${_formatDate(expireDate)}',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: MembersColors.body,
+          style: TextStyle(
+            //color: MembersColors.body,
+            color: statusColor,
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -50,6 +53,18 @@ class MemberInformation extends StatelessWidget {
         // Member plan
         Text(
           'Plan : $plan',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: MembersColors.body,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+
+        //WILL TKE FOR BACKEND
+        Text(
+          'Timming : 6AM - 12PM',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(

@@ -63,7 +63,7 @@ class ProfileCard extends StatelessWidget {
                 child: Text(
                   number.toString(),
                   style: TextStyle(
-                    color: AppColors.primarys,
+                    color: AppColors.primary,
                     fontSize: 14 * scale,
                     fontWeight: FontWeight.w700,
                   ),
@@ -85,7 +85,7 @@ class ProfileCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: AppColors.darkText,
+                      color: AppColors.heading,
                       fontSize: 22 * scale,
                       height: 1.1,
                       fontWeight: FontWeight.w700,

@@ -1,84 +1,55 @@
 import 'package:flutter/material.dart';
 
-class AppColors {
+abstract final class AppColors {
   // ==========================================================
-  // BRAND COLORS (Original - Do Not Change)
+  // BRAND
   // ==========================================================
 
-  static const Color primary = Color(0xFF1E3A8A);
-  static const Color secondary = Color(0xFFF59E0B);
+  static const Color primary = Color(0xFF536FE7);
+  static const Color primarySoft = Color(0xFFEEF2FF);
+
+  static const Color accent = Color(0xFFFF7A59);
+  static const Color accentSoft = Color(0xFFFFEEE8);
+
+  static const Color activeButtonText = Color(0xFF172033);
 
   // ==========================================================
   // BACKGROUND
   // ==========================================================
 
-  static const Color background = Color(0xFFF8FAFC);
-  static const Color card = Color(0xFFFFF3CB);
-
+  static const Color background = Color(0xFFF8F9FC);
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceLight = Color(0xFFFDFDFD);
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color card = Color(0xFFFFFFFF);
 
-  static const Color bottomBar = Color(0xFFD0E6FF);
+  static const Color divider = Color(0xFFE8ECF3);
+  static const Color border = Color(0xFFE8ECF3);
 
   // ==========================================================
-  // TEXT COLORS
+  // TEXT
   // ==========================================================
 
-  static const Color heading = Color(0xFF4A4A4A);
-  static const Color body = Color(0xFF4B5563);
-  static const Color caption = Color(0xFF9CA3AF);
+  static const Color heading = Color(0xFF172033);
+  static const Color body = Color(0xFF667085);
+  static const Color caption = Color(0xFF98A2B3);
 
   static const Color white = Colors.white;
   static const Color black = Color(0xFF111827);
 
   // ==========================================================
-  // STATUS COLORS
+  // STATUS
   // ==========================================================
 
-  static const Color success = Color(0xFF22C55E);
-  static const Color successLight = Color(0xFFE8F8ED);
+  static const Color success = Color(0xFF4BA66A);
+  static const Color successLight = Color(0xFFE2F4E9);
 
-  static const Color error = Color(0xFFEF4444);
-  static const Color errorLight = Color(0xFFFDECEC);
+  static const Color warning = Color(0xFFD69238);
+  static const Color warningLight = Color(0xFFFFF0D4);
 
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color warningLight = Color(0xFFFFF7E6);
+  static const Color error = Color(0xFFD95C67);
+  static const Color errorLight = Color(0xFFFFE3E6);
 
-  static const Color info = Color(0xFF3B82F6);
-  static const Color infoLight = Color(0xFFEAF3FF);
-
-  static const Color backgrounScreen = Color(0xFFF9F9F9);
-
-  // ==========================================================
-  // PRIMARY SHADES
-  // ==========================================================
-
-  static const Color primary50 = Color(0xFFEAF1FF);
-  static const Color primary100 = Color(0xFFD4E2FF);
-  static const Color primary200 = Color(0xFFA8C4FF);
-  static const Color primary300 = Color(0xFF7CA6FF);
-  static const Color primary400 = Color(0xFF5088FF);
-  static const Color primary500 = primary;
-  static const Color primary600 = Color(0xFF19317A);
-  static const Color primary700 = Color(0xFF142863);
-  static const Color primary800 = Color(0xFF10204D);
-  static const Color primary900 = Color(0xFF0B1738);
-
-  // ==========================================================
-  // SECONDARY SHADES
-  // ==========================================================
-
-  static const Color secondary50 = Color(0xFFFFFAEB);
-  static const Color secondary100 = Color(0xFFFFF3CB);
-  static const Color secondary200 = Color(0xFFFDE68A);
-  static const Color secondary300 = Color(0xFFFCD34D);
-  static const Color secondary400 = Color(0xFFFBBF24);
-  static const Color secondary500 = secondary;
-  static const Color secondary600 = Color(0xFFD97706);
-  static const Color secondary700 = Color(0xFFB45309);
-  static const Color secondary800 = Color(0xFF92400E);
-  static const Color secondary900 = Color(0xFF78350F);
+  static const Color info = Color(0xFF536FE7);
+  static const Color infoLight = Color(0xFFEEF2FF);
 
   // ==========================================================
   // GREY SCALE
@@ -96,108 +67,83 @@ class AppColors {
   static const Color grey900 = Color(0xFF111827);
 
   // ==========================================================
-  // ICON COLORS
+  // ICONS
   // ==========================================================
 
   static const Color iconPrimary = primary;
-  static const Color iconSecondary = grey600;
+  static const Color iconSecondary = body;
+  static const Color iconMuted = caption;
   static const Color iconDisabled = grey400;
-  static const Color iconWhite = Colors.white;
+  static const Color iconWhite = white;
 
   // ==========================================================
-  // BUTTON COLORS
+  // BUTTONS
   // ==========================================================
 
   static const Color buttonPrimary = primary;
-  static const Color buttonPrimaryHover = primary600;
+  static const Color buttonPrimaryHover = Color(0xFF425DD5);
   static const Color buttonPrimaryDisabled = grey300;
 
-  static const Color buttonSecondary = secondary;
-  static const Color buttonSecondaryHover = secondary600;
-
-  static const Color activeButton = Color(0xFFF5A623);
-  static const Color totalButton = Color(0xFF4A90E2);
-
-  static const Color activeButtonText = Color(0xFF85008E);
+  static const Color buttonSecondary = accent;
+  static const Color buttonSecondaryHover = Color(0xFFCC7A00);
 
   // ==========================================================
-  // INPUT FIELDS
+  // INPUT
   // ==========================================================
 
-  static const Color inputFill = Colors.white;
-  static const Color inputBorder = grey300;
+  static const Color inputFill = white;
+  static const Color inputBorder = border;
   static const Color inputFocused = primary;
   static const Color inputError = error;
 
   // ==========================================================
-  // BADGES
+  // DASHBOARD COLORS
   // ==========================================================
 
-  static const Color badgeSuccess = success;
-  static const Color badgeWarning = warning;
-  static const Color badgeError = error;
-  static const Color badgeInfo = info;
+  static const Color attendance = Color(0xFF43A047); // Emerald Green
+  static const Color income = Color(0xFF536FE7); // Brand Blue
+  static const Color expense = Color(0xFFE05D6F); // Soft Rose Red
+  static const Color student = Color(0xFF7C6AE6); // Soft Indigo Purple
+  static const Color notification = Color(0xFFE6A23C); // Warm Amber
+
+  static const Color seatAvailable = success;
+  static const Color seatOccupied = error;
 
   // ==========================================================
-  // SHADOW
+  // MEMBER COLORS
   // ==========================================================
 
-  static const Color shadow = Color(0x1A000000);
+  static const Color memberActive = Color(0xFF4BA66A);
+  static const Color memberActiveSoft = Color(0xFFE2F4E9);
+
+  static const Color memberExpiring = Color(0xFFD69238);
+  static const Color memberExpiringSoft = Color(0xFFFFF0D4);
+
+  static const Color memberExpired = Color(0xFFD95C67);
+  static const Color memberExpiredSoft = Color(0xFFFFE3E6);
+
+  static const Color memberPending = Color(0xFF64748B);
+  static const Color memberPendingSoft = Color(0xFFEFF3F7);
 
   // ==========================================================
-  // TRANSPARENT COLORS
+  // EXTRA
   // ==========================================================
 
-  static const Color primaryOpacity10 = Color(0x1A1E3A8A);
-  static const Color primaryOpacity20 = Color(0x331E3A8A);
+  static const Color whatsapp = Color(0xFF52C96B);
+  static const Color purple = Color(0xFF9364E8);
+
+  static const Color shadow = Color(0x14000000);
+
+  static const Color primaryOpacity10 = Color(0x1A536FE7);
+  static const Color primaryOpacity20 = Color(0x33536FE7);
 
   static const Color secondaryOpacity10 = Color(0x1AF59E0B);
   static const Color secondaryOpacity20 = Color(0x33F59E0B);
 
   // ==========================================================
-  // SPECIAL COLORS FOR DASHBOARD
+  // FORM
   // ==========================================================
 
-  static const Color attendance = Color(0xFF10B981);
-  static const Color income = Color(0xFF2563EB);
-  static const Color expense = Color(0xFFDC2626);
-  static const Color student = Color(0xFF7C3AED);
-  static const Color notification = Color(0xFFF97316);
-  static const Color seatAvailable = Color(0xFF16A34A);
-  static const Color seatOccupied = Color(0xFFEF4444);
-
-  static const Color container = Color.fromARGB(67, 211, 188, 255);
-
-  static const backgrounds = Color(0xFFF9FAFE);
-  static const cards = Color(0xFFFFFFFF);
-
-  static const headings = Color(0xFF111936);
-  static const darkText = Color(0xFF252936);
-  static const bodyText = Color(0xFF53617D);
-  static const iconMuted = Color(0xFF8192B8);
-
-  static const primarys = Color(0xFF4F73E8);
-  static const primarySoft = Color(0xFFF2F5FF);
-
-  static const membership = Color(0xFFF4F7FF);
-
-  static const green = Color(0xFF42A447);
-  static const whatsapp = Color(0xFF52C96B);
-  static const purple = Color(0xFF9364E8);
-
-  static const red = Color(0xFFED424A);
-  static const redSoft = Color(0xFFFFE8EB);
-
-  static const dividers = Color(0xFFE5E9F2);
-  static const border = Color(0xFFF0F2F7);
+  static const Color formLabel = Color(0xFF6B7280); // Soft gray
+  static const Color formLabelLight = Color(0xFF98A2B3);
 }
-
-
-// 🔵 Primary Blue → Trust, security, professionalism.
-// 🟡 Amber → Attention, energy, premium highlights.
-// ⚪ White & Light Backgrounds → Clean, spacious UI.
-// ⚫ Gray Scale → Consistent typography and dividers.
-// 🟢 Success → Payments, attendance, verification.
-// 🔴 Error → Validation, failed actions.
-// 🔵 Info → Notifications, updates.
-// 🟠 Warning → Pending fees, reminders.

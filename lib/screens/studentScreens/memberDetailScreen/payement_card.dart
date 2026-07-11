@@ -30,25 +30,25 @@ class PaymentCard extends StatelessWidget {
             scale: scale,
             label: 'Amount',
             value: '₹$amount/-',
-            labelColor: AppColors.primarys,
+            labelColor: AppColors.primary,
           ),
 
-          Container(height: 1, color: AppColors.dividers),
+          Container(height: 1, color: AppColors.divider),
 
           PaymentRow(
             scale: scale,
             label: 'Discount',
             value: '₹$discount/-',
-            labelColor: AppColors.green,
+            labelColor: AppColors.success,
           ),
 
           PaymentRow(
             scale: scale,
             label: 'Pending',
             value: '₹$pending/-',
-            labelColor: AppColors.red,
-            valueColor: AppColors.red,
-            backgroundColor: AppColors.redSoft,
+            labelColor: AppColors.error,
+            valueColor: AppColors.error,
+            backgroundColor: AppColors.errorLight,
           ),
         ],
       ),

@@ -81,7 +81,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     child: Icon(
                       Icons.person,
                       size: 60,
-                      color: AppColors.secondary,
+                      color: AppColors.accent,
                     ),
                   ),
 
@@ -90,7 +90,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     bottom: 0,
                     child: CircleAvatar(
                       radius: 18,
-                      backgroundColor: AppColors.secondary,
+                      backgroundColor: AppColors.accent,
                       child: IconButton(
                         padding: EdgeInsets.zero,
                         icon: const Icon(
@@ -134,7 +134,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 width: double.infinity,
                 child: FilledButton.icon(
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.secondary,
+                    backgroundColor: AppColors.accent,
                     foregroundColor: Colors.white,
                     textStyle: Theme.of(context).textTheme.titleMedium
                         ?.copyWith(fontWeight: FontWeight.w700),

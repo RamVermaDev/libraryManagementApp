@@ -30,7 +30,7 @@ class ProfileInfo extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: AppColors.darkText,
+              color: AppColors.heading,
               fontSize: 17 * scale,
               height: 1.1,
               fontWeight: FontWeight.w400,

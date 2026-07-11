@@ -32,7 +32,7 @@ class AppButton extends StatelessWidget {
           );
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.secondary,
+          backgroundColor: AppColors.accent,
           foregroundColor: Colors.white,
           textStyle: textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,

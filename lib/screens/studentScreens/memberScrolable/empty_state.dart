@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/member_color.dart';
-import 'package:library_management/screens/studentScreens/memberScrolable/todelete.dart';
+import 'package:library_management/screens/studentScreens/memberScrolable/members.dart';
 
 class EmptyState extends StatelessWidget {
   final MemberStatus status;
 
-  const EmptyState({super.key, 
-    required this.status,
-  });
+  const EmptyState({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {
@@ -48,10 +46,7 @@ class EmptyState extends StatelessWidget {
             const Text(
               'Members will appear here when available.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: MembersColors.muted,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: MembersColors.muted, fontSize: 14),
             ),
           ],
         ),

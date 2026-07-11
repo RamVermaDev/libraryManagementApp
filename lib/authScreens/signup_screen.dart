@@ -195,7 +195,7 @@ class _SignupForm extends StatelessWidget {
           child: ElevatedButton(
             onPressed: loading ? null : onSubmit,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.secondary,
+              backgroundColor: AppColors.accent,
               foregroundColor: Colors.white,
               textStyle: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,

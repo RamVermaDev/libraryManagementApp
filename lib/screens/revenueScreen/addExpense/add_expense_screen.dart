@@ -1,0 +1,270 @@
+import 'package:flutter/material.dart';
+import 'package:library_management/app_colors.dart';
+import 'package:library_management/screens/revenueScreen/section_header.dart';
+import 'package:library_management/screens/taskScreen/field/date_field.dart';
+import 'package:library_management/screens/taskScreen/field/task_text_field.dart';
+import 'package:library_management/screens/taskScreen/field/title_text.dart';
+
+class AddExpenseScreen extends StatefulWidget {
+  const AddExpenseScreen({super.key});
+
+  @override
+  State<AddExpenseScreen> createState() => _AddExpenseScreenState();
+}
+
+class _AddExpenseScreenState extends State<AddExpenseScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+
+  DateTime? _selectedDate = DateTime.now();
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Container(
+        width: double.infinity, // Full width
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: EdgeInsets.fromLTRB(
+          20,
+          20,
+          20,
+          MediaQuery.of(context).viewInsets.bottom + 20,
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+
+                      children: [
+                        SectionHeader(
+                          title: 'Add Expense',
+                          fontSize: 15,
+                          weight: FontWeight.w700,
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Track your money',
+                          style: TextStyle(color: AppColors.body, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Icon(Icons.close_outlined, size: 18),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 5),
+              Divider(),
+              SizedBox(height: 10),
+
+              _AddForm(
+                titleController: _titleController,
+                descriptionController: _descriptionController,
+                amountController: _amountController,
+                date: _selectedDate,
+                onDateChanged: (value) {
+                  setState(() {
+                    _selectedDate = value;
+                  });
+                },
+                onSubmit: () {
+                  print(_selectedDate);
+                  print(_amountController.text);
+                  print(_descriptionController.text);
+                  print(_titleController.text);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AddForm extends StatelessWidget {
+  const _AddForm({
+    required this.titleController,
+    required this.descriptionController,
+    required this.onDateChanged,
+    required this.amountController,
+    required this.date,
+    required this.onSubmit,
+  });
+
+  final TextEditingController titleController;
+  final TextEditingController descriptionController;
+  final TextEditingController amountController;
+  final DateTime? date;
+
+  final ValueChanged<DateTime?> onDateChanged;
+  final VoidCallback onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      children: [
+        const TitleText(
+          title: 'Expense Title',
+          fontSize: 12,
+          weight: FontWeight.w400,
+          fontColor: AppColors.formLabel,
+        ),
+        const SizedBox(height: 8),
+        TaskTextField(
+          hintText: 'e.g. Employee Salary',
+          controller: titleController,
+          fillColor: AppColors.background,
+          keyboardType: TextInputType.name,
+          textInputAction: TextInputAction.next,
+          validator: (p0) {
+            return null;
+          },
+        ),
+
+        const SizedBox(height: 20),
+
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const TitleText(
+                    title: 'Amount',
+                    fontSize: 12,
+                    weight: FontWeight.w400,
+                    fontColor: AppColors.formLabel,
+                  ),
+                  const SizedBox(height: 8),
+                  TaskTextField(
+                    hintText: '0',
+                    controller: amountController,
+                    fillColor: AppColors.background,
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.next,
+                    validator: (p0) {
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(width: 15),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const TitleText(
+                    title: 'Category',
+                    fontSize: 12,
+                    weight: FontWeight.w400,
+                    fontColor: AppColors.formLabel,
+                  ),
+                  const SizedBox(height: 8),
+                  TaskTextField(
+                    hintText: 'e.g. Employee Salary',
+                    controller: titleController,
+                    fillColor: AppColors.background,
+                    keyboardType: TextInputType.name,
+                    textInputAction: TextInputAction.next,
+                    validator: (p0) {
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 20),
+
+        const TitleText(
+          title: 'Date',
+          fontSize: 12,
+          weight: FontWeight.w400,
+          fontColor: AppColors.formLabel,
+        ),
+        const SizedBox(height: 8),
+        DateField(
+          onDateChanged: onDateChanged,
+          selectedDate: date,
+          hight: 48,
+          color: AppColors.background,
+        ),
+
+        const SizedBox(height: 20),
+
+        const TitleText(
+          title: 'Description (Optional)',
+          fontSize: 12,
+          weight: FontWeight.w400,
+          fontColor: AppColors.formLabel,
+        ),
+        const SizedBox(height: 8),
+        TaskTextField(
+          hintText: 'e.g. Employee Salary',
+          controller: descriptionController,
+          fillColor: AppColors.background,
+          keyboardType: TextInputType.name,
+          textInputAction: TextInputAction.done,
+          minLines: 2,
+          maxLines: 4,
+          validator: (p0) {
+            return null;
+          },
+        ),
+
+        const SizedBox(height: 30),
+
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: FilledButton(
+            onPressed: onSubmit,
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'Add Task',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

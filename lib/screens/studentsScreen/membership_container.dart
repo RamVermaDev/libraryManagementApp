@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:library_management/screens/studentScreens/widgets/card/memberships_card.dart';
+import 'package:library_management/screens/studentsScreen/memberships_card.dart';
 
 class MembershipContainer extends StatelessWidget {
   const MembershipContainer({
@@ -14,6 +14,9 @@ class MembershipContainer extends StatelessWidget {
     required this.cardTextColor,
     this.titleColor,
     this.isLoading = false,
+    required this.onTapeOne,
+    required this.onTapeTwo,
+    required this.onTapeThree,
   });
   final IconData icon;
   final String title;
@@ -25,7 +28,9 @@ class MembershipContainer extends StatelessWidget {
   final Color conatinerColor;
   final String cardTitle;
   final bool isLoading;
-
+  final VoidCallback onTapeOne;
+  final VoidCallback onTapeTwo;
+  final VoidCallback onTapeThree;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +58,7 @@ class MembershipContainer extends StatelessWidget {
           Row(
             children: [
               MembershipsCard(
+                onTap: onTapeOne,
                 title: cardTitle,
                 daysNumber: dayNumber[0],
                 dayCount: dayCount[0],
@@ -63,6 +69,7 @@ class MembershipContainer extends StatelessWidget {
               ),
               SizedBox(width: 2),
               MembershipsCard(
+                onTap: onTapeTwo,
                 title: cardTitle,
                 daysNumber: dayNumber[1],
                 dayCount: dayCount[1],
@@ -73,6 +80,7 @@ class MembershipContainer extends StatelessWidget {
               ),
               SizedBox(width: 2),
               MembershipsCard(
+                onTap: onTapeThree,
                 title: cardTitle,
                 daysNumber: dayNumber[2],
                 dayCount: dayCount[2],

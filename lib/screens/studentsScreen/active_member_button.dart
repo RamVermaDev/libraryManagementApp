@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:library_management/app_colors.dart';
 
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:library_management/screens/studentScreens/memberScrolable/member_screen.dart';
+import 'package:library_management/screens/studentScreens/memberScrolable/members.dart';
+import 'package:library_management/screens/studentScreens/memberScrolable/members_screen_args.dart';
 
 class ActiveMemberButton extends StatelessWidget {
   const ActiveMemberButton({
@@ -16,12 +19,25 @@ class ActiveMemberButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return MembersScreen(
+                args: MembersScreenArgs(initialStatus: MemberStatus.active),
+                appBarTitle: 'Active Member',
+              );
+            },
+          ),
+        );
+      },
       child: Container(
         width: double.infinity,
         height: 60,
         padding: EdgeInsets.fromLTRB(30, 4, 30, 4),
         decoration: BoxDecoration(
-          color: AppColors.activeButton,
+          color: AppColors.warning,
           borderRadius: BorderRadius.circular(4),
         ),
         child: Row(

@@ -40,7 +40,7 @@ class LibrarySummaryCard extends StatelessWidget {
                     height: 52,
                     width: 52,
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceLight,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     alignment: Alignment.center,

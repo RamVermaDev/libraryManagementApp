@@ -102,7 +102,7 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBarWidget(title: 'Add Member'),
-      backgroundColor: AppColors.backgrounScreen,
+      backgroundColor: AppColors.background,
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsetsGeometry.fromLTRB(25, 30, 25, 30),

@@ -39,7 +39,7 @@ class AdmissionsCard extends StatelessWidget {
                   Icon(
                     Icons.arrow_forward_ios_rounded,
                     size: 19 * scale,
-                    color: AppColors.primarys,
+                    color: AppColors.primary,
                   ),
                 ],
               ),
