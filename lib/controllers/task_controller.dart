@@ -73,7 +73,7 @@ class TaskController {
     }
   }
 
-  Future<List<TaskModel>> getAllTasks({
+  Future<void> getAllTasks({
     required BuildContext context,
     required WidgetRef ref,
     required String libraryId,
@@ -83,7 +83,7 @@ class TaskController {
 
       if (token == null || token.isEmpty) {
         showSnackBar(context, 'Authentication required');
-        return [];
+        return;
       }
 
       final response = await http.get(
@@ -95,7 +95,7 @@ class TaskController {
       );
       //print(response.body);
 
-      if (!context.mounted) return [];
+      if (!context.mounted) return;
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
@@ -116,7 +116,7 @@ class TaskController {
         onSuccess: () {},
       );
 
-      return [];
+      return;
     } catch (e, stackTrace) {
       debugPrint('Get All Tasks Error: $e');
       debugPrintStack(stackTrace: stackTrace);
@@ -125,7 +125,7 @@ class TaskController {
         showSnackBar(context, 'Unable to load tasks');
       }
 
-      return [];
+      return;
     }
   }
 

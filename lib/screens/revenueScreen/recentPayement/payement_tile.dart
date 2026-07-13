@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:library_management/app_colors.dart';
+import 'package:library_management/models/payemnt_model.dart';
 import 'package:library_management/screens/revenueScreen/recentPayement/payment_style.dart';
-import 'package:library_management/screens/revenueScreen/payement_item.dart';
 import 'package:library_management/screens/revenueScreen/revenue_formatters.dart';
 
 class PaymentTile extends StatelessWidget {
   const PaymentTile({super.key, required this.payment});
 
-  final PaymentItem payment;
+  final PaymentModel payment;
 
   @override
   Widget build(BuildContext context) {
-    final style = PaymentMethodStyle.from(payment.paymentMethod);
+    final style = PaymentMethodStyle.from(payment.paymentMode);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
@@ -32,7 +32,7 @@ class PaymentTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  PaymentFormatter.method(payment.paymentMethod),
+                  payment.paymentMode,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -43,7 +43,7 @@ class PaymentTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  DateFormatter.paymentDate(payment.paidAt),
+                  DateFormatter.paymentDate(payment.paymentDate),
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,

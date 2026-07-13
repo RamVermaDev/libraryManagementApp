@@ -19,16 +19,18 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   int _selectedIndex = 0;
 
+  final screnName = ['Students', 'Tasks', 'Revenue'];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       //Appbar
       appBar: AppBar(
-        title: const Text(
-          "Svadhyaya Library",
+        title: Text(
+          screnName[_selectedIndex],
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
-        backgroundColor: AppColors.inputBorder,
+        //backgroundColor: AppColors.inputBorder,
         centerTitle: true,
         actions: [
           IconButton(

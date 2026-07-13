@@ -1,25 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
+import 'package:library_management/controllers/expense_controller.dart';
+import 'package:library_management/screens/revenueScreen/addExpense/expense_menu_dropdown.dart';
+import 'package:library_management/screens/revenueScreen/addExpense/top_snack_bar.dart';
 import 'package:library_management/screens/revenueScreen/section_header.dart';
 import 'package:library_management/screens/taskScreen/field/date_field.dart';
 import 'package:library_management/screens/taskScreen/field/task_text_field.dart';
 import 'package:library_management/screens/taskScreen/field/title_text.dart';
 
-class AddExpenseScreen extends StatefulWidget {
+class AddExpenseScreen extends ConsumerStatefulWidget {
   const AddExpenseScreen({super.key});
 
   @override
-  State<AddExpenseScreen> createState() => _AddExpenseScreenState();
+  ConsumerState<AddExpenseScreen> createState() => _AddExpenseScreenState();
 }
 
-class _AddExpenseScreenState extends State<AddExpenseScreen> {
+class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _expenseController = ExpenseController();
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
   DateTime? _selectedDate = DateTime.now();
+
+  String? _selectedCategory;
+
+  Future<void> _addExpense() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (_selectedCategory == null) {
+      TopSnackBar.show(context, message: 'Please select a category');
+      return;
+    }
+
+    if (_selectedDate == null) {
+      TopSnackBar.show(context, message: 'Please select a date');
+      return;
+    }
+
+    final amount = double.tryParse(_amountController.text.trim());
+
+    if (amount == null || amount <= 0) {
+      TopSnackBar.show(context, message: 'Please enter a valid amount');
+      return;
+    }
+
+    await _expenseController.addExpense(
+      context: context,
+      ref: ref,
+      libraryId: '6a422593f2ed24f734e41864',
+      title: _titleController.text.trim(),
+      amount: amount,
+      category: _selectedCategory!,
+      expenseDate: _selectedDate!,
+      description: _descriptionController.text.trim(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _amountController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -57,7 +105,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'Track your money',
+                          'Track your business expenses',
                           style: TextStyle(color: AppColors.body, fontSize: 12),
                         ),
                       ],
@@ -81,17 +129,24 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 descriptionController: _descriptionController,
                 amountController: _amountController,
                 date: _selectedDate,
+                selectedCategory: _selectedCategory,
                 onDateChanged: (value) {
                   setState(() {
                     _selectedDate = value;
                   });
                 },
-                onSubmit: () {
-                  print(_selectedDate);
-                  print(_amountController.text);
-                  print(_descriptionController.text);
-                  print(_titleController.text);
+                onCategoryChange: (value) {
+                  setState(() {
+                    _selectedCategory = value;
+                  });
                 },
+                onSubmit: _addExpense,
+                //  () {
+                //   print(_selectedDate);
+                //   print(_amountController.text);
+                //   print(_descriptionController.text);
+                //   print(_titleController.text);
+                // },
               ),
             ],
           ),
@@ -109,15 +164,19 @@ class _AddForm extends StatelessWidget {
     required this.amountController,
     required this.date,
     required this.onSubmit,
+    required this.selectedCategory,
+    required this.onCategoryChange,
   });
 
   final TextEditingController titleController;
   final TextEditingController descriptionController;
   final TextEditingController amountController;
   final DateTime? date;
+  final String? selectedCategory;
 
   final ValueChanged<DateTime?> onDateChanged;
   final VoidCallback onSubmit;
+  final ValueChanged<String?> onCategoryChange;
 
   @override
   Widget build(BuildContext context) {
@@ -138,6 +197,7 @@ class _AddForm extends StatelessWidget {
           fillColor: AppColors.background,
           keyboardType: TextInputType.name,
           textInputAction: TextInputAction.next,
+          maxLength: 50,
           validator: (p0) {
             return null;
           },
@@ -185,15 +245,9 @@ class _AddForm extends StatelessWidget {
                     fontColor: AppColors.formLabel,
                   ),
                   const SizedBox(height: 8),
-                  TaskTextField(
-                    hintText: 'e.g. Employee Salary',
-                    controller: titleController,
-                    fillColor: AppColors.background,
-                    keyboardType: TextInputType.name,
-                    textInputAction: TextInputAction.next,
-                    validator: (p0) {
-                      return null;
-                    },
+                  ExpenseMenuDropdown(
+                    onChange: onCategoryChange,
+                    selectedCategory: selectedCategory,
                   ),
                 ],
               ),
@@ -234,6 +288,7 @@ class _AddForm extends StatelessWidget {
           textInputAction: TextInputAction.done,
           minLines: 2,
           maxLines: 4,
+          maxLength: 200,
           validator: (p0) {
             return null;
           },

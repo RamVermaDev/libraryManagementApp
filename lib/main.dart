@@ -8,6 +8,7 @@ import 'package:library_management/drawer/drawer_screen/profile/my_profile_scree
 import 'package:library_management/drawer/drawer_screen/plan_setup_screen.dart';
 import 'package:library_management/drawer/drawer_screen/program_setup_screen.dart';
 import 'package:library_management/drawer/drawer_screen/subscription_screen.dart';
+import 'package:library_management/scaffold_messenger.dart';
 
 void main() {
   runApp(ProviderScope(child: const MyApp()));
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: scaffoldMessengerKey,
       routes: {
         '/profile': (context) => const MyProfileScreen(),
         '/library': (context) => const MyLibraryScreen(),

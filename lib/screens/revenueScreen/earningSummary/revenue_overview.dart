@@ -10,26 +10,30 @@ class RevenueOverview extends StatelessWidget {
     required this.month,
     required this.year,
     required this.allTime,
+    required this.scale,
+    required this.isLoading,
   });
 
-  final double today;
-  final double month;
-  final double year;
-  final double allTime;
+  final double? today;
+  final double? month;
+  final double? year;
+  final double? allTime;
+  final double scale;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(title: 'Earning Summary', fontSize: 18),
-        const SizedBox(height: 16),
+        SectionHeader(title: 'Earning Summary', fontSize: 18 * scale),
+        SizedBox(height: 16 * scale),
         GridView.count(
           crossAxisCount: 2,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
+          mainAxisSpacing: 10 * scale,
+          crossAxisSpacing: 10 * scale,
           childAspectRatio: 2,
           children: [
             RevenueStatCard(
@@ -38,6 +42,8 @@ class RevenueOverview extends StatelessWidget {
               icon: Icons.calendar_month_outlined,
               color: const Color(0xFF059669),
               background: const Color(0xFFE4F6EF),
+              scale: scale,
+              isLoading: isLoading,
             ),
             RevenueStatCard(
               title: 'This Month',
@@ -46,6 +52,8 @@ class RevenueOverview extends StatelessWidget {
               color: const Color(0xFF2563EB),
               background: const Color(0xFFEAF1FF),
               cardColor: AppColors.grey200,
+              scale: scale,
+              isLoading: isLoading,
             ),
             RevenueStatCard(
               title: 'This Year',
@@ -53,6 +61,8 @@ class RevenueOverview extends StatelessWidget {
               icon: Icons.calendar_month_outlined,
               color: const Color(0xFF3322B8),
               background: const Color(0xFFF0EAFF),
+              scale: scale,
+              isLoading: isLoading,
             ),
             RevenueStatCard(
               title: 'All Time',
@@ -60,6 +70,8 @@ class RevenueOverview extends StatelessWidget {
               icon: Icons.all_inclusive_rounded,
               color: const Color(0xFFEA580C),
               background: const Color(0xFFFFEFE6),
+              scale: scale,
+              isLoading: isLoading,
             ),
           ],
         ),

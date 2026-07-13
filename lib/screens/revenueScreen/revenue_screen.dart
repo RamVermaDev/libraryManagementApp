@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:library_management/context_extension.dart';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
+import 'package:library_management/controllers/revenue_summary_controller.dart';
+import 'package:library_management/provider/revenue_provider.dart';
 import 'package:library_management/screens/revenueScreen/addExpense/add_expense_screen.dart';
 import 'package:library_management/screens/revenueScreen/chart/chart_models.dart';
 import 'package:library_management/screens/revenueScreen/chart/earnings_trend_card.dart';
@@ -11,19 +16,52 @@ import 'package:library_management/screens/revenueScreen/payement_item.dart';
 import 'package:library_management/screens/revenueScreen/recentPayement/recent_payements_section.dart';
 import 'package:library_management/screens/revenueScreen/revenue_formatters.dart';
 
-class RevenueAnalyticsScreen extends StatefulWidget {
+class RevenueAnalyticsScreen extends ConsumerStatefulWidget {
   const RevenueAnalyticsScreen({super.key});
 
   @override
-  State<RevenueAnalyticsScreen> createState() => _RevenueAnalyticsScreenState();
+  ConsumerState<RevenueAnalyticsScreen> createState() =>
+      _RevenueAnalyticsScreenState();
 }
 
-class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
+class _RevenueAnalyticsScreenState
+    extends ConsumerState<RevenueAnalyticsScreen> {
   DateTime _selectedMonth = DateTime(2026, 6);
   TrendPeriod _selectedPeriod = TrendPeriod.thirtyDays;
 
   late final List<PaymentItem> _payments = List.unmodifiable(paymentItems);
   late final List<ExpenseItem> _expenses = List.unmodifiable(expenseItems);
+
+  final _revenueSummaryController = RevenueSummaryController();
+  bool _isloading = false;
+
+  // final ScrollController _scrollController = ScrollController();
+  // double _titleOpacity = 0;
+
+  @override
+  void initState() {
+    _getRevenue();
+
+    // _scrollController.addListener(() {
+    //   const fadeStart = 40.0;
+    //   const fadeEnd = 110.0;
+
+    //   final opacity =
+    //       ((_scrollController.offset - fadeStart) / (fadeEnd - fadeStart))
+    //           .clamp(0.0, 1.0);
+
+    //   if (opacity != _titleOpacity) {
+    //     setState(() => _titleOpacity = opacity);
+    //   }
+    // });
+    super.initState();
+  }
+
+  // @override
+  // void dispose() {
+  //   _scrollController.dispose();
+  //   super.dispose();
+  // }
 
   List<PaymentItem> get _selectedPayments {
     final items = _payments
@@ -31,6 +69,23 @@ class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
         .toList();
     items.sort((a, b) => b.paidAt.compareTo(a.paidAt));
     return items;
+  }
+
+  Future<void> _getRevenue() async {
+    setState(() {
+      _isloading = true;
+    });
+    try {
+      _revenueSummaryController.getRevenueSummary(
+        context: context,
+        ref: ref,
+        libraryId: '6a422593f2ed24f734e41864',
+      );
+    } finally {
+      setState(() {
+        _isloading = false;
+      });
+    }
   }
 
   List<ExpenseItem> get _selectedExpenses {
@@ -44,22 +99,22 @@ class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
   double get _monthlyRevenue => _sum(_selectedPayments.map((e) => e.amount));
   double get _monthlyExpense => _sum(_selectedExpenses.map((e) => e.amount));
   double get _monthlyProfit => _monthlyRevenue - _monthlyExpense;
-  double get _allTimeIncome => _sum(_payments.map((e) => e.amount));
+  //double get _allTimeIncome => _sum(_payments.map((e) => e.amount));
 
-  double get _yearIncome => _sum(
-    _payments
-        .where((item) => item.paidAt.year == _selectedMonth.year)
-        .map((item) => item.amount),
-  );
+  // double get _yearIncome => _sum(
+  //   _payments
+  //       .where((item) => item.paidAt.year == _selectedMonth.year)
+  //       .map((item) => item.amount),
+  // );
 
-  double get _todayIncome {
-    final now = DateTime.now();
-    return _sum(
-      _payments
-          .where((item) => _sameDay(item.paidAt, now))
-          .map((e) => e.amount),
-    );
-  }
+  // double get _todayIncome {
+  //   final now = DateTime.now();
+  //   return _sum(
+  //     _payments
+  //         .where((item) => _sameDay(item.paidAt, now))
+  //         .map((e) => e.amount),
+  //   );
+  // }
 
   List<ChartPoint> get _chartPoints {
     return _selectedPeriod == TrendPeriod.thirtyDays
@@ -109,6 +164,12 @@ class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scale = context.scale;
+    final revenue = ref.watch(revenueProvider);
+
+    final summary = revenue.summary;
+    final recentPayment = revenue.recentPayments;
+    //print(recentPayment?[0].paymentDate);
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFE),
       floatingActionButton: FloatingActionButton.extended(
@@ -140,10 +201,12 @@ class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
               padding: const EdgeInsets.fromLTRB(22, 28, 22, 0),
               sliver: SliverToBoxAdapter(
                 child: RevenueOverview(
-                  today: _todayIncome,
-                  month: _monthlyRevenue,
-                  year: _yearIncome,
-                  allTime: _allTimeIncome,
+                  today: summary?.todayIncome,
+                  month: summary?.monthlyIncome,
+                  year: summary?.yearlyIncome,
+                  allTime: summary?.allTimeIncome,
+                  scale: scale,
+                  isLoading: _isloading,
                 ),
               ),
             ),
@@ -180,7 +243,8 @@ class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
               padding: const EdgeInsets.fromLTRB(22, 34, 22, 110),
               sliver: SliverToBoxAdapter(
                 child: RecentPaymentsSection(
-                  payments: _selectedPayments.take(4).toList(),
+                  payments: recentPayment,
+                  isloading: true,
                 ),
               ),
             ),
@@ -232,8 +296,8 @@ class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
 
   static bool _sameMonth(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month;
-  static bool _sameDay(DateTime a, DateTime b) =>
-      _sameMonth(a, b) && a.day == b.day;
+  // static bool _sameDay(DateTime a, DateTime b) =>
+  //     _sameMonth(a, b) && a.day == b.day;
   static int _monthNumber(DateTime date) => date.year * 12 + date.month;
   static double _sum(Iterable<double> values) =>
       values.fold(0, (total, item) => total + item);

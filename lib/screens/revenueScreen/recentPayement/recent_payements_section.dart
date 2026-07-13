@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:library_management/app_colors.dart';
-import 'package:library_management/screens/revenueScreen/payement_item.dart';
+import 'package:library_management/models/payemnt_model.dart';
 import 'package:library_management/screens/revenueScreen/recentPayement/payement_tile.dart';
 import 'package:library_management/screens/revenueScreen/revenue_card_decoration.dart';
 import 'package:library_management/screens/revenueScreen/section_header.dart';
 
 class RecentPaymentsSection extends StatelessWidget {
-  const RecentPaymentsSection({super.key, required this.payments});
+  const RecentPaymentsSection({
+    super.key,
+    required this.payments,
+    required this.isloading,
+  });
 
-  final List<PaymentItem> payments;
+  final List<PaymentModel>? payments;
+  final bool isloading;
 
   @override
   Widget build(BuildContext context) {
@@ -42,20 +47,20 @@ class RecentPaymentsSection extends StatelessWidget {
         Container(
           decoration: AppCardDecoration.standard(),
           clipBehavior: Clip.antiAlias,
-          child: payments.isEmpty
+          child: payments!.isEmpty
               ? const _EmptyPaymentWidget()
               : ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   padding: EdgeInsets.zero,
-                  itemCount: payments.length,
+                  itemCount: payments!.length,
                   separatorBuilder: (_, __) => const Divider(
                     height: 1,
                     thickness: 1,
                     color: Color(0xFFF1F3F5),
                   ),
                   itemBuilder: (_, index) {
-                    return PaymentTile(payment: payments[index]);
+                    return PaymentTile(payment: payments![index]);
                   },
                 ),
         ),
