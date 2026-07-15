@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:library_management/app_notification.dart';
 import 'package:library_management/global_varaible.dart';
+import 'package:library_management/models/payemnt_model.dart';
 import 'package:library_management/models/student_model.dart';
+import 'package:library_management/provider/revenue_provider.dart';
 import 'package:library_management/provider/student_provider.dart';
 import 'package:library_management/provider/token_provider.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/members.dart';
@@ -66,13 +68,15 @@ class StudentController {
         response: response,
         context: context,
         onSuccess: () {
-          // final Map<String, dynamic> responseData = jsonDecode(response.body);
+          final Map<String, dynamic> responseData = jsonDecode(response.body);
 
-          // final newStudent = StudentModel.fromMap(
-          //   responseData['data']['student'] as Map<String, dynamic>,
-          // );
+          final payment = PaymentModel.fromMap(
+            responseData['data']['payment'] as Map<String, dynamic>,
+          );
 
           //ref.read(studentProvider.notifier).addStudent(newStudent);
+
+          ref.read(revenueProvider.notifier).addPayment(payment);
 
           Navigator.pop(context);
 

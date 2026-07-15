@@ -8,6 +8,9 @@ abstract final class AppColors {
   static const Color primary = Color(0xFF536FE7);
   static const Color primarySoft = Color(0xFFEEF2FF);
 
+  static const Color primaryShade = Color(0xff2F5BFF);
+  static const Color primaryShadeLight = Color(0xffEEF4FF);
+
   static const Color accent = Color(0xFFFF7A59);
   static const Color accentSoft = Color(0xFFFFEEE8);
 
@@ -23,6 +26,10 @@ abstract final class AppColors {
 
   static const Color divider = Color(0xFFE8ECF3);
   static const Color border = Color(0xFFE8ECF3);
+
+  static const Color expiredContainer = Color(0xFFFFD6DB);
+  static const Color expiredContainerTwo = Color(0xFFFFCDD5);
+  static const Color expiredContainerThree = Color(0xFFFFBCC6);
 
   // ==========================================================
   // TEXT

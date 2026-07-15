@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:library_management/app_colors.dart';
 import 'package:library_management/screens/studentsScreen/memberships_card.dart';
 
 class MembershipContainer extends StatelessWidget {
@@ -6,88 +7,82 @@ class MembershipContainer extends StatelessWidget {
     super.key,
     required this.title,
     required this.conatinerColor,
-    required this.icon,
     required this.cardTitle,
     required this.dayNumber,
     required this.dayCount,
-    required this.cardConatinaerColor,
-    required this.cardTextColor,
     this.titleColor,
     this.isLoading = false,
     required this.onTapeOne,
     required this.onTapeTwo,
     required this.onTapeThree,
+    required this.scale,
   });
-  final IconData icon;
+
   final String title;
-  final Color? titleColor;
-  final List<String> dayNumber;
-  final List<int> dayCount;
-  final Color cardConatinaerColor;
-  final Color cardTextColor;
   final Color conatinerColor;
   final String cardTitle;
+  final List<String> dayNumber;
+  final List<int> dayCount;
+  final Color? titleColor;
   final bool isLoading;
   final VoidCallback onTapeOne;
   final VoidCallback onTapeTwo;
   final VoidCallback onTapeThree;
+  final double scale;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 230,
+      padding: EdgeInsets.all(22 * scale),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
         color: conatinerColor,
-        border: Border.all(width: 0.5),
+        borderRadius: BorderRadius.circular(22 * scale),
       ),
-
-      padding: EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            textAlign: TextAlign.left,
             style: TextStyle(
-              color: titleColor ?? Colors.black,
-              fontWeight: FontWeight.w500,
+              fontSize: 18 * scale,
+              fontWeight: FontWeight.w700,
+              color: titleColor ?? AppColors.heading,
             ),
           ),
-          SizedBox(height: 12),
+
+          SizedBox(height: 18 * scale),
+
           Row(
             children: [
               MembershipsCard(
-                onTap: onTapeOne,
                 title: cardTitle,
                 daysNumber: dayNumber[0],
                 dayCount: dayCount[0],
-                icon: icon,
-                containerColor: cardConatinaerColor,
-                containerTextColor: cardTextColor,
                 isLoading: isLoading,
+                onTap: onTapeOne,
+                scale: scale,
               ),
-              SizedBox(width: 2),
+
+              SizedBox(width: 16 * scale),
+
               MembershipsCard(
-                onTap: onTapeTwo,
                 title: cardTitle,
                 daysNumber: dayNumber[1],
                 dayCount: dayCount[1],
-                icon: icon,
-                containerColor: cardConatinaerColor,
-                containerTextColor: cardTextColor,
                 isLoading: isLoading,
+                onTap: onTapeTwo,
+                scale: scale,
               ),
-              SizedBox(width: 2),
+
+              SizedBox(width: 16 * scale),
+
               MembershipsCard(
-                onTap: onTapeThree,
                 title: cardTitle,
                 daysNumber: dayNumber[2],
                 dayCount: dayCount[2],
-                icon: icon,
-                containerColor: cardConatinaerColor,
-                containerTextColor: cardTextColor,
                 isLoading: isLoading,
+                onTap: onTapeThree,
+                scale: scale,
               ),
             ],
           ),

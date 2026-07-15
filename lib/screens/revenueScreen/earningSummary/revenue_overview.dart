@@ -11,7 +11,6 @@ class RevenueOverview extends StatelessWidget {
     required this.year,
     required this.allTime,
     required this.scale,
-    required this.isLoading,
   });
 
   final double? today;
@@ -19,14 +18,17 @@ class RevenueOverview extends StatelessWidget {
   final double? year;
   final double? allTime;
   final double scale;
-  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionHeader(title: 'Earning Summary', fontSize: 18 * scale),
+        SectionHeader(
+          title: 'Earning Summary',
+          fontSize: 18 * scale,
+          scale: scale,
+        ),
         SizedBox(height: 16 * scale),
         GridView.count(
           crossAxisCount: 2,
@@ -39,39 +41,35 @@ class RevenueOverview extends StatelessWidget {
             RevenueStatCard(
               title: 'Today',
               amount: today,
-              icon: Icons.calendar_month_outlined,
+              icon: Icons.today_rounded,
               color: const Color(0xFF059669),
               background: const Color(0xFFE4F6EF),
               scale: scale,
-              isLoading: isLoading,
             ),
             RevenueStatCard(
               title: 'This Month',
               amount: month,
-              icon: Icons.calendar_month_outlined,
+              icon: Icons.date_range_rounded,
               color: const Color(0xFF2563EB),
               background: const Color(0xFFEAF1FF),
               cardColor: AppColors.grey200,
               scale: scale,
-              isLoading: isLoading,
             ),
             RevenueStatCard(
               title: 'This Year',
               amount: year,
-              icon: Icons.calendar_month_outlined,
+              icon: Icons.event_available_rounded,
               color: const Color(0xFF3322B8),
               background: const Color(0xFFF0EAFF),
               scale: scale,
-              isLoading: isLoading,
             ),
             RevenueStatCard(
               title: 'All Time',
               amount: allTime,
-              icon: Icons.all_inclusive_rounded,
+              icon: Icons.account_balance_wallet_rounded,
               color: const Color(0xFFEA580C),
               background: const Color(0xFFFFEFE6),
               scale: scale,
-              isLoading: isLoading,
             ),
           ],
         ),

@@ -1,6 +1,6 @@
 class CurrencyFormatter {
-  static String format(double amount, {bool signed = false}) {
-    final value = amount.round().abs();
+  static String format(double? amount, {bool signed = false}) {
+    final value = amount!.round().abs();
     final formatted = value.toString().replaceAllMapped(
       RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
       (match) => '${match[1]},',
@@ -52,6 +52,8 @@ class DateFormatter {
       '${_fullMonths[date.month - 1]} ${date.year}';
   static String shortDate(DateTime date) =>
       '${date.day} ${shortMonth(date.month)}';
+  static String shortDateWithYear(DateTime date) =>
+      '${date.day} ${shortMonth(date.month)} ${date.year}';
 
   static String paymentDate(DateTime date) {
     final hour = date.hour > 12 ? date.hour - 12 : date.hour;

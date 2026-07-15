@@ -25,6 +25,15 @@ class _EarningsLineChartState extends State<EarningsLineChart> {
   int _selectedIndex = -1;
 
   @override
+  void didUpdateWidget(covariant EarningsLineChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (_selectedIndex >= widget.points.length) {
+      _selectedIndex = -1;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (widget.points.isEmpty) {
       return SizedBox(
@@ -53,12 +62,12 @@ class _EarningsLineChartState extends State<EarningsLineChart> {
 
   LineChartData _chartData() {
     return LineChartData(
-      minX: widget.points.first.x,
-      maxX: widget.points.last.x,
-      minY: 0,
+      minX: widget.points.first.x - .35,
+      maxX: widget.points.last.x + .35,
+      minY: -_maxY * .05,
       maxY: _maxY,
 
-      clipData: const FlClipData.all(),
+      clipData: const FlClipData.none(),
 
       borderData: FlBorderData(show: false),
 
@@ -72,17 +81,14 @@ class _EarningsLineChartState extends State<EarningsLineChart> {
 
       extraLinesData: const ExtraLinesData(),
 
-      showingTooltipIndicators: _selectedIndex == -1
+      showingTooltipIndicators: _selectedPoint == null
           ? []
           : [
               ShowingTooltipIndicators([
                 LineBarSpot(
                   _lineBar(),
                   0,
-                  FlSpot(
-                    widget.points[_selectedIndex].x,
-                    widget.points[_selectedIndex].y,
-                  ),
+                  FlSpot(_selectedPoint!.x, _selectedPoint!.y),
                 ),
               ]),
             ],
@@ -95,6 +101,14 @@ class _EarningsLineChartState extends State<EarningsLineChart> {
         .reduce((a, b) => a > b ? a : b);
 
     return highest <= 0 ? 1 : highest * 1.25;
+  }
+
+  ChartPoint? get _selectedPoint {
+    if (_selectedIndex < 0 || _selectedIndex >= widget.points.length) {
+      return null;
+    }
+
+    return widget.points[_selectedIndex];
   }
 
   LineChartBarData _lineBar() {
@@ -176,22 +190,30 @@ class _EarningsLineChartState extends State<EarningsLineChart> {
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: true,
-          interval: widget.period == TrendPeriod.thirtyDays ? 7 : 2,
+          reservedSize: 38,
+          interval: 1,
           getTitlesWidget: (value, meta) {
-            final index = value.toInt();
+            final index = _pointIndexForX(value);
 
-            if (index < 0 || index >= widget.points.length) {
+            if (index == null || !_shouldShowBottomTitle(index)) {
               return const SizedBox();
             }
 
             return Padding(
               padding: const EdgeInsets.only(top: 10),
-              child: Text(
-                widget.points[index].label,
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: AppColors.caption,
-                  fontWeight: FontWeight.w500,
+              child: SizedBox(
+                width: widget.period == TrendPeriod.thirtyDays ? 44 : 38,
+                child: Text(
+                  _bottomLabel(widget.points[index].label),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.visible,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    height: 1.15,
+                    color: AppColors.caption,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             );
@@ -298,5 +320,37 @@ class _EarningsLineChartState extends State<EarningsLineChart> {
         },
       ),
     );
+  }
+
+  int? _pointIndexForX(double x) {
+    final rounded = x.round();
+
+    if ((x - rounded).abs() > .01 ||
+        rounded < 0 ||
+        rounded >= widget.points.length) {
+      return null;
+    }
+
+    return rounded;
+  }
+
+  bool _shouldShowBottomTitle(int index) {
+    if (widget.period == TrendPeriod.thirtyDays) {
+      return index == 0 ||
+          index == 7 ||
+          index == 14 ||
+          index == 21 ||
+          index == 29;
+    }
+
+    return index.isEven || index == widget.points.length - 1;
+  }
+
+  String _bottomLabel(String label) {
+    if (widget.period == TrendPeriod.twelveMonths) {
+      return label.replaceFirst(' ', '\n');
+    }
+
+    return label;
   }
 }

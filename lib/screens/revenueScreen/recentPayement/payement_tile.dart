@@ -5,9 +5,10 @@ import 'package:library_management/screens/revenueScreen/recentPayement/payment_
 import 'package:library_management/screens/revenueScreen/revenue_formatters.dart';
 
 class PaymentTile extends StatelessWidget {
-  const PaymentTile({super.key, required this.payment});
+  const PaymentTile({super.key, required this.payment, required this.scale});
 
   final PaymentModel payment;
+  final double scale;
 
   @override
   Widget build(BuildContext context) {
@@ -18,15 +19,15 @@ class PaymentTile extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 36 * scale,
+            height: 36 * scale,
             decoration: BoxDecoration(
               color: style.background,
               borderRadius: BorderRadius.circular(4),
             ),
-            child: Icon(style.icon, size: 22, color: style.color),
+            child: Icon(style.icon, size: 22 * scale, color: style.color),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16 * scale),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,17 +36,17 @@ class PaymentTile extends StatelessWidget {
                   payment.paymentMode,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontSize: 14 * scale,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF101B33),
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2 * scale),
                 Text(
                   DateFormatter.paymentDate(payment.paymentDate),
-                  style: const TextStyle(
-                    fontSize: 11,
+                  style: TextStyle(
+                    fontSize: 11 * scale,
                     fontWeight: FontWeight.w500,
                     color: Color(0xFF747D93),
                   ),
@@ -53,11 +54,11 @@ class PaymentTile extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12 * scale),
           Text(
             CurrencyFormatter.format(payment.amount),
-            style: const TextStyle(
-              fontSize: 15,
+            style: TextStyle(
+              fontSize: 15 * scale,
               fontWeight: FontWeight.w700,
               color: AppColors.black,
             ),

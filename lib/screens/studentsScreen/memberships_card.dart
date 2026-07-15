@@ -5,75 +5,83 @@ import 'package:library_management/app_colors.dart';
 class MembershipsCard extends StatelessWidget {
   const MembershipsCard({
     super.key,
-    required this.icon,
     required this.title,
     required this.daysNumber,
     required this.dayCount,
-    required this.containerColor,
-    required this.containerTextColor,
     required this.isLoading,
     required this.onTap,
+    this.scale = 1,
   });
+
   final String title;
   final String daysNumber;
   final int dayCount;
-  final IconData icon;
-  final Color containerTextColor;
-  final Color containerColor;
   final bool isLoading;
   final VoidCallback onTap;
+  final double scale;
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: BorderSide(
-            color: AppColors.black,
-            width: 1, // Thin border
+      child: InkWell(
+        //borderRadius: BorderRadius.circular(14 * scale),
+        onTap: isLoading ? null : onTap,
+        child: Container(
+          height: 110 * scale,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(14 * scale),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadow,
+                blurRadius: 12 * scale,
+                offset: Offset(0, 4 * scale),
+              ),
+            ],
           ),
-        ),
+          padding: EdgeInsets.symmetric(
+            horizontal: 12 * scale,
+            vertical: 18 * scale,
+          ),
+          child: Column(
+            children: [
+              Text(
+                daysNumber.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 10 * scale,
+                  color: AppColors.grey500,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
 
-        child: InkWell(
-          onTap: isLoading ? null : onTap,
-          child: Padding(
-            padding: EdgeInsetsGeometry.fromLTRB(8, 12, 8, 16),
-            child: Column(
-              children: [
-                Icon(icon),
-                SizedBox(height: 4),
-                Text(
-                  title,
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+              const Spacer(),
+
+              isLoading
+                  ? SpinKitThreeBounce(
+                      color: AppColors.primary,
+                      size: 24 * scale,
+                    )
+                  : Text(
+                      dayCount.toString(),
+                      style: TextStyle(
+                        fontSize: 26 * scale,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.buttonPrimaryHover,
+                        height: 1,
+                      ),
+                    ),
+
+              const Spacer(),
+
+              Text(
+                title.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 7 * scale,
+                  color: AppColors.grey500,
+                  fontWeight: FontWeight.w600,
                 ),
-                Text(daysNumber),
-                SizedBox(height: 16),
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                    color: containerColor,
-                  ),
-                  alignment: Alignment.center,
-                  child: isLoading
-                      ? SizedBox(
-                          width: 30,
-                          child: SpinKitWave(color: Colors.white, size: 15),
-                        )
-                      : Text(
-                          dayCount.toString(),
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                            color: containerTextColor,
-                          ),
-                        ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

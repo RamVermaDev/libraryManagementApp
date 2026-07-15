@@ -1,3 +1,4 @@
+import 'package:library_management/models/chart_point_model.dart';
 import 'package:library_management/models/monthly_revenue_model.dart';
 import 'package:library_management/models/payemnt_model.dart';
 import 'package:library_management/models/revenue_summary_model.dart';
@@ -22,21 +23,17 @@ class RevenueState {
   final List<PaymentModel>? recentPayments;
 
   /// Charts
-  // final List<ChartPointModel> thirtyDayTrend;
+  final List<ChartPointModel> thirtyDayTrend;
 
-  // final List<ChartPointModel> twelveMonthTrend;
-
-  /// Loading
-  //final bool isLoading;
+  final List<ChartPointModel> twelveMonthTrend;
 
   const RevenueState({
     this.summary,
     this.currentMonth,
     this.monthCache = const {},
     this.recentPayments = const [],
-    // this.thirtyDayTrend = const [],
-    // this.twelveMonthTrend = const [],
-    //this.isLoading = false,
+    this.thirtyDayTrend = const [],
+    this.twelveMonthTrend = const [],
   });
 
   RevenueState copyWith({
@@ -44,18 +41,16 @@ class RevenueState {
     MonthlyRevenueModel? currentMonth,
     Map<String, MonthlyRevenueModel>? monthCache,
     List<PaymentModel>? recentPayments,
-    // List<ChartPointModel>? thirtyDayTrend,
-    // List<ChartPointModel>? twelveMonthTrend,
-    //bool? isLoading,
+    List<ChartPointModel>? thirtyDayTrend,
+    List<ChartPointModel>? twelveMonthTrend,
   }) {
     return RevenueState(
       summary: summary ?? this.summary,
       currentMonth: currentMonth ?? this.currentMonth,
       monthCache: monthCache ?? this.monthCache,
       recentPayments: recentPayments ?? this.recentPayments,
-      // thirtyDayTrend: thirtyDayTrend ?? this.thirtyDayTrend,
-      // twelveMonthTrend: twelveMonthTrend ?? this.twelveMonthTrend,
-      //isLoading: isLoading ?? this.isLoading,
+      thirtyDayTrend: thirtyDayTrend ?? this.thirtyDayTrend,
+      twelveMonthTrend: twelveMonthTrend ?? this.twelveMonthTrend,
     );
   }
 
@@ -63,7 +58,3 @@ class RevenueState {
     return const RevenueState();
   }
 }
-
-// class ChartPointModel {
-//   static Object? fromMap(e) {}
-// }

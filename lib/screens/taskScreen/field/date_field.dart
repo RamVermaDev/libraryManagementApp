@@ -45,7 +45,7 @@ class _DateFieldState extends State<DateField> {
     final selectedDate = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
+      firstDate: DateTime(2010),
       lastDate: DateTime(2030),
     );
 

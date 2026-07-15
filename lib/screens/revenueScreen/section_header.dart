@@ -7,12 +7,14 @@ class SectionHeader extends StatelessWidget {
     this.trailing,
     this.fontSize,
     this.weight,
+    required this.scale,
   });
 
   final String title;
   final Widget? trailing;
   final double? fontSize;
   final FontWeight? weight;
+  final double scale;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +25,7 @@ class SectionHeader extends StatelessWidget {
             title,
             style: TextStyle(
               color: Color(0xFF101B33),
-              fontSize: fontSize ?? 20,
+              fontSize: fontSize ?? 20 * scale,
               fontWeight: weight ?? FontWeight.w500,
               height: 1.2,
             ),

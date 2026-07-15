@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:library_management/app_colors.dart';
+import 'package:library_management/context_extension.dart';
 import 'package:library_management/controllers/expense_controller.dart';
 import 'package:library_management/screens/revenueScreen/addExpense/expense_menu_dropdown.dart';
 import 'package:library_management/screens/revenueScreen/addExpense/top_snack_bar.dart';
@@ -27,6 +29,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   DateTime? _selectedDate = DateTime.now();
 
   String? _selectedCategory;
+  bool _isLoading = false;
 
   Future<void> _addExpense() async {
     if (!_formKey.currentState!.validate()) return;
@@ -48,16 +51,26 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
       return;
     }
 
-    await _expenseController.addExpense(
-      context: context,
-      ref: ref,
-      libraryId: '6a422593f2ed24f734e41864',
-      title: _titleController.text.trim(),
-      amount: amount,
-      category: _selectedCategory!,
-      expenseDate: _selectedDate!,
-      description: _descriptionController.text.trim(),
-    );
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _expenseController.addExpense(
+        context: context,
+        ref: ref,
+        libraryId: '6a422593f2ed24f734e41864',
+        title: _titleController.text.trim(),
+        amount: amount,
+        category: _selectedCategory!,
+        expenseDate: _selectedDate!,
+        description: _descriptionController.text.trim(),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -70,6 +83,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scale = context.scale;
     return SingleChildScrollView(
       child: Container(
         width: double.infinity, // Full width
@@ -89,6 +103,17 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 5,
+                  margin: const EdgeInsets.only(top: 2, bottom: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD1D5DB),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                ),
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,13 +125,17 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                       children: [
                         SectionHeader(
                           title: 'Add Expense',
-                          fontSize: 15,
+                          fontSize: 15 * scale,
                           weight: FontWeight.w700,
+                          scale: scale,
                         ),
-                        SizedBox(height: 4),
+                        SizedBox(height: 6),
                         Text(
                           'Track your business expenses',
-                          style: TextStyle(color: AppColors.body, fontSize: 12),
+                          style: TextStyle(
+                            color: AppColors.body,
+                            fontSize: 12 * scale,
+                          ),
                         ),
                       ],
                     ),
@@ -120,9 +149,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                 ],
               ),
 
-              SizedBox(height: 5),
-              Divider(),
-              SizedBox(height: 10),
+              SizedBox(height: 30),
 
               _AddForm(
                 titleController: _titleController,
@@ -130,6 +157,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                 amountController: _amountController,
                 date: _selectedDate,
                 selectedCategory: _selectedCategory,
+                isLoading: _isLoading,
                 onDateChanged: (value) {
                   setState(() {
                     _selectedDate = value;
@@ -166,6 +194,7 @@ class _AddForm extends StatelessWidget {
     required this.onSubmit,
     required this.selectedCategory,
     required this.onCategoryChange,
+    required this.isLoading,
   });
 
   final TextEditingController titleController;
@@ -173,6 +202,7 @@ class _AddForm extends StatelessWidget {
   final TextEditingController amountController;
   final DateTime? date;
   final String? selectedCategory;
+  final bool isLoading;
 
   final ValueChanged<DateTime?> onDateChanged;
   final VoidCallback onSubmit;
@@ -300,23 +330,25 @@ class _AddForm extends StatelessWidget {
           width: double.infinity,
           height: 52,
           child: FilledButton(
-            onPressed: onSubmit,
+            onPressed: isLoading ? () {} : onSubmit,
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
-            child: const Text(
-              'Add Task',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.2,
-              ),
-            ),
+            child: isLoading
+                ? SpinKitThreeBounce(color: Colors.white, size: 12)
+                : const Text(
+                    'Add Expense',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
           ),
         ),
       ],

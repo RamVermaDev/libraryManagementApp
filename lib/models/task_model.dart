@@ -15,7 +15,7 @@ class TaskModel {
     required this.title,
     required this.description,
     required this.dueDate,
-    this.urgency = 'medium',
+    this.urgency = 'high',
     this.isCompleted = false,
   });
 

@@ -13,7 +13,6 @@ class RevenueStatCard extends StatelessWidget {
     required this.background,
     this.cardColor,
     required this.scale,
-    required this.isLoading,
   });
 
   final String title;
@@ -24,11 +23,9 @@ class RevenueStatCard extends StatelessWidget {
   final Color? cardColor;
 
   final double scale;
-  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
-    print(isLoading);
     return Container(
       padding: EdgeInsets.all(16 * scale),
       decoration: AppCardDecoration.standard(cardColor: cardColor),

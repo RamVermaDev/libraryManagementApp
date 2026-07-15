@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:library_management/app_colors.dart';
 
 class TaskUrgency extends StatelessWidget {
   const TaskUrgency({
@@ -18,25 +19,31 @@ class TaskUrgency extends StatelessWidget {
         Row(
           children: [
             _UrgencyButton(
-              title: 'Low',
-              isSelected: selectedUrgency == 'low',
-              onTap: () => onChanged('low'),
+              title: 'High',
+              description: '3 Days',
+              isSelected: selectedUrgency == 'high',
+              onTap: () => onChanged('high'),
+              color: AppColors.grey600,
             ),
 
             const SizedBox(width: 10),
 
             _UrgencyButton(
               title: 'Medium',
+              description: '6 Days',
               isSelected: selectedUrgency == 'medium',
               onTap: () => onChanged('medium'),
+              color: AppColors.grey500,
             ),
 
             const SizedBox(width: 10),
 
             _UrgencyButton(
-              title: 'High',
-              isSelected: selectedUrgency == 'high',
-              onTap: () => onChanged('high'),
+              title: 'Low',
+              description: '10 Days',
+              isSelected: selectedUrgency == 'low',
+              onTap: () => onChanged('low'),
+              color: AppColors.grey400,
             ),
           ],
         ),
@@ -48,11 +55,15 @@ class TaskUrgency extends StatelessWidget {
 class _UrgencyButton extends StatelessWidget {
   const _UrgencyButton({
     required this.title,
+    required this.description,
+    required this.color,
     required this.isSelected,
     required this.onTap,
   });
 
   final String title;
+  final String description;
+  final Color color;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -60,27 +71,58 @@ class _UrgencyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+
         onTap: onTap,
-        borderRadius: BorderRadius.circular(4),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          height: 46,
-          alignment: Alignment.center,
+          height: 50,
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF0B2A66) : Colors.white,
-            borderRadius: BorderRadius.circular(isSelected ? 8 : 4),
+            color: isSelected ? color.withValues(alpha: .02) : Colors.white,
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: isSelected
-                  ? const Color(0xFF0B2A66)
-                  : const Color(0xFFE2E8F0),
+                  ? AppColors.buttonPrimary
+                  : const Color(0xFFE5E7EB),
+              width: isSelected ? 1 : 0,
             ),
+            boxShadow: [
+              if (isSelected)
+                BoxShadow(
+                  color: color.withValues(alpha: .15),
+                  blurRadius: 14,
+                  offset: const Offset(0, 5),
+                ),
+            ],
           ),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : const Color(0xFF475569),
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: isSelected
+                      ? AppColors.activeButtonText
+                      : AppColors.black,
+                ),
+              ),
+
+              const SizedBox(height: 4),
+
+              Text(
+                description,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 9,
+                  color: Color(0xFF64748B),
+                  height: 1.3,
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -8,16 +8,19 @@ class TrendPeriodSelector extends StatelessWidget {
     super.key,
     required this.selectedPeriod,
     required this.onChanged,
+    required this.scale,
   });
 
   final TrendPeriod selectedPeriod;
   final ValueChanged<TrendPeriod> onChanged;
 
+  final double scale;
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 42,
-      padding: const EdgeInsets.all(4),
+      height: 35,
+      padding: const EdgeInsets.all(0.5),
       decoration: BoxDecoration(
         color: const Color(0xFFF0F2F7),
         borderRadius: BorderRadius.circular(8),
@@ -29,12 +32,14 @@ class TrendPeriodSelector extends StatelessWidget {
             title: TrendPeriod.thirtyDays.title,
             selected: selectedPeriod == TrendPeriod.thirtyDays,
             onTap: () => onChanged(TrendPeriod.thirtyDays),
+            scale: scale,
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 0.5),
           _TrendButton(
             title: TrendPeriod.twelveMonths.title,
             selected: selectedPeriod == TrendPeriod.twelveMonths,
             onTap: () => onChanged(TrendPeriod.twelveMonths),
+            scale: scale,
           ),
         ],
       ),
@@ -47,11 +52,13 @@ class _TrendButton extends StatelessWidget {
     required this.title,
     required this.selected,
     required this.onTap,
+    required this.scale,
   });
 
   final String title;
   final bool selected;
   final VoidCallback onTap;
+  final double scale;
 
   @override
   Widget build(BuildContext context) {
@@ -59,13 +66,13 @@ class _TrendButton extends StatelessWidget {
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeOutCubic,
       decoration: BoxDecoration(
-        color: selected ? AppColors.primary : Colors.transparent,
+        color: selected ? AppColors.activeButtonText : Colors.transparent,
         borderRadius: BorderRadius.circular(7),
         boxShadow: selected
-            ? const [
+            ? [
                 BoxShadow(
                   color: Color(0x221E3A8A),
-                  blurRadius: 14,
+                  blurRadius: 14 * scale,
                   offset: Offset(0, 4),
                 ),
               ]
@@ -77,14 +84,14 @@ class _TrendButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(7),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             child: AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 220),
               curve: Curves.easeOut,
               style: TextStyle(
                 color: selected ? Colors.white : const Color(0xFF747D93),
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                fontSize: 14,
+                fontSize: 9 * scale,
               ),
               child: Text(title),
             ),

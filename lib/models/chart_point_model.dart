@@ -28,11 +28,23 @@ class ChartPointModel {
 
   factory ChartPointModel.fromMap(Map<String, dynamic> map) {
     return ChartPointModel(
-      year: map['year'] ?? 0,
-      month: map['month'] ?? 0,
-      day: map['day'],
-      income: (map['income'] ?? 0).toDouble(),
+      year: _toInt(map['year']),
+      month: _toInt(map['month']),
+      day: map['day'] == null ? null : _toInt(map['day']),
+      income: _toDouble(map['income']),
     );
+  }
+
+  static int _toInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static double _toDouble(dynamic value) {
+    if (value is double) return value;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
   }
 
   String toJson() => jsonEncode(toMap());

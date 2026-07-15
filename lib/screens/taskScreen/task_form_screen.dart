@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:library_management/app_colors.dart';
+import 'package:library_management/context_extension.dart';
 import 'package:library_management/controllers/task_controller.dart';
 import 'package:library_management/models/task_model.dart';
-import 'package:library_management/screens/taskScreen/field/date_field.dart';
+import 'package:library_management/screens/revenueScreen/section_header.dart';
+import 'package:library_management/screens/taskScreen/field/task_assign_toggle.dart';
 import 'package:library_management/screens/taskScreen/field/task_text_field.dart';
 import 'package:library_management/screens/taskScreen/field/task_urgency.dart';
 import 'package:library_management/screens/taskScreen/field/title_text.dart';
@@ -25,9 +29,13 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
   final _descriptionController = TextEditingController();
 
   DateTime? _selectedDate;
-  String _urgency = 'low';
+  String _urgency = 'high';
+
+  String _selected = "Self";
 
   final _taskController = TaskController();
+
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -47,15 +55,46 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
     super.dispose();
   }
 
+  void _setDueDate() {
+    final now = DateTime.now();
+
+    if (!widget.isEditing) {
+      switch (_urgency.toLowerCase()) {
+        case 'low':
+          _selectedDate = now.add(const Duration(days: 10));
+          break;
+
+        case 'medium':
+          _selectedDate = now.add(const Duration(days: 6));
+          break;
+
+        case 'high':
+          _selectedDate = now.add(const Duration(days: 3));
+          break;
+
+        default:
+          _selectedDate = now;
+      }
+    }
+  }
+
   Future<void> _addTask() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_selectedDate == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please select a due date')));
-      return;
+    setState(() {
+      _isLoading = true;
+    });
+
+    if (!widget.isEditing) {
+      _setDueDate();
     }
+
+    // if (_selectedDate == null) {
+    //   ScaffoldMessenger.of(
+    //     context,
+    //   ).showSnackBar(const SnackBar(content: Text('Please select a due date')));
+    //   return;
+    // }
 
     //will change it
 
@@ -70,69 +109,132 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
 
     //print(library.id!);
 
-    if (widget.isEditing) {
-      await _taskController.editTask(
-        context: context,
-        ref: ref,
-        taskId: widget.task!.id!,
-        libraryId: widget.task!.libraryId,
-        title: _titleController.text.trim(),
-        description: _descriptionController.text.trim(),
-        dueDate: _selectedDate!,
-        urgency: _urgency,
-      );
-    } else {
-      await _taskController.addTask(
-        context: context,
-        ref: ref,
-        //i will do it later
-        //libraryId: library.id!,
-        libraryId: '6a422593f2ed24f734e41864',
-        title: _titleController.text.trim(),
-        description: _descriptionController.text.trim(),
-        dueDate: _selectedDate!,
-        urgency: _urgency,
-      );
+    try {
+      if (widget.isEditing) {
+        await _taskController.editTask(
+          context: context,
+          ref: ref,
+          taskId: widget.task!.id!,
+          libraryId: widget.task!.libraryId,
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim(),
+          dueDate: _selectedDate!,
+          urgency: _urgency,
+        );
+      } else {
+        await _taskController.addTask(
+          context: context,
+          ref: ref,
+          //i will do it later
+          //libraryId: library.id!,
+          libraryId: '6a422593f2ed24f734e41864',
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim(),
+          dueDate: _selectedDate!,
+          urgency: _urgency,
+        );
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Text(
-          widget.isEditing ? 'Update Task' : 'Add Task',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF0B1F44),
-          ),
+    final double scale = context.scale;
+    return SingleChildScrollView(
+      child: Container(
+        width: double.infinity, // Full width
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-      ),
-
-      body: SafeArea(
+        padding: EdgeInsets.fromLTRB(
+          20,
+          20,
+          20,
+          MediaQuery.of(context).viewInsets.bottom + 20,
+        ),
         child: Form(
           key: _formKey,
-          child: _TaskForm(
-            isEditing: widget.isEditing,
-            titleController: _titleController,
-            descriptionController: _descriptionController,
-            onDateChanged: (date) {
-              _selectedDate = date;
-            },
-            onSubmit: _addTask,
-            selectedUrgency: _urgency,
-            onChange: (value) {
-              setState(() {
-                _urgency = value;
-              });
-            },
-            date: _selectedDate,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 5,
+                  margin: const EdgeInsets.only(top: 2, bottom: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD1D5DB),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+
+                      children: [
+                        SectionHeader(
+                          title: 'New Task',
+                          fontSize: 15 * scale,
+                          weight: FontWeight.w700,
+                          scale: scale,
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          'Plan and assign tasks with clarity',
+                          style: TextStyle(
+                            color: AppColors.body,
+                            fontSize: 12 * scale,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Icon(Icons.close_outlined, size: 18),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 30),
+              _TaskForm(
+                isEditing: widget.isEditing,
+                titleController: _titleController,
+                descriptionController: _descriptionController,
+                onDateChanged: (date) {
+                  _selectedDate = date;
+                },
+                onSubmit: _addTask,
+                selectedUrgency: _urgency,
+                onChange: (value) {
+                  setState(() {
+                    _urgency = value;
+                  });
+                },
+                //date: _selectedDate,
+                isLoading: _isLoading,
+                scale: scale,
+                selected: _selected,
+                assignTo: (value) {
+                  setState(() {
+                    _selected = value;
+                  });
+                },
+              ),
+            ],
           ),
         ),
       ),
@@ -149,7 +251,11 @@ class _TaskForm extends StatelessWidget {
     required this.selectedUrgency,
     required this.onChange,
     required this.isEditing,
-    this.date,
+    //this.date,
+    required this.scale,
+    required this.selected,
+    required this.assignTo,
+    required this.isLoading,
   });
 
   final TextEditingController titleController;
@@ -159,15 +265,28 @@ class _TaskForm extends StatelessWidget {
   final String selectedUrgency;
   final ValueChanged<String> onChange;
   final bool isEditing;
-  final DateTime? date;
+  //final DateTime? date;
+
+  final String selected;
+  final ValueChanged<String> assignTo;
+
+  final double scale;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(20),
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+
       children: [
-        const TitleText(title: 'Task title'),
-        const SizedBox(height: 8),
+        TitleText(
+          title: 'Task Title',
+          fontSize: 12 * scale,
+          weight: FontWeight.w400,
+          fontColor: AppColors.formLabel,
+        ),
+        SizedBox(height: 8 * scale),
 
         TaskTextField(
           hintText: 'e.g. Clean bathroom',
@@ -181,12 +300,18 @@ class _TaskForm extends StatelessWidget {
             }
             return null;
           },
+          fillColor: AppColors.background,
         ),
 
-        const SizedBox(height: 20),
+        SizedBox(height: 20 * scale),
 
-        const TitleText(title: 'Description'),
-        const SizedBox(height: 8),
+        TitleText(
+          title: 'Description',
+          fontSize: 12 * scale,
+          weight: FontWeight.w400,
+          fontColor: AppColors.formLabel,
+        ),
+        SizedBox(height: 8 * scale),
 
         TaskTextField(
           hintText: 'Add task details...',
@@ -200,33 +325,85 @@ class _TaskForm extends StatelessWidget {
             }
             return null;
           },
-          maxLength: 50,
+          maxLength: 200,
+          fillColor: AppColors.background,
         ),
 
-        const SizedBox(height: 20),
+        SizedBox(height: 20 * scale),
 
-        const TitleText(title: 'Due date'),
-        const SizedBox(height: 8),
+        // TitleText(
+        //   title: 'Due date',
+        //   fontSize: 12 * scale,
+        //   weight: FontWeight.w400,
+        //   fontColor: AppColors.formLabel,
+        // ),
+        // SizedBox(height: 8 * scale),
 
-        isEditing
-            ? DateField(onDateChanged: onDateChanged, selectedDate: date)
-            : DateField(onDateChanged: onDateChanged),
-        const SizedBox(height: 20),
-
-        const TitleText(title: 'Urgency'),
-        const SizedBox(height: 8),
+        // isEditing
+        //     ? DateField(onDateChanged: onDateChanged, selectedDate: date)
+        //     : DateField(onDateChanged: onDateChanged),
+        // const SizedBox(height: 20),
+        TitleText(
+          title: 'Urgency',
+          fontSize: 12 * scale,
+          weight: FontWeight.w400,
+          fontColor: AppColors.formLabel,
+        ),
+        SizedBox(height: 8 * scale),
 
         TaskUrgency(selectedUrgency: selectedUrgency, onChanged: onChange),
 
-        const SizedBox(height: 32),
+        SizedBox(height: 20 * scale),
+
+        TitleText(
+          title: 'Assign To',
+          fontSize: 12 * scale,
+          weight: FontWeight.w400,
+          fontColor: AppColors.formLabel,
+        ),
+        SizedBox(height: 8 * scale),
+        TaskAssignToggle(
+          leftTitle: 'Self',
+          rightTitle: 'Reception',
+          selected: selected,
+          onChanged: assignTo,
+        ),
+
+        SizedBox(height: 32 * scale),
 
         SizedBox(
-          height: 54,
+          width: double.infinity,
+          height: 52,
           child: FilledButton(
-            onPressed: onSubmit,
-            child: Text(isEditing ? 'Update Task' : 'Add Task'),
+            onPressed: isLoading ? () {} : onSubmit,
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.buttonPrimary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: isLoading
+                ? SpinKitThreeBounce(color: Colors.white, size: 12)
+                : Text(
+                    'Add Task',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.2 * scale,
+                    ),
+                  ),
           ),
         ),
+
+        // SizedBox(
+        //   height: 54 * scale,
+        //   child: FilledButton(
+        //     onPressed: onSubmit,
+        //     child: Text(isEditing ? 'Update Task' : 'Add Task'),
+        //   ),
+        // ),
       ],
     );
   }
