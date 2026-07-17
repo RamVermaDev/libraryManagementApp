@@ -18,16 +18,16 @@ class DrawerButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     return SizedBox(
-      height: 50,
+      height: 52,
       width: double.infinity,
       child: FilledButton.icon(
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.accent,
+          backgroundColor: AppColors.buttonPrimary,
           foregroundColor: Colors.white,
-          textStyle: textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
         onPressed: () {

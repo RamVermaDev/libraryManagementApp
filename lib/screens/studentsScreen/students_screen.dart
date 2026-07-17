@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/context_extension.dart';
 import 'package:library_management/controllers/student_summary_controller.dart';
+import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/provider/student_summary_provider.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/member_screen.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/members.dart';
@@ -32,21 +33,27 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
 
     final studentSummary = ref.read(studentSummaryProvider);
 
-    isLoading = studentSummary == null;
+    final libraryId = ref.read(currentLibraryProvider);
+    isLoading = libraryId != null && studentSummary == null;
 
-    if (studentSummary == null) {
+    if (studentSummary == null && libraryId != null) {
       Future.microtask(() {
-        _getStudentSummary();
+        _getStudentSummary(libraryId);
       });
     }
   }
 
-  Future<void> _getStudentSummary() async {
+  Future<void> _getStudentSummary(String libraryId) async {
+    if (!mounted) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
     try {
       await StudentSummaryController().getStudentSummary(
         ref: ref,
-        //TO BE CHANGE
-        libraryId: '6a422593f2ed24f734e41864',
+        libraryId: libraryId,
       );
     } finally {
       if (mounted) {
@@ -59,6 +66,11 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<String?>(currentLibraryProvider, (previous, next) {
+      if (previous == next || next == null) return;
+      _getStudentSummary(next);
+    });
+
     final studentSummary = ref.watch(studentSummaryProvider);
     final activeStudent = studentSummary?.active ?? 0;
 

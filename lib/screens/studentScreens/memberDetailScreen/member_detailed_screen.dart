@@ -26,7 +26,7 @@ class MemberDetailedScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBarWidget(
         title: 'Member Info',
-        actionIcon: Icons.edit_document,
+        //actionIcon: Icons.edit_document,
       ),
 
       body: SafeArea(

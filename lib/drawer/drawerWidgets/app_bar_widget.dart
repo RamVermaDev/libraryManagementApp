@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:library_management/app_colors.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   const AppBarWidget({
@@ -18,7 +19,7 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: const Color(0xFFD0E6FF),
+      backgroundColor: AppColors.background,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       //centerTitle: true,

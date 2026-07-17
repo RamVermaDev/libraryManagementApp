@@ -9,6 +9,7 @@ import 'package:library_management/models/payemnt_model.dart';
 import 'package:library_management/models/student_model.dart';
 import 'package:library_management/provider/revenue_provider.dart';
 import 'package:library_management/provider/student_provider.dart';
+import 'package:library_management/provider/student_summary_provider.dart';
 import 'package:library_management/provider/token_provider.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/members.dart';
 import 'package:library_management/services/manage_http_response.dart';
@@ -69,14 +70,22 @@ class StudentController {
         context: context,
         onSuccess: () {
           final Map<String, dynamic> responseData = jsonDecode(response.body);
-
-          final payment = PaymentModel.fromMap(
-            responseData['data']['payment'] as Map<String, dynamic>,
+          final data = responseData['data'] as Map<String, dynamic>;
+          final newStudent = StudentModel.fromMap(
+            data['student'] as Map<String, dynamic>,
           );
 
-          //ref.read(studentProvider.notifier).addStudent(newStudent);
+          ref.read(studentProvider.notifier).addStudent(newStudent);
+          ref.read(studentProvider.notifier).addActiveStudent(newStudent);
+          ref.read(studentSummaryProvider.notifier).addActiveStudent();
 
-          ref.read(revenueProvider.notifier).addPayment(payment);
+          final paymentData = data['payment'];
+          if (paymentData != null) {
+            final payment = PaymentModel.fromMap(
+              paymentData as Map<String, dynamic>,
+            );
+            ref.read(revenueProvider.notifier).addPayment(payment);
+          }
 
           Navigator.pop(context);
 

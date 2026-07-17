@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
+import 'package:library_management/context_extension.dart';
 import 'package:library_management/controllers/user_controller.dart';
 import 'package:library_management/drawer/drawerWidgets/app_bar_widget.dart';
 import 'package:library_management/drawer/drawerWidgets/drawer_button_widget.dart';
 import 'package:library_management/drawer/drawer_screen/profile/edit_profile_screen.dart';
 import 'package:library_management/drawer/drawer_screen/profile/email_verification_dialog.dart';
 import 'package:library_management/drawer/drawer_screen/profile/logout_confirmation_dialog.dart';
-import 'package:library_management/drawer/drawer_screen/profile/profile_tile.dart';
+import 'package:library_management/drawer/drawer_screen/profile/build_profile_row.dart';
 import 'package:library_management/provider/user_provider.dart';
 
 class MyProfileScreen extends ConsumerWidget {
@@ -15,21 +16,17 @@ class MyProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final double scale = context.scale;
     final user = ref.watch(userProvider);
     final userController = UserController();
     final userName = user != null ? user.name : 'Your Name';
     final userEmail = user != null ? user.email : 'gmail.com';
     final userIsActive = user != null ? 'Active' : "Not Active";
-    final userEmailVerify = user != null
-        ? user.isEmailVerified
-              ? 'Verified'
-              : 'Verify'
-        : 'Not Verified';
     final userNumberOfLibrary = user != null ? user.libraries.length : 0;
     return Scaffold(
       appBar: AppBarWidget(
         title: 'My Profile',
-        actionIcon: Icons.logout,
+        actionIcon: Icons.logout_outlined,
         onActionPressed: () {
           showLogoutConfirmationDialog(context: context, ref: ref);
         },
@@ -38,108 +35,225 @@ class MyProfileScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            const SizedBox(height: 20),
+            SizedBox(height: 20 * scale),
 
-            const CircleAvatar(
-              radius: 50,
-              backgroundColor: Color(0xFFD0E6FF),
-              child: Icon(Icons.person, size: 60, color: AppColors.accent),
+            // Avatar
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // We'll replace this with your custom Avatar widget later
+                CircleAvatar(
+                  radius: 52 * scale,
+                  backgroundColor: Colors.white,
+                  child: CircleAvatar(
+                    radius: 48 * scale,
+                    backgroundColor: AppColors.border,
+                    child: Icon(Icons.person, size: 65, color: AppColors.info),
+                  ),
+                ),
+
+                // Verification Badge
+                if (user?.isEmailVerified ?? false)
+                  Positioned(
+                    bottom: 4,
+                    right: 4,
+                    child: Container(
+                      width: 28 * scale,
+                      height: 28 * scale,
+                      decoration: BoxDecoration(
+                        color: AppColors.caption,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 3),
+                      ),
+                      child: Icon(
+                        Icons.verified,
+                        color: Colors.white,
+                        size: 16 * scale,
+                      ),
+                    ),
+                  ),
+              ],
             ),
 
-            const SizedBox(height: 10),
+            SizedBox(height: 10 * scale),
 
             Text(
               // name will update from backend
               userName,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 24 * scale,
+                fontWeight: FontWeight.bold,
+              ),
             ),
 
-            const SizedBox(height: 8),
+            SizedBox(height: 8 * scale),
 
             Text(
               //email from backend
               userEmail,
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+              style: TextStyle(color: AppColors.grey600, fontSize: 16 * scale),
             ),
 
-            const SizedBox(height: 30),
+            SizedBox(height: 30 * scale),
 
             Card(
-              elevation: 2,
+              elevation: 0,
+              color: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(14),
+                side: BorderSide(color: AppColors.grey200),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  children: [
-                    ProfileTile(title: "Name", value: userName),
-                    Divider(),
-
-                    ProfileTile(title: "Email", value: userEmail),
-                    Divider(),
-
-                    ProfileTile(
-                      title: "Email Verification",
-                      value: userEmailVerify,
-                      isIconValue: user?.isEmailVerified ?? false,
-                      iconValue: Icons.verified,
-                      isClickable: user != null && !user.isEmailVerified,
-                      clickableValue: () async {
-                        if (user == null || user.isEmailVerified) return;
-
-                        final isSent = await userController
-                            .sendEmailVerificationOtp(
-                              context: context,
-                              ref: ref,
-                            );
-
-                        if (!context.mounted || !isSent) return;
-
-                        await showEmailVerificationOtpDialogBox(
-                          context: context,
-                          ref: ref,
-                        );
-                      },
+              child: Column(
+                children: [
+                  buildProfileRow(
+                    title: "Name",
+                    child: Text(
+                      userName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14 * scale,
+                      ),
                     ),
-                    Divider(),
+                  ),
 
-                    ProfileTile(title: "Subscription", value: userIsActive),
-                    Divider(),
+                  _divider(),
 
-                    ProfileTile(
-                      title: "Libraries",
-                      value: userNumberOfLibrary.toString(),
+                  buildProfileRow(
+                    title: "Email",
+                    child: Text(
+                      userEmail,
+                      style: TextStyle(
+                        color: AppColors.grey700,
+                        fontSize: 14 * scale,
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+
+                  _divider(),
+
+                  buildProfileRow(
+                    title: "Email Verification",
+                    child: user?.isEmailVerified ?? false
+                        ? _statusChip(
+                            text: "Verified",
+                            color: AppColors.buttonPrimaryHover,
+                            icon: Icons.verified,
+                            scale: scale,
+                          )
+                        : InkWell(
+                            onTap: () async {
+                              if (user == null) return;
+
+                              final isSent = await userController
+                                  .sendEmailVerificationOtp(
+                                    context: context,
+                                    ref: ref,
+                                  );
+
+                              if (!context.mounted || !isSent) return;
+
+                              await showEmailVerificationOtpDialogBox(
+                                context: context,
+                                ref: ref,
+                              );
+                            },
+                            child: _statusChip(
+                              text: "Verify",
+                              color: AppColors.error,
+                              icon: Icons.warning_amber,
+                              scale: scale,
+                            ),
+                          ),
+                  ),
+
+                  _divider(),
+
+                  buildProfileRow(
+                    title: "Subscription",
+                    child: _statusChip(
+                      text: userIsActive,
+                      color: Colors.green,
+                      scale: scale,
+                    ),
+                  ),
+
+                  _divider(),
+
+                  buildProfileRow(
+                    title: "Libraries",
+                    child: Text(
+                      "$userNumberOfLibrary",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15 * scale,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
 
-            const SizedBox(height: 30),
+            SizedBox(height: 30 * scale),
 
             DrawerButtonWidget(
               buttonText: 'Edit Profile',
-              buttonIcon: Icons.edit,
+              buttonIcon: Icons.edit_outlined,
               buttonRoutes: true,
               screenChange: EditProfileScreen(),
             ),
 
-            SizedBox(height: 15),
+            SizedBox(height: 15 * scale),
 
             InkWell(
               onTap: () {},
               child: Text(
                 'Change Password',
                 style: TextStyle(
+                  fontSize: 12,
                   fontWeight: FontWeight.w500,
                   color: AppColors.primary,
                 ),
               ),
             ),
+
+            SizedBox(height: 25 * scale),
           ],
         ),
       ),
     );
   }
+}
+
+Widget _divider() {
+  return Divider(height: 1, thickness: 1, color: Colors.grey.shade200);
+}
+
+Widget _statusChip({
+  required String text,
+  required Color color,
+  IconData? icon,
+  required double scale,
+}) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: .08),
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (icon != null) Icon(icon, size: 14 * scale, color: color),
+        if (icon != null) const SizedBox(width: 4),
+        Text(
+          text,
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.w600,
+            fontSize: 12 * scale,
+          ),
+        ),
+      ],
+    ),
+  );
 }

@@ -4,6 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/context_extension.dart';
 import 'package:library_management/controllers/expense_controller.dart';
+import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/screens/revenueScreen/addExpense/expense_menu_dropdown.dart';
 import 'package:library_management/screens/revenueScreen/addExpense/top_snack_bar.dart';
 import 'package:library_management/screens/revenueScreen/section_header.dart';
@@ -56,10 +57,13 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
     });
 
     try {
+      final libraryId = ref.read(currentLibraryProvider);
+      if (libraryId == null) return;
+
       await _expenseController.addExpense(
         context: context,
         ref: ref,
-        libraryId: '6a422593f2ed24f734e41864',
+        libraryId: libraryId,
         title: _titleController.text.trim(),
         amount: amount,
         category: _selectedCategory!,

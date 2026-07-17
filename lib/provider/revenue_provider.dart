@@ -142,9 +142,9 @@ class RevenueNotifier extends StateNotifier<RevenueState> {
 
   // ---------------- Clear ----------------
 
-  // void clear() {
-  //   state = const RevenueState();
-  // }
+  void clear() {
+    state = const RevenueState();
+  }
 
   String _monthKey(int year, int month) {
     return '$year-${month.toString().padLeft(2, '0')}';

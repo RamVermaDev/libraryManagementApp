@@ -19,6 +19,10 @@ class StudentNotifier extends StateNotifier<StudentState> {
     state = state.copyWith(allStudents: students);
   }
 
+  void addStudent(StudentModel student) {
+    state = state.copyWith(allStudents: [student, ...state.allStudents]);
+  }
+
   void addMoreAllStudents(List<StudentModel> students) {
     state = state.copyWith(allStudents: [...state.allStudents, ...students]);
   }
@@ -29,6 +33,10 @@ class StudentNotifier extends StateNotifier<StudentState> {
 
   void setActiveStudents(List<StudentModel> students) {
     state = state.copyWith(activeStudents: students);
+  }
+
+  void addActiveStudent(StudentModel student) {
+    state = state.copyWith(activeStudents: [student, ...state.activeStudents]);
   }
 
   void addMoreActiveStudents(List<StudentModel> students) {
@@ -130,5 +138,9 @@ class StudentNotifier extends StateNotifier<StudentState> {
     state = state.copyWith(
       expired8To10Days: [...state.expired8To10Days, ...students],
     );
+  }
+
+  void clearStudents() {
+    state = const StudentState();
   }
 }

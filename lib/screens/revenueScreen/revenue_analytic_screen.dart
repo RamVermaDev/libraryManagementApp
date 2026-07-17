@@ -3,8 +3,10 @@ import 'package:library_management/context_extension.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
+import 'package:library_management/components/create_library_required_dialog.dart';
 import 'package:library_management/controllers/revenue_summary_controller.dart';
 import 'package:library_management/models/chart_point_model.dart' as backend;
+import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/provider/revenue_provider.dart';
 import 'package:library_management/screens/revenueScreen/addExpense/add_expense_screen.dart';
 import 'package:library_management/screens/revenueScreen/chart/chart_models.dart';
@@ -31,15 +33,18 @@ class _RevenueAnalyticsScreenState
 
   @override
   void initState() {
-    _getRevenue();
+    Future.microtask(_getRevenue);
     super.initState();
   }
 
   Future<void> _getRevenue() async {
+    final libraryId = ref.read(currentLibraryProvider);
+    if (libraryId == null) return;
+
     final revenueState = ref.read(revenueProvider);
 
     // Already loaded once, don't call the API again.
-    if (revenueState.summary != null) {
+    if (revenueState.summary != null && revenueState.currentMonth != null) {
       return;
     }
 
@@ -47,20 +52,26 @@ class _RevenueAnalyticsScreenState
       await _revenueSummaryController.getRevenueSummary(
         context: context,
         ref: ref,
-        libraryId: '6a422593f2ed24f734e41864',
+        libraryId: libraryId,
       );
     } finally {}
   }
 
   Future<void> _refreshRevenue() async {
+    final libraryId = ref.read(currentLibraryProvider);
+    if (libraryId == null) return;
+
     await _revenueSummaryController.getRevenueSummary(
       context: context,
       ref: ref,
-      libraryId: '6a422593f2ed24f734e41864',
+      libraryId: libraryId,
     );
   }
 
   Future<void> _loadMonth(DateTime month) async {
+    final libraryId = ref.read(currentLibraryProvider);
+    if (libraryId == null) return;
+
     final notifier = ref.read(revenueProvider.notifier);
 
     if (notifier.hasMonth(year: month.year, month: month.month)) {
@@ -71,7 +82,7 @@ class _RevenueAnalyticsScreenState
     await _revenueSummaryController.getMonthlyRevenue(
       context: context,
       ref: ref,
-      libraryId: '6a422593f2ed24f734e41864',
+      libraryId: libraryId,
       year: month.year,
       month: month.month,
     );
@@ -100,7 +111,14 @@ class _RevenueAnalyticsScreenState
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<String?>(currentLibraryProvider, (previous, next) {
+      if (previous == next || next == null) return;
+      _selectedMonth = DateTime.now();
+      _getRevenue();
+    });
+
     final scale = context.scale;
+    final hasLibrary = ref.watch(currentLibraryProvider) != null;
     final revenue = ref.watch(revenueProvider);
     final monthSummary = revenue.currentMonth;
     final summary = revenue.summary;
@@ -113,6 +131,11 @@ class _RevenueAnalyticsScreenState
       backgroundColor: const Color(0xFFF8FAFE),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
+          if (ref.read(currentLibraryProvider) == null) {
+            showCreateLibraryRequiredDialog(context);
+            return;
+          }
+
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
@@ -144,10 +167,10 @@ class _RevenueAnalyticsScreenState
                 padding: const EdgeInsets.fromLTRB(22, 28, 22, 0),
                 sliver: SliverToBoxAdapter(
                   child: RevenueOverview(
-                    today: summary?.todayIncome,
-                    month: summary?.monthlyIncome,
-                    year: summary?.yearlyIncome,
-                    allTime: summary?.allTimeIncome,
+                    today: hasLibrary ? summary?.todayIncome : 0,
+                    month: hasLibrary ? summary?.monthlyIncome : 0,
+                    year: hasLibrary ? summary?.yearlyIncome : 0,
+                    allTime: hasLibrary ? summary?.allTimeIncome : 0,
                     scale: scale,
                   ),
                 ),
@@ -157,9 +180,11 @@ class _RevenueAnalyticsScreenState
                 sliver: SliverToBoxAdapter(
                   child: MonthlySummaryCard(
                     selectedMonth: _selectedMonth,
-                    revenue: monthSummary?.income,
-                    expenses: monthSummary?.expense,
-                    expenseItems: monthSummary?.expenses,
+                    revenue: hasLibrary ? monthSummary?.income : 0,
+                    expenses: hasLibrary ? monthSummary?.expense : 0,
+                    expenseItems: hasLibrary
+                        ? monthSummary?.expenses
+                        : const [],
                     canGoPrevious: _canGoPrevious,
                     canGoNext: _canGoNext,
                     onPreviousMonth: () => _changeMonth(-1),

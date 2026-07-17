@@ -9,9 +9,9 @@ import 'package:library_management/global_varaible.dart';
 import 'package:http/http.dart' as http;
 import 'package:library_management/local_storage.dart';
 import 'package:library_management/models/user_model.dart';
+import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/provider/token_provider.dart';
 import 'package:library_management/provider/user_provider.dart';
-import 'package:library_management/screens/library_profile_screen.dart';
 import 'package:library_management/screens/main_screen.dart';
 import 'package:library_management/services/manage_http_response.dart';
 
@@ -109,19 +109,30 @@ class UserController {
           final token = data['token'];
           final userJson = jsonEncode(user);
 
+          //get Libraries
+          final libraries = user['libraries'] as List<dynamic>;
+
           //saving data to local storage
           await LocalStorage.saveLogin(token: token, userJson: userJson);
+
+          //saving current library id there
+          if (libraries.isNotEmpty) {
+            final String currentLibraryId = libraries.first.toString();
+            await LocalStorage.saveCurrentLibrary(libraryId: currentLibraryId);
+            ref
+                .read(currentLibraryProvider.notifier)
+                .setLibrary(currentLibraryId);
+          }
 
           //update riverpod
           ref.read(userProvider.notifier).setUser(userJson);
           ref.read(tokenProvider.notifier).setToken(token);
 
-          print(ref.read(tokenProvider));
-          final localdata = await LocalStorage.getUser();
-          print('data from localtorage $localdata');
+          //print(ref.read(tokenProvider));
+          //final localdata = await LocalStorage.getUser();
+          //print('data from localtorage $localdata');
 
-          //check libraries number
-          final libraries = ref.read(userProvider)!.libraries;
+          print('LibrarID: ${ref.read(currentLibraryProvider)}');
 
           if (!context.mounted) return;
 
@@ -129,9 +140,10 @@ class UserController {
             context,
             MaterialPageRoute(
               builder: (context) {
-                return libraries.isEmpty
-                    ? LibraryProfileScreen()
-                    : MainScreen();
+                return MainScreen();
+                // return libraries.isEmpty
+                //     ? LibraryProfileScreen()
+                //     : MainScreen();
                 //--------here i Have to check if already library or not
                 //---- count library number and if user select one then save that
                 //----if one library that directly to home page

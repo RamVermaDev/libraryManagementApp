@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:library_management/app_colors.dart';
+import 'package:library_management/components/create_library_required_dialog.dart';
 import 'package:library_management/controllers/task_controller.dart';
 import 'package:library_management/models/task_model.dart';
+import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/provider/task_provider.dart';
 import 'package:library_management/screens/taskScreen/task_form_screen.dart';
 import 'package:library_management/screens/taskScreen/widgets/delete_task_dialog.dart';
@@ -19,6 +22,7 @@ class _TaskScreenState extends ConsumerState<TaskScreen> {
   final _taskController = TaskController();
 
   bool _showCompletedTasks = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -30,28 +34,46 @@ class _TaskScreenState extends ConsumerState<TaskScreen> {
   }
 
   Future<void> _fetchTasksIfNeeded() async {
+    final libraryId = ref.read(currentLibraryProvider);
+    if (libraryId == null) return;
+
     final tasks = ref.read(taskProvider);
 
     if (tasks.isEmpty) {
-      await _taskController.getAllTasks(
-        context: context,
-        ref: ref,
-        //will change
-        libraryId: '6a422593f2ed24f734e41864',
-      );
+      await _refreshTask(libraryId);
     }
   }
 
-  Future<void> _refreshTask() async {
-    await _taskController.getAllTasks(
-      context: context,
-      ref: ref,
-      libraryId: '6a422593f2ed24f734e41864',
-    );
+  Future<void> _refreshTask([String? libraryId]) async {
+    final activeLibraryId = libraryId ?? ref.read(currentLibraryProvider);
+    if (activeLibraryId == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _taskController.getAllTasks(
+        context: context,
+        ref: ref,
+        libraryId: activeLibraryId,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<String?>(currentLibraryProvider, (previous, next) {
+      if (previous == next || next == null) return;
+      _refreshTask(next);
+    });
+
     final tasks = ref.watch(taskProvider);
 
     final pendingTasks = tasks.where((task) => !task.isCompleted).toList();
@@ -61,6 +83,11 @@ class _TaskScreenState extends ConsumerState<TaskScreen> {
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
+          if (ref.read(currentLibraryProvider) == null) {
+            showCreateLibraryRequiredDialog(context);
+            return;
+          }
+
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
@@ -99,21 +126,27 @@ class _TaskScreenState extends ConsumerState<TaskScreen> {
 
               const SizedBox(height: 12),
 
-              // ---------------- PENDING TASKS ----------------
-              if (pendingTasks.isNotEmpty)
-                ...pendingTasks.map(
-                  (task) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _buildTaskCard(task),
-                  ),
+              if (_isLoading)
+                const SpinKitThreeBounce(
+                  color: AppColors.buttonPrimaryHover,
+                  size: 20,
                 )
-              else
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  child: Center(child: Text('No Pending Task')),
-                ),
+              else ...[
+                if (pendingTasks.isNotEmpty)
+                  ...pendingTasks.map(
+                    (task) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _buildTaskCard(task),
+                    ),
+                  )
+                else
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Center(child: Text('No Pending Task')),
+                  ),
 
-              const SizedBox(height: 12),
+                const SizedBox(height: 12),
+              ],
 
               // ---------------- COMPLETED HEADER ----------------
               InkWell(
@@ -220,7 +253,7 @@ class _TaskScreenState extends ConsumerState<TaskScreen> {
               context: context,
               ref: ref,
               taskId: task.id!,
-              libraryId: '6a422593f2ed24f734e41864',
+              libraryId: task.libraryId,
             );
           },
         );

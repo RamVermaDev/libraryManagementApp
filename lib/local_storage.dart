@@ -18,6 +18,7 @@ class LocalStorage {
     await prefs.remove('token');
     await prefs.remove('user');
     await prefs.remove('isLoggedIn');
+    await prefs.remove('currentLibrary');
   }
 
   static Future<String?> getToken() async {
@@ -34,4 +35,21 @@ class LocalStorage {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('isLoggedIn') ?? false;
   }
+
+  // Current Library
+
+  static Future<void> saveCurrentLibrary({required String libraryId}) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('currentLibrary', libraryId);
+  }
+
+  static Future<String?> getCurrentLibrary() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('currentLibrary');
+  }
+
+  // static Future<void> removeCurrentLibrary() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   await prefs.remove('currentLibrary');
+  // }
 }

@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:library_management/global_varaible.dart';
 import 'package:library_management/local_storage.dart';
+import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/provider/token_provider.dart';
 import 'package:library_management/provider/user_provider.dart';
-import 'package:library_management/screens/library_profile_screen.dart';
 import 'package:library_management/screens/main_screen.dart';
 import 'package:library_management/screens/welcome_screen.dart';
 
@@ -61,18 +61,24 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       }
 
       final data = jsonDecode(response.body);
+      final userLib = data['user'];
+      final userJson = jsonEncode(userLib);
+      final libraries = userLib['libraries'] as List<dynamic>;
 
-      final userJson = jsonEncode(data['user']);
+      if (libraries.isNotEmpty) {
+        final String currentLibraryId = libraries.first.toString();
+        ref.read(currentLibraryProvider.notifier).setLibrary(currentLibraryId);
+      }
 
       await LocalStorage.saveLogin(token: token, userJson: userJson);
 
       ref.read(userProvider.notifier).setUser(userJson);
 
-      final user = ref.read(userProvider)!;
+      //final user = ref.read(userProvider)!;
 
-      if (user.libraries.isEmpty) {
-        return const LibraryProfileScreen();
-      }
+      // if (user.libraries.isEmpty) {
+      //   return const LibraryProfileScreen();
+      // }
 
       return const MainScreen();
     } on http.ClientException catch (e, st) {

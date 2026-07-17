@@ -1,36 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:library_management/screens/taskScreen/field/input_decoration.dart';
 
 class DrawerTextFormField extends StatelessWidget {
   const DrawerTextFormField({
     super.key,
+    required this.hintText,
     required this.controller,
-    required this.lable,
-    required this.prefixIcon,
-    required this.validator,
-    required this.keyboardType,
-    this.borderRadius = 8,
+    this.validator,
+    this.minLines = 1,
+    this.maxLines = 1,
+    this.maxLength,
+    this.keyboardType,
+    this.textInputAction,
+    this.onChanged,
+    this.enabled = true,
+    this.fillColor,
   });
 
+  final String hintText;
   final TextEditingController controller;
-  final String lable;
-  final IconData prefixIcon;
-  final double borderRadius;
+
   final String? Function(String?)? validator;
+  final ValueChanged<String>? onChanged;
+
+  final int minLines;
+  final int maxLines;
+  final int? maxLength;
+
   final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+
+  final bool enabled;
+  final Color? fillColor;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
       validator: validator,
+      onChanged: onChanged,
+      enabled: enabled,
+      minLines: minLines,
+      maxLines: maxLines,
+      maxLength: maxLength,
       keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: lable,
-        prefixIcon: Icon(prefixIcon),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(borderRadius),
-        ),
-      ),
+      textInputAction: textInputAction,
+      decoration: inputDecoration(hintText: hintText, fillColor: fillColor),
     );
   }
 }

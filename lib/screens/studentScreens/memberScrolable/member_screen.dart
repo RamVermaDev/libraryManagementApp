@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/controllers/student_controller.dart';
 import 'package:library_management/models/student_model.dart';
+import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/provider/student_provider.dart';
 import 'package:library_management/provider/student_state.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/day_filter_section.dart';
@@ -97,6 +98,9 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
   }
 
   Future<void> _fetchMembers() async {
+    final libraryId = ref.read(currentLibraryProvider);
+    if (libraryId == null) return;
+
     _currentPage = 1;
     _hasMoreMembers = true;
     _startLoading();
@@ -104,7 +108,7 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
     try {
       final hasMore = await _studentController.getStudents(
         ref: ref,
-        libraryId: '6a422593f2ed24f734e41864',
+        libraryId: libraryId,
         status: _selectedStatus,
         page: _currentPage,
         limit: _membersLimit,
@@ -138,6 +142,9 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
   Future<void> _fetchMoreMembers() async {
     if (_isLoading || _isLoadingMore || !_hasMoreMembers) return;
 
+    final libraryId = ref.read(currentLibraryProvider);
+    if (libraryId == null) return;
+
     setState(() {
       _isLoadingMore = true;
       _errorMessage = null;
@@ -147,7 +154,7 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
       final nextPage = _currentPage + 1;
       final hasMore = await _studentController.getStudents(
         ref: ref,
-        libraryId: '6a422593f2ed24f734e41864',
+        libraryId: libraryId,
         status: _selectedStatus,
         page: nextPage,
         limit: _membersLimit,
@@ -322,6 +329,11 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<String?>(currentLibraryProvider, (previous, next) {
+      if (previous == next || next == null) return;
+      _fetchMembers();
+    });
+
     final studentState = ref.watch(studentProvider);
 
     return Scaffold(

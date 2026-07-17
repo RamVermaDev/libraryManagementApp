@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:library_management/app_colors.dart';
+import 'package:library_management/context_extension.dart';
 import 'package:library_management/controllers/user_controller.dart';
 import 'package:library_management/drawer/drawerWidgets/app_bar_widget.dart';
 import 'package:library_management/drawer/drawerWidgets/drawer_text_form_field.dart';
 import 'package:library_management/provider/user_provider.dart';
+import 'package:library_management/screens/taskScreen/field/title_text.dart';
 import 'package:library_management/validator/form_validators.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
@@ -39,6 +42,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double scale = context.scale;
     Future<void> saveProfile() async {
       if (!_formKey.currentState!.validate()) return;
 
@@ -70,84 +74,129 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           key: _formKey,
 
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 10),
 
-              Stack(
-                children: [
-                  const CircleAvatar(
-                    radius: 55,
-                    backgroundColor: Color(0xffD0E6FF),
-                    child: Icon(
-                      Icons.person,
-                      size: 60,
-                      color: AppColors.accent,
-                    ),
-                  ),
-
-                  Positioned(
-                    right: 0,
-                    bottom: 0,
-                    child: CircleAvatar(
-                      radius: 18,
-                      backgroundColor: AppColors.accent,
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        icon: const Icon(
-                          Icons.camera_alt,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                        onPressed: () {
-                          // Pick Image
-                        },
+              Center(
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 55,
+                      backgroundColor: Color(0xffD0E6FF),
+                      child: Icon(
+                        Icons.person,
+                        size: 60 * scale,
+                        color: AppColors.accent,
                       ),
                     ),
-                  ),
-                ],
+
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: CircleAvatar(
+                        radius: 18,
+                        backgroundColor: AppColors.accent,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 18 * scale,
+                          ),
+                          onPressed: () {
+                            // Pick Image
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
-              const SizedBox(height: 30),
+              SizedBox(height: 30 * scale),
 
-              DrawerTextFormField(
-                controller: _nameController,
-                lable: 'Full Name',
-                prefixIcon: Icons.person_outline,
-                validator: FormValidators.nameValidator,
-                keyboardType: TextInputType.text,
-              ),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: Colors.grey.shade200),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(.03),
+                      blurRadius: 20,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 30 * scale),
 
-              const SizedBox(height: 20),
+                    /// Full Name
+                    TitleText(
+                      title: 'Full Name',
+                      fontSize: 12 * scale,
+                      weight: FontWeight.w600,
+                      fontColor: AppColors.formLabel,
+                    ),
 
-              DrawerTextFormField(
-                controller: _emailController,
-                lable: 'Email Adress',
-                prefixIcon: Icons.email_outlined,
-                validator: FormValidators.emailValidator,
-                keyboardType: TextInputType.emailAddress,
-              ),
+                    SizedBox(height: 8 * scale),
 
-              const SizedBox(height: 30),
+                    DrawerTextFormField(
+                      controller: _nameController,
+                      hintText: 'Enter your full name',
+                      validator: FormValidators.nameValidator,
+                      keyboardType: TextInputType.name,
+                    ),
 
-              SizedBox(
-                height: 50,
-                width: double.infinity,
-                child: FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    foregroundColor: Colors.white,
-                    textStyle: Theme.of(context).textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                  onPressed: _isLoading ? null : saveProfile,
-                  icon: _isLoading
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.save),
-                  label: Text(_isLoading ? 'Saving...' : 'Save Changes'),
+                    SizedBox(height: 24 * scale),
+
+                    /// Email
+                    TitleText(
+                      title: 'Email Address',
+                      fontSize: 12 * scale,
+                      weight: FontWeight.w600,
+                      fontColor: AppColors.formLabel,
+                    ),
+
+                    SizedBox(height: 8 * scale),
+
+                    DrawerTextFormField(
+                      controller: _emailController,
+                      hintText: 'Enter your email',
+                      validator: FormValidators.emailValidator,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+
+                    SizedBox(height: 30 * scale),
+
+                    SizedBox(
+                      height: 52,
+                      width: double.infinity,
+                      child: FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.buttonPrimary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        onPressed: _isLoading ? () {} : saveProfile,
+
+                        child: _isLoading
+                            ? SpinKitThreeBounce(
+                                size: 16,
+                                color: AppColors.buttonPrimary,
+                              )
+                            : Text('Save Changes'),
+                      ),
+                    ),
+                    SizedBox(height: 30 * scale),
+                  ],
                 ),
               ),
             ],

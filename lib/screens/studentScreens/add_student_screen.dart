@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/controllers/student_controller.dart';
 import 'package:library_management/drawer/drawerWidgets/app_bar_widget.dart';
+import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/screens/studentScreens/field/amount_display_field.dart';
 import 'package:library_management/screens/studentScreens/field/end_student_date_field.dart';
 import 'package:library_management/screens/studentScreens/field/payement_menu_dropdown.dart';
@@ -24,7 +25,6 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _studentController = StudentController();
-  final libraryId = '6a422593f2ed24f734e41864';
 
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -56,7 +56,8 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
 
     final finalAmount = amount - discount;
     final paidAmount = finalAmount - pending;
-    // We will add your actual library provider here
+    final libraryId = ref.read(currentLibraryProvider);
+    if (libraryId == null) return;
 
     await _studentController.addStudent(
       context: context,

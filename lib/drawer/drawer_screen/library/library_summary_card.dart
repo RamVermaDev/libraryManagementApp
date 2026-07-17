@@ -1,123 +1,110 @@
 import 'package:flutter/material.dart';
 import 'package:library_management/app_colors.dart';
-import 'package:library_management/drawer/drawer_screen/library/library_detail_screen.dart';
+import 'package:library_management/context_extension.dart';
+import 'package:library_management/drawer/drawer_screen/library/components/library_avatar.dart';
+import 'package:library_management/drawer/drawer_screen/library/components/library_edit_button.dart';
+import 'package:library_management/drawer/drawer_screen/library/components/library_info_pill.dart';
 import 'package:library_management/models/library_model.dart';
 
 class LibrarySummaryCard extends StatelessWidget {
-  const LibrarySummaryCard({super.key, required this.library});
+  const LibrarySummaryCard({
+    super.key,
+    required this.library,
+    required this.isCurrent,
+    required this.onActiveChanged,
+    required this.onEdit,
+  });
 
   final LibraryModel library;
+  final bool isCurrent;
 
-  String getInitials(String name) {
-    final words = name.trim().split(RegExp(r'\s+'));
-
-    if (words.isEmpty) return "";
-
-    if (words.length == 1) {
-      return words.first.substring(0, 1).toUpperCase();
-    }
-
-    return (words.first[0] + words.last[0]).toUpperCase();
-  }
+  final ValueChanged<bool> onActiveChanged;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      color: AppColors.card,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Container(
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
+    final double scale = context.scale;
+    return AnimatedScale(
+      scale: isCurrent ? 1.0 : .98,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(26),
+          color: Colors.white,
+          border: Border.all(
+            color: isCurrent ? AppColors.primary : Colors.grey.shade200,
+            width: isCurrent ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isCurrent
+                  ? AppColors.primary.withValues(alpha: .10)
+                  : Colors.black.withValues(alpha: .05),
+              blurRadius: isCurrent ? 26 : 18,
+              spreadRadius: isCurrent ? 1 : 0,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
 
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    height: 52,
-                    width: 52,
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      getInitials(library.libraryName),
-                      style: TextStyle(
-                        color: AppColors.grey900,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 20),
+                  LibraryAvatar(title: library.libraryName, scale: scale),
+
+                  const SizedBox(width: 18),
+
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
-                          library.libraryName.toUpperCase(),
+                          library.libraryName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 20,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          library.tagLine,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: AppColors.heading),
+
+                        const SizedBox(height: 6),
+                        _rowTitle(
+                          name: library.whatsappNumber,
+                          icon: Icons.call_outlined,
+                        ),
+
+                        const SizedBox(height: 2),
+                        _rowTitle(
+                          name: library.city,
+                          icon: Icons.location_city_outlined,
                         ),
                       ],
                     ),
                   ),
 
-                  //this will become tick for active library
-                  IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return LibraryDetailScreen();
-                          },
-                        ),
-                      );
-                    },
-                    icon: Icon(Icons.edit, color: AppColors.caption),
-                  ),
+                  LibraryEditButton(onTap: onEdit, scale: scale),
                 ],
               ),
 
-              const SizedBox(height: 18),
-              Container(
-                padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(172, 255, 255, 255),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                height: 50,
-                child: Row(
-                  children: [
-                    _SummaryItem(
-                      label: 'Students',
-                      value: library.totalStudents.toString(),
-                    ),
-                    const SizedBox(width: 12),
-                    _SummaryItem(
-                      label: 'Seats',
-                      value: (library.totalSeats).toString(),
-                    ),
-                    const Spacer(),
-                    _StatusChip(status: library.status),
-                  ],
-                ),
+              const SizedBox(height: 16),
+
+              //-----------------------------------
+              // Bottom Glass Pill
+              //-----------------------------------
+              LibraryInfoPill(
+                seats: library.totalSeats,
+                isCurrent: isCurrent,
+                onChanged: onActiveChanged,
+                scale: scale,
               ),
             ],
           ),
@@ -127,63 +114,15 @@ class LibrarySummaryCard extends StatelessWidget {
   }
 }
 
-class _SummaryItem extends StatelessWidget {
-  const _SummaryItem({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          '$label: ',
-          style: const TextStyle(
-            fontSize: 16,
-            color: AppColors.black,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppColors.heading,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.status});
-
-  final String status;
-
-  @override
-  Widget build(BuildContext context) {
-    final isActive = status.toLowerCase() == 'active';
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: isActive
-            ? AppColors.buttonSecondary
-            : AppColors.error.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(4),
+Widget _rowTitle({required String name, required IconData icon}) {
+  return Row(
+    children: [
+      Icon(icon, color: AppColors.grey700, size: 14),
+      SizedBox(width: 6),
+      Text(
+        name,
+        style: TextStyle(color: AppColors.grey700, fontSize: 12, height: 1.35),
       ),
-      child: Text(
-        status,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-          color: isActive ? AppColors.background : AppColors.error,
-        ),
-      ),
-    );
-  }
+    ],
+  );
 }

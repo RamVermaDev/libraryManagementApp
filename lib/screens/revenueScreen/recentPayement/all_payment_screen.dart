@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/controllers/payment_controller.dart';
+import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/provider/payment_provider.dart';
 import 'package:library_management/screens/revenueScreen/recentPayement/payement_tile.dart';
 
@@ -34,12 +35,18 @@ class _AllPaymentScreenState extends ConsumerState<AllPaymentScreen> {
   }
 
   Future<void> _getPayments() async {
+    final libraryId = ref.read(currentLibraryProvider);
+    if (libraryId == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     await _paymentController.getPayments(
       context: context,
       ref: ref,
-      libraryId: '6a422593f2ed24f734e41864',
+      libraryId: libraryId,
       page: 1,
     );
 
@@ -54,6 +61,9 @@ class _AllPaymentScreenState extends ConsumerState<AllPaymentScreen> {
   Future<void> _loadMore() async {
     if (_isLoadingMore || !_hasMore) return;
 
+    final libraryId = ref.read(currentLibraryProvider);
+    if (libraryId == null) return;
+
     setState(() {
       _isLoadingMore = true;
     });
@@ -63,7 +73,7 @@ class _AllPaymentScreenState extends ConsumerState<AllPaymentScreen> {
     await _paymentController.getPayments(
       context: context,
       ref: ref,
-      libraryId: '6a422593f2ed24f734e41864',
+      libraryId: libraryId,
       page: _page + 1,
     );
 
@@ -91,6 +101,11 @@ class _AllPaymentScreenState extends ConsumerState<AllPaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<String?>(currentLibraryProvider, (previous, next) {
+      if (previous == next || next == null) return;
+      _getPayments();
+    });
+
     final payments = ref.watch(paymentProvider);
 
     return Scaffold(
