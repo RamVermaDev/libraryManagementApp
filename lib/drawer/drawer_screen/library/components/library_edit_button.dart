@@ -15,15 +15,15 @@ class LibraryEditButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         onTap: onTap,
         child: Ink(
-          height: 32 * scale,
-          width: 32 * scale,
+          height: 40 * scale,
+          width: 40 * scale,
           decoration: BoxDecoration(
             color: AppColors.grey100,
             borderRadius: BorderRadius.circular(14),
           ),
           child: Icon(
             Icons.edit_outlined,
-            size: 16 * scale,
+            size: 18 * scale,
             color: Colors.grey.shade700,
           ),
         ),

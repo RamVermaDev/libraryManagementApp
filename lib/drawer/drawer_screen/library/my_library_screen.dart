@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
+import 'package:library_management/context_extension.dart';
 import 'package:library_management/controllers/library_controller.dart';
 import 'package:library_management/drawer/drawerWidgets/app_bar_widget.dart';
 import 'package:library_management/drawer/drawer_screen/library/library_setup_screen.dart';
@@ -62,6 +63,7 @@ class _MyLibraryScreenState extends ConsumerState<MyLibraryScreen> {
   Widget build(BuildContext context) {
     final libraries = ref.watch(libraryProvider);
     final currentLibrary = ref.watch(currentLibraryProvider);
+    final double scale = context.scale;
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -90,78 +92,77 @@ class _MyLibraryScreenState extends ConsumerState<MyLibraryScreen> {
         ),
       ),
       backgroundColor: AppColors.background,
-      appBar: AppBarWidget(
-        title: 'My Libraries',
-        // onActionPressed: () {
-        //   Navigator.push(
-        //     context,
-        //     MaterialPageRoute(builder: (_) => const LibraryProfileScreen()),
-        //   );
-        // },
-      ),
-      body: RefreshIndicator(
-        onRefresh: _fetchLibraries,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : libraries.isEmpty
-            ? ListView(
-                padding: const EdgeInsets.all(20),
-                children: const [
-                  SizedBox(height: 180),
-                  Icon(
-                    Icons.local_library_outlined,
-                    size: 56,
-                    color: AppColors.caption,
+      appBar: AppBarWidget(title: 'My Libraries'),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: _fetchLibraries,
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : libraries.isEmpty
+              ? ListView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 16,
                   ),
-                  SizedBox(height: 12),
-                  Center(
-                    child: Text(
-                      'No libraries found',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.heading,
+                  children: const [
+                    SizedBox(height: 180),
+                    Icon(
+                      Icons.local_library_outlined,
+                      size: 56,
+                      color: AppColors.caption,
+                    ),
+                    SizedBox(height: 12),
+                    Center(
+                      child: Text(
+                        'No libraries found',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.heading,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              )
-            : ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: libraries.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 6),
-                itemBuilder: (context, index) {
-                  final library = libraries[index];
-                  return LibrarySummaryCard(
-                    library: library,
-                    isCurrent: currentLibrary == library.id ? true : false,
-                    onActiveChanged: (value) async {
-                      if (!value || currentLibrary == library.id) return;
+                  ],
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  itemCount: libraries.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 2),
+                  itemBuilder: (context, index) {
+                    final library = libraries[index];
+                    return LibrarySummaryCard(
+                      scale: scale,
+                      library: library,
+                      isCurrent: currentLibrary == library.id ? true : false,
+                      onActiveChanged: (value) async {
+                        if (!value || currentLibrary == library.id) return;
 
-                      // Save locally
-                      await LocalStorage.saveCurrentLibrary(
-                        libraryId: library.id!,
-                      );
+                        // Save locally
+                        await LocalStorage.saveCurrentLibrary(
+                          libraryId: library.id!,
+                        );
 
-                      _clearLibraryScopedProviders();
+                        _clearLibraryScopedProviders();
 
-                      // Update Riverpod state after clearing cached data so
-                      // active screens can fetch for the new library.
-                      ref
-                          .read(currentLibraryProvider.notifier)
-                          .setLibrary(library.id);
-                    },
-                    onEdit: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => LibrarySetupScreen(library: library),
-                        ),
-                      ).then((_) => _fetchLibraries());
-                    },
-                  );
-                },
-              ),
+                        // Update Riverpod state after clearing cached data so
+                        // active screens can fetch for the new library.
+                        ref
+                            .read(currentLibraryProvider.notifier)
+                            .setLibrary(library.id);
+                      },
+                      onEdit: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                LibrarySetupScreen(library: library),
+                          ),
+                        ).then((_) => _fetchLibraries());
+                      },
+                    );
+                  },
+                ),
+        ),
       ),
     );
   }

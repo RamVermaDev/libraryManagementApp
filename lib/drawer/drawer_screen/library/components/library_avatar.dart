@@ -22,8 +22,8 @@ class LibraryAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 60 * scale,
-      width: 60 * scale,
+      height: 65 * scale,
+      width: 65 * scale,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: AppColors.buttonPrimary,

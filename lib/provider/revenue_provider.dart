@@ -129,6 +129,9 @@ class RevenueNotifier extends StateNotifier<RevenueState> {
     state = state.copyWith(
       summary: summary,
       recentPayments: [payment, ...state.recentPayments!].toList(),
+      currentMonth: state.currentMonth!.copyWith(
+        income: state.currentMonth!.income + payment.amount,
+      ),
     );
   }
 

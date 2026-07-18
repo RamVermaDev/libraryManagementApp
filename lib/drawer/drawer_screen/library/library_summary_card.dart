@@ -13,6 +13,7 @@ class LibrarySummaryCard extends StatelessWidget {
     required this.isCurrent,
     required this.onActiveChanged,
     required this.onEdit,
+    required this.scale,
   });
 
   final LibraryModel library;
@@ -20,6 +21,7 @@ class LibrarySummaryCard extends StatelessWidget {
 
   final ValueChanged<bool> onActiveChanged;
   final VoidCallback onEdit;
+  final double scale;
 
   @override
   Widget build(BuildContext context) {
@@ -30,13 +32,13 @@ class LibrarySummaryCard extends StatelessWidget {
       curve: Curves.easeOut,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(26),
           color: Colors.white,
           border: Border.all(
             color: isCurrent ? AppColors.primary : Colors.grey.shade200,
-            width: isCurrent ? 2 : 1,
+            width: isCurrent ? 2 * scale : 1 * scale,
           ),
           boxShadow: [
             BoxShadow(
@@ -51,7 +53,7 @@ class LibrarySummaryCard extends StatelessWidget {
         ),
 
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+          padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
           child: Column(
             children: [
               Row(
@@ -59,7 +61,7 @@ class LibrarySummaryCard extends StatelessWidget {
                 children: [
                   LibraryAvatar(title: library.libraryName, scale: scale),
 
-                  const SizedBox(width: 18),
+                  SizedBox(width: 22 * scale),
 
                   Expanded(
                     child: Column(
@@ -70,22 +72,24 @@ class LibrarySummaryCard extends StatelessWidget {
                           library.libraryName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
+                          style: TextStyle(
+                            fontSize: 18 * scale,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
 
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
                         _rowTitle(
                           name: library.whatsappNumber,
                           icon: Icons.call_outlined,
+                          scale: scale,
                         ),
 
                         const SizedBox(height: 2),
                         _rowTitle(
                           name: library.city,
                           icon: Icons.location_city_outlined,
+                          scale: scale,
                         ),
                       ],
                     ),
@@ -95,7 +99,7 @@ class LibrarySummaryCard extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
 
               //-----------------------------------
               // Bottom Glass Pill
@@ -114,14 +118,22 @@ class LibrarySummaryCard extends StatelessWidget {
   }
 }
 
-Widget _rowTitle({required String name, required IconData icon}) {
+Widget _rowTitle({
+  required String name,
+  required IconData icon,
+  double scale = 1,
+}) {
   return Row(
     children: [
-      Icon(icon, color: AppColors.grey700, size: 14),
-      SizedBox(width: 6),
+      Icon(icon, color: AppColors.grey700, size: 14 * scale),
+      SizedBox(width: 6 * scale),
       Text(
         name,
-        style: TextStyle(color: AppColors.grey700, fontSize: 12, height: 1.35),
+        style: TextStyle(
+          color: AppColors.grey700,
+          fontSize: 12 * scale,
+          height: 1.35,
+        ),
       ),
     ],
   );
