@@ -14,9 +14,9 @@ class TaskTextField extends StatelessWidget {
     this.textInputAction,
     this.onChanged,
     this.enabled = true,
-    this.fillColor,
+    this.fillColor, this.suffixIcon,
   });
-
+  final Widget? suffixIcon;
   final String hintText;
   final TextEditingController controller;
 
@@ -46,7 +46,7 @@ class TaskTextField extends StatelessWidget {
       keyboardType: keyboardType,
       textInputAction: textInputAction,
 
-      decoration: inputDecoration(hintText: hintText, fillColor: fillColor),
+      decoration: inputDecoration(hintText: hintText, fillColor: fillColor, suffixIcon: suffixIcon,),
     );
   }
 }

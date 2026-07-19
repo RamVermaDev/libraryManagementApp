@@ -22,6 +22,7 @@ class RevenueSummaryController {
       if (token == null || token.isEmpty) {
         showSnackBar(context, 'Authentication required');
       }
+      print('happen');
 
       final response = await http.get(
         Uri.parse('$uri/api/$libraryId/dashboard'),
@@ -34,6 +35,7 @@ class RevenueSummaryController {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         final revenue = RevenueDashboardModel.fromMap(data['revenue']);
+        print(revenue.monthSummary.income);
 
         ref.read(revenueProvider.notifier).setDashboard(revenue);
 

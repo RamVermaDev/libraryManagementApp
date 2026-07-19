@@ -85,7 +85,7 @@ class LibrarySummaryCard extends StatelessWidget {
                           scale: scale,
                         ),
 
-                        const SizedBox(height: 2),
+                        SizedBox(height: 2 * scale),
                         _rowTitle(
                           name: library.city,
                           icon: Icons.location_city_outlined,
@@ -99,7 +99,7 @@ class LibrarySummaryCard extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 14),
+              SizedBox(height: 14 * scale),
 
               //-----------------------------------
               // Bottom Glass Pill

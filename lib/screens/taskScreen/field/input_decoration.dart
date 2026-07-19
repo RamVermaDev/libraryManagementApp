@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 
-InputDecoration inputDecoration({required String hintText, Color? fillColor}) {
+InputDecoration inputDecoration({
+  required String hintText,
+  Color? fillColor,
+  Widget? suffixIcon,
+}) {
   double radius = 12;
   return InputDecoration(
+    suffixIcon: suffixIcon,
     hintText: hintText,
     hintStyle: const TextStyle(color: Color(0xFF98A2B3), fontSize: 13),
     filled: true,

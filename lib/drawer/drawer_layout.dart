@@ -29,14 +29,14 @@ class DrawerLayout extends StatelessWidget {
     },
     {
       'icon': Icons.assignment_ind_outlined,
-      'title': 'Plan Setup',
-      'route': '/plan',
+      'title': 'Slot Setup',
+      'route': '/slot',
     },
-    {
-      'icon': Icons.schedule_outlined,
-      'title': 'Program Setup',
-      'route': '/program',
-    },
+    // {
+    //   'icon': Icons.schedule_outlined,
+    //   'title': 'Program Setup',
+    //   'route': '/program',
+    // },
     {
       'icon': Icons.event_seat_outlined,
       'title': 'Available Seat',

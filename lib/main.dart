@@ -4,9 +4,8 @@ import 'package:library_management/auth_gate.dart';
 import 'package:library_management/drawer/drawer_screen/available_seat_screen.dart';
 import 'package:library_management/drawer/drawer_screen/enrolement_fee_screen.dart';
 import 'package:library_management/drawer/drawer_screen/library/my_library_screen.dart';
-import 'package:library_management/drawer/drawer_screen/plan_setup_screen.dart';
+import 'package:library_management/drawer/drawer_screen/slot/slot_setup_screen.dart';
 import 'package:library_management/drawer/drawer_screen/profile/my_profile_screen.dart';
-import 'package:library_management/drawer/drawer_screen/program_setup_screen.dart';
 import 'package:library_management/drawer/drawer_screen/subscription_screen.dart';
 import 'package:library_management/scaffold_messenger.dart';
 
@@ -26,8 +25,8 @@ class MyApp extends StatelessWidget {
         '/library': (context) => const MyLibraryScreen(),
         '/subscription': (context) => const SubscriptionScreen(),
         '/enrolement': (context) => const EnrolementFeeScreen(),
-        '/plan': (context) => const PlanSetupScreen(),
-        '/program': (context) => const ProgramSetupScreen(),
+        '/slot': (context) => const SlotSetupScreen(),
+        //'/program': (context) => const ProgramSetupScreen(),
         '/seat': (context) => const AvailableSeatScreen(),
       },
       debugShowCheckedModeBanner: false,
