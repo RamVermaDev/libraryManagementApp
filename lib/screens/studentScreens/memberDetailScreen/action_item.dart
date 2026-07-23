@@ -3,18 +3,22 @@ import 'package:library_management/app_colors.dart';
 
 class ActionItem extends StatelessWidget {
   final double scale;
-  final IconData icon;
+  final IconData? icon;
+  final String? iconImage;
   final String label;
   final Color color;
-  final VoidCallback onTap;
+  final Color? labelColor;
+  final VoidCallback? onTap;
 
   const ActionItem({
     super.key,
     required this.scale,
-    required this.icon,
+    this.icon,
     required this.label,
     required this.color,
-    required this.onTap,
+    this.onTap,
+    this.iconImage,
+    this.labelColor,
   });
 
   @override
@@ -27,17 +31,24 @@ class ActionItem extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 30 * scale, color: color),
+              icon != null
+                  ? Icon(icon, size: 24 * scale, color: color)
+                  : Image.asset(
+                      iconImage!,
+                      width: 24 * scale,
+                      height: 24 * scale,
+                      color: color, // Optional: tints monochrome images
+                    ),
 
-              SizedBox(height: 10 * scale),
+              SizedBox(height: 8 * scale),
 
               FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
                   label,
                   style: TextStyle(
-                    color: AppColors.body,
-                    fontSize: 14 * scale,
+                    color: labelColor ?? AppColors.body,
+                    fontSize: 10 * scale,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

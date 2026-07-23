@@ -7,11 +7,13 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     this.actionIcon,
     this.onActionPressed,
+    this.color,
   });
 
   final String title;
   final IconData? actionIcon;
   final VoidCallback? onActionPressed;
+  final Color? color;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -29,7 +31,12 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         ...(actionIcon != null
-            ? [IconButton(onPressed: onActionPressed, icon: Icon(actionIcon))]
+            ? [
+                IconButton(
+                  onPressed: onActionPressed,
+                  icon: Icon(actionIcon, color: color ?? AppColors.primary),
+                ),
+              ]
             : []),
       ],
     );

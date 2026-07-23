@@ -3,14 +3,14 @@ import 'package:library_management/app_colors.dart';
 
 class MembershipRow extends StatelessWidget {
   final double scale;
-  final IconData icon;
+  final String iconString;
   final String label;
-  final String value;
+  final String? value;
 
   const MembershipRow({
     super.key,
     required this.scale,
-    required this.icon,
+    required this.iconString,
     required this.label,
     required this.value,
   });
@@ -20,8 +20,14 @@ class MembershipRow extends StatelessWidget {
     return Row(
       children: [
         SizedBox(
-          width: 28 * scale,
-          child: Icon(icon, size: 24 * scale, color: AppColors.primary),
+          width: 20 * scale,
+          //child: Icon(icon, size: 18 * scale, color: AppColors.primary),
+          child: Image.asset(
+            'assets/icons/$iconString.png',
+            width: 19 * scale,
+            height: 19 * scale,
+            color: AppColors.primary, // Optional: tints monochrome images
+          ),
         ),
 
         SizedBox(width: 14 * scale),
@@ -41,7 +47,7 @@ class MembershipRow extends StatelessWidget {
 
         Expanded(
           child: Text(
-            value,
+            value == null ? 'Not Avaliable' : value!,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.right,

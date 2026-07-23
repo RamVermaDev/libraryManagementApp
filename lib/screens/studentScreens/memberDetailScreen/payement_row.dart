@@ -32,8 +32,8 @@ class PaymentRow extends StatelessWidget {
               label,
               style: TextStyle(
                 color: labelColor,
-                fontSize: 17 * scale,
-                fontWeight: FontWeight.w700,
+                fontSize: 15 * scale,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -42,7 +42,7 @@ class PaymentRow extends StatelessWidget {
             value,
             style: TextStyle(
               color: valueColor ?? AppColors.heading,
-              fontSize: 17 * scale,
+              fontSize: 16 * scale,
               fontWeight: FontWeight.w500,
             ),
           ),

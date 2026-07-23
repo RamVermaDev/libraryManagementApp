@@ -34,7 +34,7 @@ class SlotCardAvalibility extends StatelessWidget {
     final Color background = isSelected
         ? primary
         : isFull
-        ? const Color(0xffF4F6FB)
+        ? const Color.fromARGB(204, 255, 255, 255)
         : Colors.white;
 
     final Color titleColor = isSelected
@@ -55,7 +55,7 @@ class SlotCardAvalibility extends StatelessWidget {
       margin: EdgeInsets.only(bottom: 14 * scale),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(18 * scale),
+        borderRadius: BorderRadius.circular(16 * scale),
         border: Border.all(
           color: isSelected ? Colors.white : const Color(0xffEAECF0),
           width: isSelected ? 2 : 1,
@@ -71,8 +71,9 @@ class SlotCardAvalibility extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(18 * scale),
-          onTap: isFull ? null : onTap,
+          borderRadius: BorderRadius.circular(16 * scale),
+          //onTap: isFull ? null : onTap,
+          onTap: onTap,
           child: Padding(
             padding: EdgeInsets.all(18 * scale),
             child: Row(
@@ -89,7 +90,7 @@ class SlotCardAvalibility extends StatelessWidget {
                         subtitleColor: subtitleColor,
                       ),
 
-                      SizedBox(height: 12 * scale),
+                      SizedBox(height: 8 * scale),
 
                       _SlotPrice(
                         scale: scale,
@@ -101,7 +102,7 @@ class SlotCardAvalibility extends StatelessWidget {
                   ),
                 ),
 
-                SizedBox(width: 12 * scale),
+                SizedBox(width: 18 * scale),
 
                 _SlotStatusBadge(
                   scale: scale,
@@ -141,15 +142,15 @@ class _SlotTitle extends StatelessWidget {
         Text(
           time,
           style: TextStyle(
-            fontSize: 18 * scale,
-            fontWeight: FontWeight.w700,
+            fontSize: 16 * scale,
+            fontWeight: FontWeight.w600,
             color: titleColor,
           ),
         ),
-        SizedBox(height: 4 * scale),
+        //SizedBox(height: 1 * scale),
         Text(
           name,
-          style: TextStyle(fontSize: 13 * scale, color: subtitleColor),
+          style: TextStyle(fontSize: 14 * scale, color: subtitleColor),
         ),
       ],
     );
@@ -174,7 +175,7 @@ class _SlotPrice extends StatelessWidget {
     return Text(
       price,
       style: TextStyle(
-        fontSize: 16 * scale,
+        fontSize: 14 * scale,
         fontWeight: FontWeight.w700,
         color: disabled
             ? Colors.grey
@@ -202,11 +203,12 @@ class _SlotStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      isFull ? "Full" : "$seats seats left",
+      //isFull ? "Full" : "$seats seats left",
+      "$seats seats left",
       textAlign: TextAlign.right,
       style: TextStyle(
-        fontSize: 15 * scale,
-        fontWeight: FontWeight.w600,
+        fontSize: 13 * scale,
+        fontWeight: FontWeight.w500,
         color: isFull
             ? const Color(0xffF04438)
             : selected

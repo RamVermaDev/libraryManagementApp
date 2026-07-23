@@ -115,7 +115,7 @@ class MembersBody extends StatelessWidget {
             },
             memberNumber: index + 1,
             name: member.name,
-            plan: member.currentPlan,
+            plan: member.slotTemplateId,
             status: _statusForMember(member),
             message: 'Hello',
             number: member.phone,

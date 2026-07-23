@@ -29,4 +29,21 @@ class ExternalAppService {
       throw Exception('Could not open WhatsApp');
     }
   }
+
+  static Future<void> sendSms({
+    required String phoneNumber,
+    String? message,
+  }) async {
+    final Uri uri = Uri(
+      scheme: 'sms',
+      path: phoneNumber,
+      queryParameters: message != null && message.isNotEmpty
+          ? {'body': message}
+          : null,
+    );
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
 }

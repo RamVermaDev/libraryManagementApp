@@ -87,7 +87,7 @@ class SlotController {
       }
 
       final response = await http.get(
-        Uri.parse('$uri/api/$libraryId/slots'),
+        Uri.parse('$uri/api/$libraryId/slots?activeOnly=false'),
 
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',

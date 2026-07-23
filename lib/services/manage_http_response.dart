@@ -70,10 +70,8 @@ String getMessageFromResponse(http.Response response) {
   try {
     final Map<String, dynamic> body = jsonDecode(response.body);
     final message = body['message'] ?? body['err'];
-    print(body);
-    return message?.toString() ?? 'something went wrong heree';
+    return message?.toString() ?? 'Something went wrong';
   } catch (err) {
-    print(err.toString());
-    return 'Something went wrong her';
+    return 'Server error (${response.statusCode})';
   }
 }

@@ -27,6 +27,55 @@ class StudentNotifier extends StateNotifier<StudentState> {
     state = state.copyWith(allStudents: [...state.allStudents, ...students]);
   }
 
+  List<StudentModel> _replaceStudentInList(
+    List<StudentModel> students,
+    StudentModel updatedStudent,
+  ) {
+    return students.map((student) {
+      return student.id == updatedStudent.id ? updatedStudent : student;
+    }).toList();
+  }
+
+  void updateStudent(StudentModel updatedStudent) {
+    if (updatedStudent.id == null) return;
+
+    state = state.copyWith(
+      allStudents: _replaceStudentInList(state.allStudents, updatedStudent),
+      activeStudents: _replaceStudentInList(
+        state.activeStudents,
+        updatedStudent,
+      ),
+      pendingStudents: _replaceStudentInList(
+        state.pendingStudents,
+        updatedStudent,
+      ),
+      expiring1To3Days: _replaceStudentInList(
+        state.expiring1To3Days,
+        updatedStudent,
+      ),
+      expiring4To7Days: _replaceStudentInList(
+        state.expiring4To7Days,
+        updatedStudent,
+      ),
+      expiring8To10Days: _replaceStudentInList(
+        state.expiring8To10Days,
+        updatedStudent,
+      ),
+      expired1To3Days: _replaceStudentInList(
+        state.expired1To3Days,
+        updatedStudent,
+      ),
+      expired4To7Days: _replaceStudentInList(
+        state.expired4To7Days,
+        updatedStudent,
+      ),
+      expired8To10Days: _replaceStudentInList(
+        state.expired8To10Days,
+        updatedStudent,
+      ),
+    );
+  }
+
   // =========================
   // ACTIVE STUDENTS
   // =========================
@@ -142,5 +191,34 @@ class StudentNotifier extends StateNotifier<StudentState> {
 
   void clearStudents() {
     state = const StudentState();
+  }
+
+  //update student profile image
+  void updateStudentPhoto({
+    required String studentId,
+    required String profileImage,
+  }) {
+    List<StudentModel> update(List<StudentModel> students) {
+      return students.map((student) {
+        if (student.id != studentId) return student;
+
+        return student.copyWith(profileImage: profileImage);
+      }).toList();
+    }
+
+    state = state.copyWith(
+      allStudents: update(state.allStudents),
+      activeStudents: update(state.activeStudents),
+
+      expiring1To3Days: update(state.expiring1To3Days),
+      expiring4To7Days: update(state.expiring4To7Days),
+      expiring8To10Days: update(state.expiring8To10Days),
+
+      expired1To3Days: update(state.expired1To3Days),
+      expired4To7Days: update(state.expired4To7Days),
+      expired8To10Days: update(state.expired8To10Days),
+
+      pendingStudents: update(state.pendingStudents),
+    );
   }
 }

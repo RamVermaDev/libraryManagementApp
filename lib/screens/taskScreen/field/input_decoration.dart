@@ -5,7 +5,7 @@ InputDecoration inputDecoration({
   Color? fillColor,
   Widget? suffixIcon,
 }) {
-  double radius = 12;
+  double radius = 10;
   return InputDecoration(
     suffixIcon: suffixIcon,
     hintText: hintText,

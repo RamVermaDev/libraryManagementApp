@@ -19,11 +19,12 @@ class StudentController {
     required BuildContext context,
     required WidgetRef ref,
     required String libraryId,
+    required String slotTemplateId,
+    String? seatId,
     required String name,
     required String phone,
     String? idProof,
-    required String planId,
-    required int programDays,
+    required int currentPlanDays,
     required DateTime startDate,
     required DateTime expireDate,
     required double amount,
@@ -48,11 +49,12 @@ class StudentController {
         },
         body: jsonEncode({
           'libraryId': libraryId,
+          'slotTemplateId': slotTemplateId,
+          'seatId': seatId,
           'name': name,
           'phone': phone,
           'idProof': idProof,
-          'planId': planId,
-          'programDays': programDays,
+          'currentPlanDays': currentPlanDays,
           'startDate': startDate.toIso8601String(),
           'expireDate': expireDate.toIso8601String(),
           'amount': amount,
@@ -102,53 +104,6 @@ class StudentController {
     }
   }
 
-  // Future<bool> getAllStudents({
-  //   required WidgetRef ref,
-  //   required String libraryId,
-  //   required int page,
-  //   int limit = 20,
-  //   bool append = false,
-  // }) async {
-  //   try {
-  //     final token = ref.read(tokenProvider);
-  //     final response = await http.get(
-  //       Uri.parse(
-  //         '$uri/api/$libraryId/getstudents'
-  //         '?page=$page&limit=$limit',
-  //       ),
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         'Authorization': 'Bearer $token',
-  //       },
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       final data = jsonDecode(response.body)['data'];
-  //       //print(data);
-
-  //       final studentList = (data['students'] as List<dynamic>? ?? []);
-
-  //       final students = studentList
-  //           .map((student) => StudentModel.fromMap(student))
-  //           .toList();
-
-  //       if (append) {
-  //         ref.read(studentProvider.notifier).addMoreAllStudents(students);
-  //       } else {
-  //         ref.read(studentProvider.notifier).setAllStudents(students);
-  //       }
-
-  //       return students.length == limit;
-  //     }
-
-  //     print('GET STUDENTS ERROR: ${response.body}');
-  //     return false;
-  //   } catch (error) {
-  //     print('GET STUDENTS ERROR: $error');
-  //     return false;
-  //   }
-  // }
-
   Future<bool> getStudents({
     required WidgetRef ref,
     required String libraryId,
@@ -187,7 +142,7 @@ class StudentController {
       }
 
       if (response.statusCode != 200) {
-        print('GET STUDENTS ERROR: ${response.body}');
+        debugPrint('GET STUDENTS ERROR: ${response.body}');
         return false;
       }
 
@@ -209,8 +164,63 @@ class StudentController {
 
       return students.length == limit;
     } catch (error) {
-      print('GET STUDENTS ERROR: $error');
+      debugPrint('GET STUDENTS ERROR: $error');
       return false;
+    }
+  }
+
+  Future<StudentModel?> updateStudentProfile({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String libraryId,
+    required String studentId,
+    required String name,
+    required String phone,
+    String? idProof,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+
+      if (token == null || token.isEmpty) {
+        showSnackBar(context, 'Authentication required');
+        return null;
+      }
+
+      final response = await http.patch(
+        Uri.parse('$uri/api/$libraryId/students/$studentId/profile'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'name': name, 'phone': phone, 'idProof': idProof}),
+      );
+
+      if (!context.mounted) return null;
+
+      if (response.statusCode != 200) {
+        showSnackBar(context, getMessageFromResponse(response));
+        return null;
+      }
+
+      final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = responseData['data'] as Map<String, dynamic>;
+      final updatedStudent = StudentModel.fromMap(
+        data['student'] as Map<String, dynamic>,
+      );
+
+      ref.read(studentProvider.notifier).updateStudent(updatedStudent);
+      AppNotification.show(context, message: 'Student updated successfully');
+
+      return updatedStudent;
+    } catch (e, stackTrace) {
+      debugPrint('Update Student Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (context.mounted) {
+        showSnackBar(context, 'Unable to update student');
+      }
+
+      return null;
     }
   }
 

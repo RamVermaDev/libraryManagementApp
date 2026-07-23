@@ -2,17 +2,22 @@ import 'dart:convert';
 
 class StudentModel {
   final String? id;
+
+  // Ownership / booking links
   final String libraryId;
+  final String slotTemplateId;
+  final String? seatId;
 
   // Personal details
   final String name;
   final String phone;
+  final String? gender;
   final String? idProof;
+  final String? profileImage;
 
   // Membership summary
   final DateTime? joiningDate;
-  final String currentPlan;
-  final int? currentProgramDays;
+  final int? currentPlanDays;
   final DateTime? currentStartDate;
   final DateTime? currentExpireDate;
 
@@ -32,12 +37,15 @@ class StudentModel {
   const StudentModel({
     this.id,
     required this.libraryId,
+    required this.slotTemplateId,
+    this.seatId,
     required this.name,
     required this.phone,
+    this.gender,
     this.idProof,
+    this.profileImage,
     this.joiningDate,
-    required this.currentPlan,
-    this.currentProgramDays,
+    this.currentPlanDays,
     this.currentStartDate,
     this.currentExpireDate,
     this.totalPaid = 0,
@@ -47,55 +55,63 @@ class StudentModel {
     this.notes,
     this.createdAt,
     this.updatedAt,
+    
   });
 
   factory StudentModel.fromMap(Map<String, dynamic> map) {
-    final library = map['library'];
-
     return StudentModel(
-      id: map['_id'] ?? map['id'],
+      id: map['_id']?.toString() ?? map['id']?.toString(),
 
-      // Handles both:
-      // "library": "objectId"
-      // and populated "library": {"_id": "objectId"}
-      libraryId: library is Map
-          ? library['_id']?.toString() ?? ''
-          : library?.toString() ?? '',
+      // libraryId/slotTemplateId/seatId can each arrive either as a plain
+      // ObjectId string OR as a populated object (if the backend ever does
+      // .populate() on these refs) - _parseRefId handles both shapes.
+      libraryId: _parseRefId(map['libraryId']) ?? '',
+      slotTemplateId: _parseRefId(map['slotTemplateId']) ?? '',
+      seatId: _parseRefId(map['seatId']),
 
-      name: map['name'] ?? '',
-      phone: map['phone'] ?? '',
-      idProof: map['idProof'],
+      name: map['name']?.toString() ?? '',
+      phone: map['phone']?.toString() ?? '',
+      gender: map['gender']?.toString(),
+      idProof: map['idProof']?.toString(),
+      profileImage: map['profileImage']?.toString(),
 
       joiningDate: _parseDate(map['joiningDate']),
 
-      currentPlan: map['currentPlan'] ?? '',
-      currentProgramDays: map['currentProgramDays'],
-
+      currentPlanDays: (map['currentPlanDays'] as num?)?.toInt(),
       currentStartDate: _parseDate(map['currentStartDate']),
       currentExpireDate: _parseDate(map['currentExpireDate']),
 
-      totalPaid: (map['totalPaid'] ?? 0).toDouble(),
-      totalPending: (map['totalPending'] ?? 0).toDouble(),
-      totalDiscount: (map['totalDiscount'] ?? 0).toDouble(),
+      totalPaid: (map['totalPaid'] as num?)?.toDouble() ?? 0,
+      totalPending: (map['totalPending'] as num?)?.toDouble() ?? 0,
+      totalDiscount: (map['totalDiscount'] as num?)?.toDouble() ?? 0,
 
       lastPaymentDate: _parseDate(map['lastPaymentDate']),
 
-      notes: map['notes'],
+      notes: map['notes']?.toString(),
 
       createdAt: _parseDate(map['createdAt']),
       updatedAt: _parseDate(map['updatedAt']),
     );
   }
 
+  /// Shape matching the Student schema itself - use this for displaying/
+  /// editing an existing student record. NOTE: this is NOT the same shape
+  /// the /addstudent endpoint expects (that request also carries
+  /// startDate/expireDate/amount/discount/paidAmount/paymentMode, which
+  /// belong to FeeRecord/Payment, not Student) - build that as a separate
+  /// request payload when we get to the controller.
   Map<String, dynamic> toMap() {
     return {
-      'library': libraryId,
+      'libraryId': libraryId,
+      'slotTemplateId': slotTemplateId,
+      'seatId': seatId,
       'name': name,
       'phone': phone,
+      'gender': gender,
       'idProof': idProof,
+      'profileImage': profileImage,
       'joiningDate': joiningDate?.toIso8601String(),
-      'currentPlan': currentPlan,
-      'currentProgramDays': currentProgramDays,
+      'currentPlanDays': currentPlanDays,
       'currentStartDate': currentStartDate?.toIso8601String(),
       'currentExpireDate': currentExpireDate?.toIso8601String(),
       'totalPaid': totalPaid,
@@ -107,16 +123,65 @@ class StudentModel {
   }
 
   factory StudentModel.fromJson(String source) {
-    return StudentModel.fromMap(json.decode(source));
+    return StudentModel.fromMap(json.decode(source) as Map<String, dynamic>);
   }
 
-  String toJson() {
-    return json.encode(toMap());
+  String toJson() => json.encode(toMap());
+
+  StudentModel copyWith({
+    String? id,
+    String? libraryId,
+    String? slotTemplateId,
+    String? seatId,
+    String? name,
+    String? phone,
+    String? gender,
+    String? idProof,
+    String? profileImage,
+    DateTime? joiningDate,
+    int? currentPlanDays,
+    DateTime? currentStartDate,
+    DateTime? currentExpireDate,
+    double? totalPaid,
+    double? totalPending,
+    double? totalDiscount,
+    DateTime? lastPaymentDate,
+    String? notes,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return StudentModel(
+      id: id ?? this.id,
+      libraryId: libraryId ?? this.libraryId,
+      slotTemplateId: slotTemplateId ?? this.slotTemplateId,
+      seatId: seatId ?? this.seatId,
+      name: name ?? this.name,
+      phone: phone ?? this.phone,
+      gender: gender ?? this.gender,
+      idProof: idProof ?? this.idProof,
+      profileImage: profileImage ?? this.profileImage,
+      joiningDate: joiningDate ?? this.joiningDate,
+      currentPlanDays: currentPlanDays ?? this.currentPlanDays,
+      currentStartDate: currentStartDate ?? this.currentStartDate,
+      currentExpireDate: currentExpireDate ?? this.currentExpireDate,
+      totalPaid: totalPaid ?? this.totalPaid,
+      totalPending: totalPending ?? this.totalPending,
+      totalDiscount: totalDiscount ?? this.totalDiscount,
+      lastPaymentDate: lastPaymentDate ?? this.lastPaymentDate,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  static String? _parseRefId(dynamic value) {
+    if (value == null) return null;
+    if (value is Map) return value['_id']?.toString();
+    return value.toString();
   }
 
   static DateTime? _parseDate(dynamic value) {
     if (value == null) return null;
-
     return DateTime.tryParse(value.toString());
   }
 }

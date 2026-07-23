@@ -8,15 +8,15 @@ class MembershipCard extends StatelessWidget {
     required this.scale,
     required this.joinDate,
     required this.expireDate,
-    required this.plan,
-    required this.program,
+    required this.planDuration,
+    required this.slotId,
   });
 
   final double scale;
   final String joinDate;
   final String expireDate;
-  final String plan;
-  final String program;
+  final String slotId;
+  final String planDuration;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class MembershipCard extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(
         20 * scale,
-        24 * scale,
+        34 * scale,
         20 * scale,
         25 * scale,
       ),
@@ -36,36 +36,45 @@ class MembershipCard extends StatelessWidget {
         children: [
           MembershipRow(
             scale: scale,
-            icon: Icons.calendar_month_outlined,
-            label: 'Join In',
+            iconString: 'joinDate',
+            label: 'Join Date',
             value: joinDate,
           ),
 
-          SizedBox(height: 28 * scale),
+          SizedBox(height: 20 * scale),
 
           MembershipRow(
             scale: scale,
-            icon: Icons.hourglass_empty_rounded,
-            label: 'Expire on',
+            iconString: 'expireDate',
+            label: 'Expiry Date',
             value: expireDate,
           ),
 
-          SizedBox(height: 28 * scale),
+          SizedBox(height: 20 * scale),
 
           MembershipRow(
             scale: scale,
-            icon: Icons.schedule_rounded,
-            label: 'Plan',
-            value: plan,
+            iconString: 'slot',
+            label: 'Slot',
+            value: slotId,
           ),
 
-          SizedBox(height: 28 * scale),
+          SizedBox(height: 20 * scale),
 
           MembershipRow(
             scale: scale,
-            icon: Icons.menu_book_rounded,
-            label: 'Program',
-            value: program,
+            iconString: 'timming',
+            label: 'Timming',
+            value: slotId,
+          ),
+
+          SizedBox(height: 20 * scale),
+
+          MembershipRow(
+            scale: scale,
+            iconString: 'plan',
+            label: 'Plan',
+            value: planDuration,
           ),
         ],
       ),

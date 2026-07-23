@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/components/create_library_required_dialog.dart';
 import 'package:library_management/provider/current_library_provider.dart';
-import 'package:library_management/screens/studentScreens/add_student_screen.dart';
+import 'package:library_management/screens/studentScreens/add_student_screens/book_slot_and_seat.dart';
 
 class AddMemberButton extends ConsumerStatefulWidget {
   const AddMemberButton({super.key, required this.scale});
@@ -42,7 +42,7 @@ class _AddMemberButtonState extends ConsumerState<AddMemberButton> {
 
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => AddStudentScreen()),
+            MaterialPageRoute(builder: (_) => BookSlotAndSeat()),
           );
         },
         child: Container(
