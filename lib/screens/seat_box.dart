@@ -42,7 +42,7 @@ class SeatBox extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
-        onTap: _isBooked ? null : onTap,
+        onTap: (_isBooked && !isSelected) ? null : onTap,
         child: Container(
           decoration: BoxDecoration(
             color: background,

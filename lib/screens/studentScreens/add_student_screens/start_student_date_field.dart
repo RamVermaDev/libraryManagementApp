@@ -29,6 +29,17 @@ class _StartStudentDateFieldState extends State<StartStudentDateField> {
     _selectedDate = widget.initialDate ?? DateTime.now();
   }
 
+  @override
+  void didUpdateWidget(covariant StartStudentDateField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialDate != null &&
+        widget.initialDate != oldWidget.initialDate) {
+      setState(() {
+        _selectedDate = widget.initialDate!;
+      });
+    }
+  }
+
   Future<void> _pickDate() async {
     final pickedDate = await showDatePicker(
       context: context,

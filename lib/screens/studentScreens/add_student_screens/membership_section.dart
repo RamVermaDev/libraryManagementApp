@@ -193,8 +193,10 @@ class MembershipSection extends StatelessWidget {
                       weight: FontWeight.w400,
                     ),
 
-                    SizedBox(height: 4),
-                    StartStudentDateField(onDateChanged: onStartDateChanged),
+                    StartStudentDateField(
+                      initialDate: startDate,
+                      onDateChanged: onStartDateChanged,
+                    ),
                   ],
                 ),
               ),
