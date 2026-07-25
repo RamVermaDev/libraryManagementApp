@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:library_management/screens/studentScreens/memberScrolable/member_color.dart';
+import 'package:library_management/app_colors.dart';
 
 class SearchField extends StatelessWidget {
   final TextEditingController controller;
@@ -22,26 +22,26 @@ class SearchField extends StatelessWidget {
         decoration: InputDecoration(
           hintText: 'Search member',
           hintStyle: const TextStyle(
-            color: MembersColors.muted,
+            color: AppColors.accentSoft,
             fontSize: 15,
             fontWeight: FontWeight.w400,
           ),
           prefixIcon: const Icon(
             Icons.search_rounded,
-            color: MembersColors.muted,
+            color: AppColors.accentSoft,
           ),
           filled: true,
-          fillColor: MembersColors.surface,
+          fillColor: AppColors.surface,
           contentPadding: const EdgeInsets.symmetric(vertical: 16),
           border: _border(),
           enabledBorder: _border(),
-          focusedBorder: _border(color: MembersColors.primary),
+          focusedBorder: _border(color: AppColors.primary),
         ),
       ),
     );
   }
 
-  OutlineInputBorder _border({Color color = MembersColors.border}) {
+  OutlineInputBorder _border({Color color = AppColors.border}) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(16),
       borderSide: BorderSide(color: color, width: 1),

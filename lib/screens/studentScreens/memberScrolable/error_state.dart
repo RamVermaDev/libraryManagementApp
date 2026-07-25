@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:library_management/screens/studentScreens/memberScrolable/member_color.dart';
+import 'package:library_management/app_colors.dart';
 
 class ErrorState extends StatelessWidget {
   final VoidCallback onRetry;
 
-  const ErrorState({super.key, 
-    required this.onRetry,
-  });
+  const ErrorState({super.key, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +17,7 @@ class ErrorState extends StatelessWidget {
             const Icon(
               Icons.error_outline_rounded,
               size: 42,
-              color: MembersColors.expired,
+              color: AppColors.memberExpired,
             ),
 
             const SizedBox(height: 14),
@@ -27,7 +25,7 @@ class ErrorState extends StatelessWidget {
             const Text(
               'Could not load members',
               style: TextStyle(
-                color: MembersColors.heading,
+                color: AppColors.heading,
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
               ),
@@ -35,10 +33,7 @@ class ErrorState extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            FilledButton(
-              onPressed: onRetry,
-              child: const Text('Try Again'),
-            ),
+            FilledButton(onPressed: onRetry, child: const Text('Try Again')),
           ],
         ),
       ),

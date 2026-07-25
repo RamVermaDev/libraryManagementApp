@@ -185,6 +185,9 @@ class _RevenueAnalyticsScreenState
                     expenseItems: hasLibrary
                         ? monthSummary?.expenses
                         : const [],
+                    refundItems: hasLibrary
+                        ? monthSummary?.refunds
+                        : const [],
                     canGoPrevious: _canGoPrevious,
                     canGoNext: _canGoNext,
                     onPreviousMonth: () => _changeMonth(-1),

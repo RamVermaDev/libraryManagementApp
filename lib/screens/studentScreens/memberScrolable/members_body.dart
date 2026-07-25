@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:library_management/app_colors.dart';
 import 'package:library_management/models/student_model.dart';
 import 'package:library_management/screens/studentScreens/memberDetailScreen/member_detailed_screen.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/empty_state.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/error_state.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/loading_state.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/member_card.dart';
-import 'package:library_management/screens/studentScreens/memberScrolable/member_color.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/members.dart';
 
 class MembersBody extends StatelessWidget {
@@ -84,7 +84,7 @@ class MembersBody extends StatelessWidget {
 
     return RefreshIndicator(
       onRefresh: onRefresh,
-      color: MembersColors.primary,
+      color: AppColors.primary,
       child: ListView.separated(
         controller: scrollController,
         physics: const AlwaysScrollableScrollPhysics(),

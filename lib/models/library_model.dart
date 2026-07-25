@@ -11,7 +11,6 @@ class LibraryModel {
   final String pinCode;
   final int totalStudents;
   final int totalSeats;
-  final int availableSeats;
   final String status;
 
   const LibraryModel({
@@ -25,7 +24,6 @@ class LibraryModel {
     required this.pinCode,
     this.totalStudents = 0,
     this.totalSeats = 0,
-    this.availableSeats = 0,
     this.status = "active",
   });
 
@@ -43,7 +41,6 @@ class LibraryModel {
       pinCode: map['pinCode'] ?? '',
       totalStudents: map['totalStudents'] ?? 0,
       totalSeats: map['totalSeats'] ?? 0,
-      availableSeats: map['availableSeats'] ?? 0,
       status: map['status'] ?? 'active',
     );
   }

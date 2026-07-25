@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:library_management/screens/studentScreens/memberScrolable/member_color.dart';
+import 'package:library_management/app_colors.dart';
 
 class LoadingState extends StatelessWidget {
   const LoadingState({super.key});
@@ -8,7 +8,7 @@ class LoadingState extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Center(
       child: CircularProgressIndicator(
-        color: MembersColors.primary,
+        color: AppColors.primary,
         strokeWidth: 2.5,
       ),
     );

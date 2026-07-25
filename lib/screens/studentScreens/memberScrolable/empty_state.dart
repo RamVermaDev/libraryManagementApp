@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:library_management/screens/studentScreens/memberScrolable/member_color.dart';
+import 'package:library_management/app_colors.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/members.dart';
 
 class EmptyState extends StatelessWidget {
@@ -19,12 +19,12 @@ class EmptyState extends StatelessWidget {
               width: 68,
               height: 68,
               decoration: const BoxDecoration(
-                color: MembersColors.primarySoft,
+                color: AppColors.primarySoft,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.people_outline_rounded,
-                color: MembersColors.primary,
+                color: AppColors.primary,
                 size: 30,
               ),
             ),
@@ -35,7 +35,7 @@ class EmptyState extends StatelessWidget {
               'No ${status.label.toLowerCase()} members',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: MembersColors.heading,
+                color: AppColors.heading,
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
               ),
@@ -46,7 +46,7 @@ class EmptyState extends StatelessWidget {
             const Text(
               'Members will appear here when available.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: MembersColors.muted, fontSize: 14),
+              style: TextStyle(color: AppColors.grey300, fontSize: 14),
             ),
           ],
         ),

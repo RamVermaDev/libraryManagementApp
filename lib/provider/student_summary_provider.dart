@@ -21,6 +21,14 @@ class StudentSummaryNotifier extends StateNotifier<StudentSummaryModel?> {
     state = currentState.copyWith(active: currentState.active + 1);
   }
 
+  void removeActiveStudent() {
+    final currentState = state;
+    if (currentState == null) return;
+    state = currentState.copyWith(
+      active: (currentState.active - 1).clamp(0, currentState.active),
+    );
+  }
+
   void clearSummary() {
     state = null;
   }

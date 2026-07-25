@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:library_management/app_colors.dart';
 import 'package:library_management/controllers/student_controller.dart';
 import 'package:library_management/models/student_model.dart';
 import 'package:library_management/provider/current_library_provider.dart';
@@ -10,7 +11,6 @@ import 'package:library_management/provider/student_state.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/day_filter_section.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/member_search_app_bar.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/members_body.dart';
-import 'package:library_management/screens/studentScreens/memberScrolable/member_color.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/members.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/members_screen_args.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/status_tabs.dart';
@@ -338,7 +338,7 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
 
     return Scaffold(
       appBar: MemberSearchAppBar(onSearchChanged: (value) => 'a'),
-      backgroundColor: MembersColors.background,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [

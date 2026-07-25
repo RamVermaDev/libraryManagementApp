@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:library_management/screens/studentScreens/memberScrolable/member_color.dart';
+import 'package:library_management/app_colors.dart';
 
 class MemberInformation extends StatelessWidget {
   const MemberInformation({
@@ -27,7 +27,7 @@ class MemberInformation extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-            color: MembersColors.heading,
+            color: AppColors.heading,
             fontSize: 17,
             fontWeight: FontWeight.w700,
           ),
@@ -41,7 +41,7 @@ class MemberInformation extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            //color: MembersColors.body,
+            //color: AppColors.body,
             color: statusColor,
             fontSize: 13,
             fontWeight: FontWeight.w500,
@@ -56,7 +56,7 @@ class MemberInformation extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-            color: MembersColors.body,
+            color: AppColors.body,
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -68,7 +68,7 @@ class MemberInformation extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-            color: MembersColors.body,
+            color: AppColors.body,
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),

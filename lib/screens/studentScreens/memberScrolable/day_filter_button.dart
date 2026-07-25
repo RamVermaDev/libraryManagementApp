@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:library_management/screens/studentScreens/memberScrolable/member_color.dart';
+import 'package:library_management/app_colors.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/members.dart';
 
 class DayFilterButton extends StatelessWidget {
@@ -39,7 +39,7 @@ class DayFilterButton extends StatelessWidget {
           child: AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 180),
             style: TextStyle(
-              color: isSelected ? MembersColors.heading : MembersColors.body,
+              color: isSelected ? AppColors.heading : AppColors.body,
               fontSize: 14,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             ),

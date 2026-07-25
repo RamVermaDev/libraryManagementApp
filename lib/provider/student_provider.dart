@@ -101,7 +101,7 @@ class StudentNotifier extends StateNotifier<StudentState> {
 
   void addMorePendingStudents(List<StudentModel> students) {
     state = state.copyWith(
-      activeStudents: [...state.pendingStudents, ...students],
+      pendingStudents: [...state.pendingStudents, ...students],
     );
   }
 
@@ -186,6 +186,31 @@ class StudentNotifier extends StateNotifier<StudentState> {
   void addMoreExpired8To10Days(List<StudentModel> students) {
     state = state.copyWith(
       expired8To10Days: [...state.expired8To10Days, ...students],
+    );
+  }
+
+  // Removes a refunded/cancelled student from all active & expiring lists
+  // and updates their record in the allStudents list.
+  void expireStudent(StudentModel updatedStudent) {
+    if (updatedStudent.id == null) return;
+
+    List<StudentModel> removeFrom(List<StudentModel> list) =>
+        list.where((s) => s.id != updatedStudent.id).toList();
+
+    state = state.copyWith(
+      // Update the record in the full list
+      allStudents: _replaceStudentInList(state.allStudents, updatedStudent),
+
+      // Remove from active & expiring — they are no longer valid
+      activeStudents: removeFrom(state.activeStudents),
+      expiring1To3Days: removeFrom(state.expiring1To3Days),
+      expiring4To7Days: removeFrom(state.expiring4To7Days),
+      expiring8To10Days: removeFrom(state.expiring8To10Days),
+
+      // Also remove pending (refund clears pending)
+      pendingStudents: removeFrom(state.pendingStudents),
+
+      // Keep expired lists as-is — will refresh on next fetch
     );
   }
 

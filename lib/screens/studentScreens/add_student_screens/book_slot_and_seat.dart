@@ -10,6 +10,7 @@ import 'package:library_management/provider/slot_availability_provider.dart';
 import 'package:library_management/provider/seat_availability_provider.dart';
 import 'package:library_management/models/slot_availability_model.dart';
 import 'package:library_management/models/seat_availability_model.dart';
+import 'package:library_management/provider/seat_config_provider.dart';
 import 'package:library_management/screens/studentScreens/add_student_screens/add_student_screen.dart';
 import 'package:library_management/screens/studentScreens/add_student_screens/slot_card_avalibility.dart';
 import 'package:library_management/screens/seat_box.dart';
@@ -189,6 +190,11 @@ class _BookSlotAndSeatState extends ConsumerState<BookSlotAndSeat> {
   }
 
   Widget _buildSeatSection(List seats, String? selectedSeatId) {
+    final seatConfig = ref.watch(seatConfigProvider);
+    final columns = (seatConfig?.columns != null && seatConfig!.columns > 0)
+        ? seatConfig.columns
+        : 5;
+
     return Container(
       key: _seatSectionKey,
       child: Column(
@@ -219,8 +225,8 @@ class _BookSlotAndSeatState extends ConsumerState<BookSlotAndSeat> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: seats.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 5,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
                 mainAxisSpacing: 10,
                 crossAxisSpacing: 10,
                 childAspectRatio: 1,

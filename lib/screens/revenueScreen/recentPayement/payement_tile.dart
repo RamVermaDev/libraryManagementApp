@@ -12,7 +12,20 @@ class PaymentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = PaymentMethodStyle.from(payment.paymentMode);
+    final isRefund = payment.tracker == 'refund';
+    final style = isRefund
+        ? const PaymentMethodStyle(
+            icon: Icons.undo_rounded,
+            color: AppColors.error,
+            background: AppColors.errorLight,
+          )
+        : PaymentMethodStyle.from(payment.paymentMode);
+
+    final titleText = isRefund
+        ? '${payment.paymentMode} (Refund)'
+        : (payment.studentName != null && payment.studentName!.isNotEmpty
+            ? '${payment.studentName} (${payment.paymentMode})'
+            : payment.paymentMode);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
@@ -33,13 +46,13 @@ class PaymentTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  payment.paymentMode,
+                  titleText,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 14 * scale,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF101B33),
+                    color: const Color(0xFF101B33),
                   ),
                 ),
                 SizedBox(height: 2 * scale),
@@ -48,7 +61,7 @@ class PaymentTile extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11 * scale,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF747D93),
+                    color: const Color(0xFF747D93),
                   ),
                 ),
               ],
@@ -56,11 +69,11 @@ class PaymentTile extends StatelessWidget {
           ),
           SizedBox(width: 12 * scale),
           Text(
-            CurrencyFormatter.format(payment.amount),
+            '${isRefund ? "- " : ""}${CurrencyFormatter.format(payment.amount)}',
             style: TextStyle(
               fontSize: 15 * scale,
               fontWeight: FontWeight.w700,
-              color: AppColors.black,
+              color: isRefund ? AppColors.error : AppColors.black,
             ),
           ),
         ],

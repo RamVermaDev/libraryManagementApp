@@ -16,6 +16,7 @@ class PaymentModel {
   final double amount;
   final String paymentMode;
   final DateTime paymentDate;
+  final String tracker;
 
   /// Optional
   final String? transactionReference;
@@ -31,6 +32,7 @@ class PaymentModel {
     required this.amount,
     required this.paymentMode,
     required this.paymentDate,
+    this.tracker = 'credit',
     this.transactionReference,
     this.note,
   });
@@ -45,6 +47,7 @@ class PaymentModel {
     double? amount,
     String? paymentMode,
     DateTime? paymentDate,
+    String? tracker,
     String? transactionReference,
     String? note,
   }) {
@@ -58,6 +61,7 @@ class PaymentModel {
       amount: amount ?? this.amount,
       paymentMode: paymentMode ?? this.paymentMode,
       paymentDate: paymentDate ?? this.paymentDate,
+      tracker: tracker ?? this.tracker,
       transactionReference: transactionReference ?? this.transactionReference,
       note: note ?? this.note,
     );
@@ -71,6 +75,7 @@ class PaymentModel {
       'amount': amount,
       'paymentMode': paymentMode,
       'paymentDate': paymentDate.toIso8601String(),
+      'tracker': tracker,
       'transactionReference': transactionReference,
       'note': note,
     };
@@ -105,6 +110,8 @@ class PaymentModel {
       paymentMode: map['paymentMode']?.toString() ?? '',
 
       paymentDate: DateTime.parse(map['paymentDate'].toString()).toLocal(),
+
+      tracker: map['tracker']?.toString() ?? 'credit',
 
       transactionReference: map['transactionReference']?.toString(),
 

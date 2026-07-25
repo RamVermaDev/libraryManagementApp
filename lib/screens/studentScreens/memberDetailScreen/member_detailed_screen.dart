@@ -11,7 +11,9 @@ import 'package:library_management/screens/studentScreens/memberDetailScreen/adm
 import 'package:library_management/screens/studentScreens/memberDetailScreen/membership_card.dart';
 import 'package:library_management/screens/studentScreens/memberDetailScreen/payement_card.dart';
 import 'package:library_management/screens/studentScreens/memberDetailScreen/profile_card.dart';
+import 'package:library_management/screens/studentScreens/memberDetailScreen/refund_bottom_sheet.dart';
 import 'package:library_management/services/profile_photo_service.dart';
+import 'package:library_management/services/student_message_service.dart';
 
 class MemberDetailedScreen extends ConsumerStatefulWidget {
   const MemberDetailedScreen({super.key, required this.member});
@@ -34,7 +36,7 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
     _member = widget.member;
   }
 
-  Future<void> _changePhoto() async {
+  Future<void> _changePhoto(ImageSource source) async {
     final studentId = _member.id;
 
     if (studentId == null || studentId.isEmpty) {
@@ -44,7 +46,7 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
 
     final image = await ProfilePhotoService.pick(
       context: context,
-      source: ImageSource.camera,
+      source: source,
     );
 
     if (image == null) return;
@@ -106,8 +108,75 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
     return true;
   }
 
+  Future<void> _handlePendingResolution(PendingResolutionResult result) async {
+    final studentId = _member.id;
+    if (studentId == null || studentId.isEmpty) {
+      showSnackBar(context, 'Student ID missing');
+      return;
+    }
+
+    final updatedStudent = await _studentController.clearStudentPending(
+      context: context,
+      ref: ref,
+      libraryId: _member.libraryId,
+      studentId: studentId,
+      action: result.action,
+      amount: result.amount,
+      paymentMode: result.paymentMode,
+      note: result.note,
+    );
+
+    if (updatedStudent != null && mounted) {
+      setState(() {
+        _member = updatedStudent;
+      });
+    }
+  }
+
+  Future<void> _handleRefund() async {
+    final studentId = _member.id;
+    if (studentId == null || studentId.isEmpty) {
+      showSnackBar(context, 'Student ID missing');
+      return;
+    }
+
+    // Open the bottom sheet — it computes and pre-fills the refund amount.
+    final result = await showRefundBottomSheet(
+      context: context,
+      member: _member,
+    );
+
+    if (result == null || !mounted) return;
+
+    final updatedStudent = await _studentController.refundStudent(
+      context: context,
+      ref: ref,
+      libraryId: _member.libraryId,
+      studentId: studentId,
+      refundAmount: result.refundAmount,
+      paymentMode: result.paymentMode,
+      note: result.note,
+    );
+
+    if (updatedStudent != null && mounted) {
+      setState(() {
+        _member = updatedStudent;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final libraryName = StudentMessageService.getLibraryName(
+      ref,
+      targetLibraryId: _member.libraryId,
+    );
+
+    final reminderMessage = StudentMessageService.generateMessage(
+      student: _member,
+      libraryName: libraryName,
+    );
+
     return Scaffold(
       appBar: AppBarWidget(
         title: 'Member Info',
@@ -151,9 +220,12 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
                     ActionCard(
                       scale: scale,
                       phone: _member.phone,
-                      message: 'Hi',
+                      message: reminderMessage,
                       pending: _member.totalPending,
-                      expiryDate: _member.currentExpireDate!,
+                      totalPaid: _member.totalPaid,
+                      expiryDate: _member.currentExpireDate ?? DateTime.now(),
+                      onPendingAction: _handlePendingResolution,
+                      onRefund: _handleRefund,
                     ),
 
                     SizedBox(height: 24 * scale),
@@ -163,7 +235,7 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
                       scale: scale,
                       joinDate: _formattedDate(_member.joiningDate),
                       expireDate: _formattedDate(_member.currentExpireDate),
-                      slotId: _member.seatId!,
+                      slotId: _member.slotTemplateId,
                       planDuration:
                           '${_member.currentPlanDays.toString()} Days',
                     ),

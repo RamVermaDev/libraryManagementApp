@@ -224,7 +224,163 @@ class StudentController {
     }
   }
 
+  Future<StudentModel?> clearStudentPending({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String libraryId,
+    required String studentId,
+    required String action,
+    required double amount,
+    String? paymentMode,
+    String? note,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+
+      if (token == null || token.isEmpty) {
+        showSnackBar(context, 'Authentication required');
+        return null;
+      }
+
+      final response = await http.patch(
+        Uri.parse('$uri/api/$libraryId/students/$studentId/clear-pending'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'action': action,
+          'amount': amount,
+          'paymentMode': paymentMode,
+          'note': note,
+        }),
+      );
+
+      if (!context.mounted) return null;
+
+      if (response.statusCode != 200) {
+        showSnackBar(context, getMessageFromResponse(response));
+        return null;
+      }
+
+      final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = responseData['data'] as Map<String, dynamic>;
+
+      final updatedStudent = StudentModel.fromMap(
+        data['student'] as Map<String, dynamic>,
+      );
+
+      ref.read(studentProvider.notifier).updateStudent(updatedStudent);
+
+      final paymentData = data['payment'];
+      if (paymentData != null) {
+        final payment = PaymentModel.fromMap(
+          paymentData as Map<String, dynamic>,
+        );
+        ref.read(revenueProvider.notifier).addPayment(payment);
+      }
+
+      AppNotification.show(
+        context,
+        message: responseData['message']?.toString() ??
+            'Pending balance updated successfully',
+      );
+
+      return updatedStudent;
+    } catch (e, stackTrace) {
+      debugPrint('Clear Student Pending Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (context.mounted) {
+        showSnackBar(context, 'Unable to update pending balance');
+      }
+
+      return null;
+    }
+  }
+
+  Future<StudentModel?> refundStudent({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String libraryId,
+    required String studentId,
+    required double refundAmount,
+    required String paymentMode,
+    String? note,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+
+      if (token == null || token.isEmpty) {
+        showSnackBar(context, 'Authentication required');
+        return null;
+      }
+
+      final response = await http.patch(
+        Uri.parse('$uri/api/$libraryId/students/$studentId/refund'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'refundAmount': refundAmount,
+          'paymentMode': paymentMode,
+          'note': note,
+        }),
+      );
+
+      if (!context.mounted) return null;
+
+      if (response.statusCode != 200) {
+        showSnackBar(context, getMessageFromResponse(response));
+        return null;
+      }
+
+      final responseData =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      final data = responseData['data'] as Map<String, dynamic>;
+
+      final updatedStudent = StudentModel.fromMap(
+        data['student'] as Map<String, dynamic>,
+      );
+
+      // Remove student from active/expiring lists — they are now expired
+      ref.read(studentProvider.notifier).expireStudent(updatedStudent);
+
+      // Decrement active student count on the summary/dashboard
+      ref.read(studentSummaryProvider.notifier).removeActiveStudent();
+
+      // If a refund payment record came back, record in revenue provider as a refund expense
+      final refundPaymentData = data['refundPayment'];
+      if (refundPaymentData != null) {
+        final payment = PaymentModel.fromMap(
+          refundPaymentData as Map<String, dynamic>,
+        );
+        ref.read(revenueProvider.notifier).addPayment(payment);
+      }
+
+      AppNotification.show(
+        context,
+        message:
+            responseData['message']?.toString() ?? 'Refund processed successfully',
+      );
+
+      return updatedStudent;
+    } catch (e, stackTrace) {
+      debugPrint('Refund Student Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (context.mounted) {
+        showSnackBar(context, 'Unable to process refund');
+      }
+
+      return null;
+    }
+  }
+
   String _getEndpoint({
+
+
     required String libraryId,
     required MemberStatus status,
   }) {

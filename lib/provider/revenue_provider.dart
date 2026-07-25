@@ -119,20 +119,50 @@ class RevenueNotifier extends StateNotifier<RevenueState> {
   void addPayment(PaymentModel payment) {
     if (state.summary == null) return;
 
-    final summary = state.summary!.copyWith(
-      todayIncome: state.summary!.todayIncome + payment.amount,
-      monthlyIncome: state.summary!.monthlyIncome + payment.amount,
-      yearlyIncome: state.summary!.yearlyIncome + payment.amount,
-      allTimeIncome: state.summary!.allTimeIncome + payment.amount,
-    );
+    final isRefund = payment.tracker == 'refund';
 
-    state = state.copyWith(
-      summary: summary,
-      recentPayments: [payment, ...state.recentPayments!].toList(),
-      currentMonth: state.currentMonth!.copyWith(
-        income: state.currentMonth!.income + payment.amount,
-      ),
-    );
+    if (isRefund) {
+      // Refund increases monthly expense and appends to refunds list
+      final currentMonth = state.currentMonth;
+      final updatedMonth = currentMonth?.copyWith(
+        expense: currentMonth.expense + payment.amount,
+        refunds: currentMonth.refunds != null
+            ? [payment, ...currentMonth.refunds]
+            : [payment],
+      );
+
+      final recent = state.recentPayments != null
+          ? [payment, ...state.recentPayments!]
+          : [payment];
+
+      state = state.copyWith(
+        recentPayments: recent,
+        currentMonth: updatedMonth ?? state.currentMonth,
+      );
+    } else {
+      // Credit payment increases income totals
+      final summary = state.summary!.copyWith(
+        todayIncome: state.summary!.todayIncome + payment.amount,
+        monthlyIncome: state.summary!.monthlyIncome + payment.amount,
+        yearlyIncome: state.summary!.yearlyIncome + payment.amount,
+        allTimeIncome: state.summary!.allTimeIncome + payment.amount,
+      );
+
+      final currentMonth = state.currentMonth;
+      final updatedMonth = currentMonth?.copyWith(
+        income: currentMonth.income + payment.amount,
+      );
+
+      final recent = state.recentPayments != null
+          ? [payment, ...state.recentPayments!]
+          : [payment];
+
+      state = state.copyWith(
+        summary: summary,
+        recentPayments: recent,
+        currentMonth: updatedMonth ?? state.currentMonth,
+      );
+    }
   }
 
   // ---------------- Loading ----------------

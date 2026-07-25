@@ -1,29 +1,35 @@
 import 'dart:convert';
 
 import 'package:library_management/models/expense_model.dart';
+import 'package:library_management/models/payemnt_model.dart';
 
 class MonthlyRevenueModel {
   final double income;
   final double expense;
 
   final List<ExpenseModel> expenses;
+  final List<PaymentModel> refunds;
+
+  double get profit => income - expense;
 
   const MonthlyRevenueModel({
     required this.income,
     required this.expense,
     required this.expenses,
+    this.refunds = const [],
   });
 
   MonthlyRevenueModel copyWith({
     double? income,
     double? expense,
-    double? profit,
     List<ExpenseModel>? expenses,
+    List<PaymentModel>? refunds,
   }) {
     return MonthlyRevenueModel(
       income: income ?? this.income,
       expense: expense ?? this.expense,
       expenses: expenses ?? this.expenses,
+      refunds: refunds ?? this.refunds,
     );
   }
 
@@ -32,6 +38,7 @@ class MonthlyRevenueModel {
       'income': income,
       'expense': expense,
       'expenses': expenses.map((e) => e.toMap()).toList(),
+      'refunds': refunds.map((e) => e.toMap()).toList(),
     };
   }
 
@@ -41,6 +48,9 @@ class MonthlyRevenueModel {
       expense: (map['expense'] ?? 0).toDouble(),
       expenses: (map['expenses'] as List<dynamic>? ?? [])
           .map((e) => ExpenseModel.fromMap(e as Map<String, dynamic>))
+          .toList(),
+      refunds: (map['refunds'] as List<dynamic>? ?? [])
+          .map((e) => PaymentModel.fromMap(e as Map<String, dynamic>))
           .toList(),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/screens/studentScreens/memberDetailScreen/card_decoration.dart';
 
@@ -14,6 +15,7 @@ class ProfileCard extends StatefulWidget {
     this.imageUrl,
     this.onSave,
     this.onChangePhoto,
+    this.isUploadingPhoto = false,
   });
 
   final double scale;
@@ -22,6 +24,7 @@ class ProfileCard extends StatefulWidget {
   final String? id;
   final int number;
   final String? imageUrl;
+  final bool isUploadingPhoto;
 
   /// Called when the owner taps Save after editing. Should perform the
   /// actual update (API call) and return true on success - the card only
@@ -34,10 +37,9 @@ class ProfileCard extends StatefulWidget {
   })?
   onSave;
 
-  /// Called when the owner taps "Change Photo" inside the photo popup.
-  /// The popup itself is display-only - actual image picking/upload is
-  /// the parent's responsibility.
-  final VoidCallback? onChangePhoto;
+  /// Called when the owner selects a photo option ("Open Camera" or "Open Gallery")
+  /// inside the photo popup with the selected [ImageSource].
+  final Future<void> Function(ImageSource source)? onChangePhoto;
 
   @override
   State<ProfileCard> createState() => _ProfileCardState();
@@ -50,6 +52,9 @@ class _ProfileCardState extends State<ProfileCard> {
 
   bool _isEditing = false;
   bool _isSaving = false;
+  bool _isUploadingPhoto = false;
+
+  bool get _uploading => widget.isUploadingPhoto || _isUploadingPhoto;
 
   @override
   void initState() {
@@ -145,7 +150,17 @@ class _ProfileCardState extends State<ProfileCard> {
       barrierDismissible: true,
       builder: (_) => _ProfilePhotoDialog(
         imageUrl: widget.imageUrl,
-        onChangePhoto: widget.onChangePhoto,
+        onChangePhoto: (source) async {
+          if (widget.onChangePhoto == null) return;
+          setState(() => _isUploadingPhoto = true);
+          try {
+            await widget.onChangePhoto!(source);
+          } finally {
+            if (mounted) {
+              setState(() => _isUploadingPhoto = false);
+            }
+          }
+        },
       ),
     );
   }
@@ -160,7 +175,7 @@ class _ProfileCardState extends State<ProfileCard> {
         21 * scale,
         8 * scale,
         16 * scale,
-        22 * scale,
+        32 * scale,
       ),
       decoration: cardDecoration(radius: 20 * scale),
       child: Column(
@@ -291,44 +306,64 @@ class _ProfileCardState extends State<ProfileCard> {
 
   Widget _buildAvatar(double scale) {
     final hasImage = widget.imageUrl != null && widget.imageUrl!.isNotEmpty;
+    final isLoading = _uploading;
 
     return GestureDetector(
-      onTap: _openPhotoPopup,
+      onTap: isLoading ? null : _openPhotoPopup,
       child: Stack(
         clipBehavior: Clip.none,
+        alignment: Alignment.center,
         children: [
           CircleAvatar(
             radius: 48.5 * scale,
             backgroundColor: AppColors.primarySoft,
             backgroundImage: hasImage ? NetworkImage(widget.imageUrl!) : null,
-            child: !hasImage
-                ? Icon(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                if (!hasImage && !isLoading)
+                  Icon(
                     Icons.person_rounded,
                     size: 54 * scale,
                     color: const Color(0xFF7896F1),
-                  )
-                : null,
+                  ),
+                if (isLoading)
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: SpinKitFadingCircle(
+                        color: Colors.white,
+                        size: 38 * scale,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
-          Positioned(
-            bottom: -2 * scale,
-            right: -2 * scale,
-            child: GestureDetector(
-              onTap: widget.onChangePhoto,
-              child: Container(
-                padding: EdgeInsets.all(5 * scale),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-                child: Icon(
-                  Icons.camera_alt_rounded,
-                  size: 13 * scale,
-                  color: Colors.white,
+          if (!isLoading)
+            Positioned(
+              bottom: -2 * scale,
+              right: -2 * scale,
+              child: GestureDetector(
+                onTap: _openPhotoPopup,
+                child: Container(
+                  padding: EdgeInsets.all(5 * scale),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: Icon(
+                    Icons.camera_alt_rounded,
+                    size: 13 * scale,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -339,9 +374,9 @@ class _ProfileCardState extends State<ProfileCard> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _infoRow(label: "Name", value: widget.name, scale: scale),
-        SizedBox(height: 16 * scale),
+        SizedBox(height: 14 * scale),
         _infoRow(label: "Mobile", value: "+91 ${widget.phone}", scale: scale),
-        SizedBox(height: 16 * scale),
+        SizedBox(height: 14 * scale),
         _infoRow(label: "ID", value: widget.id ?? "N/A", scale: scale),
       ],
     );
@@ -475,7 +510,7 @@ class _ProfilePhotoDialog extends StatelessWidget {
   const _ProfilePhotoDialog({required this.imageUrl, this.onChangePhoto});
 
   final String? imageUrl;
-  final VoidCallback? onChangePhoto;
+  final void Function(ImageSource source)? onChangePhoto;
 
   bool get _hasImage => imageUrl != null && imageUrl!.isNotEmpty;
 
@@ -540,10 +575,10 @@ class _ProfilePhotoDialog extends StatelessWidget {
                     child: OutlinedButton.icon(
                       onPressed: () {
                         Navigator.pop(context);
-                        onChangePhoto?.call();
+                        onChangePhoto?.call(ImageSource.camera);
                       },
                       icon: const Icon(Icons.photo_camera_outlined, size: 18),
-                      label: const Text('Change Photo'),
+                      label: const Text('Open Camera'),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
@@ -556,21 +591,20 @@ class _ProfilePhotoDialog extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.buttonPrimary,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        onChangePhoto?.call(ImageSource.gallery);
+                      },
+                      icon: const Icon(Icons.photo_library_outlined, size: 18),
+                      label: const Text('Open Gallery'),
+                      style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
-                      child: const Text(
-                        'Save',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        side: BorderSide(color: AppColors.border),
+                        foregroundColor: AppColors.body,
                       ),
                     ),
                   ),

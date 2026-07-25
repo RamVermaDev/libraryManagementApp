@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:library_management/screens/studentScreens/memberScrolable/member_color.dart';
+import 'package:library_management/app_colors.dart';
 
 class CircularIconButton extends StatelessWidget {
   final IconData icon;
@@ -14,7 +14,7 @@ class CircularIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: MembersColors.surface,
+      color: AppColors.surface,
       shape: const CircleBorder(),
       child: InkWell(
         onTap: onTap,
@@ -22,7 +22,7 @@ class CircularIconButton extends StatelessWidget {
         child: SizedBox(
           width: 44,
           height: 44,
-          child: Icon(icon, size: 22, color: MembersColors.heading),
+          child: Icon(icon, size: 22, color: AppColors.heading),
         ),
       ),
     );
