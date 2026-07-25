@@ -86,8 +86,9 @@ class _RefundSheetState extends State<_RefundSheet> {
     _dailyRate = _planDays > 0 ? finalAmount / _planDays : 0;
 
     // Suggested refund = value of remaining days, capped by what was paid
-    _suggestedRefund =
-        (_dailyRate * _daysLeft).clamp(0, _maxRefund).floorToDouble();
+    _suggestedRefund = (_dailyRate * _daysLeft)
+        .clamp(0, _maxRefund)
+        .floorToDouble();
   }
 
   @override
@@ -235,10 +236,7 @@ class _RefundSheetState extends State<_RefundSheet> {
                   ),
                   Text(
                     widget.member.name,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.body,
-                    ),
+                    style: const TextStyle(fontSize: 12, color: AppColors.body),
                   ),
                 ],
               ),
@@ -255,7 +253,9 @@ class _RefundSheetState extends State<_RefundSheet> {
               decoration: BoxDecoration(
                 color: AppColors.warningLight,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppColors.warning.withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
                 children: [
@@ -336,11 +336,13 @@ class _RefundSheetState extends State<_RefundSheet> {
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _amountCtrl,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d*\.?\d{0,2}')),
+                        RegExp(r'^\d*\.?\d{0,2}'),
+                      ),
                     ],
                     style: const TextStyle(
                       fontSize: 22,
@@ -372,7 +374,9 @@ class _RefundSheetState extends State<_RefundSheet> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide: const BorderSide(
-                            color: AppColors.primary, width: 1.5),
+                          color: AppColors.primary,
+                          width: 1.5,
+                        ),
                       ),
                       errorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -380,11 +384,15 @@ class _RefundSheetState extends State<_RefundSheet> {
                       ),
                       focusedErrorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide:
-                            const BorderSide(color: AppColors.error, width: 1.5),
+                        borderSide: const BorderSide(
+                          color: AppColors.error,
+                          width: 1.5,
+                        ),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                     ),
                     validator: (v) {
                       final val = double.tryParse(v?.trim() ?? '');
@@ -429,8 +437,10 @@ class _RefundSheetState extends State<_RefundSheet> {
                       hintStyle: const TextStyle(color: AppColors.caption),
                       filled: true,
                       fillColor: AppColors.background,
-                      counterStyle:
-                          const TextStyle(fontSize: 11, color: AppColors.caption),
+                      counterStyle: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.caption,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide: const BorderSide(color: AppColors.border),
@@ -442,10 +452,14 @@ class _RefundSheetState extends State<_RefundSheet> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide: const BorderSide(
-                            color: AppColors.primary, width: 1.5),
+                          color: AppColors.primary,
+                          width: 1.5,
+                        ),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                     ),
                   ),
 
@@ -455,12 +469,15 @@ class _RefundSheetState extends State<_RefundSheet> {
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 10),
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.warningLight,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                            color: AppColors.warning.withValues(alpha: 0.35)),
+                          color: AppColors.warning.withValues(alpha: 0.35),
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -521,13 +538,13 @@ class _RefundSheetState extends State<_RefundSheet> {
   }
 
   Widget _label(String text) => Text(
-        text,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: AppColors.body,
-        ),
-      );
+    text,
+    style: const TextStyle(
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+      color: AppColors.body,
+    ),
+  );
 
   Widget _divider() =>
       const Divider(height: 14, thickness: 1, color: AppColors.divider);

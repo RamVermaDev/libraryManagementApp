@@ -76,6 +76,59 @@ class StudentNotifier extends StateNotifier<StudentState> {
     );
   }
 
+  void renewStudent(StudentModel updatedStudent) {
+    if (updatedStudent.id == null) return;
+
+    List<StudentModel> removeFrom(List<StudentModel> list) =>
+        list.where((s) => s.id != updatedStudent.id).toList();
+
+    List<StudentModel> upsertInto(List<StudentModel> list, StudentModel item) {
+      final index = list.indexWhere((s) => s.id == item.id);
+      if (index >= 0) {
+        final copy = List<StudentModel>.from(list);
+        copy[index] = item;
+        return copy;
+      }
+      return [item, ...list];
+    }
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final rawExpire = updatedStudent.currentExpireDate?.toLocal();
+    final expireDate = rawExpire != null
+        ? DateTime(rawExpire.year, rawExpire.month, rawExpire.day)
+        : null;
+    final daysLeft =
+        expireDate != null ? expireDate.difference(today).inDays : 999;
+
+    List<StudentModel> exp1To3 = removeFrom(state.expiring1To3Days);
+    List<StudentModel> exp4To7 = removeFrom(state.expiring4To7Days);
+    List<StudentModel> exp8To10 = removeFrom(state.expiring8To10Days);
+
+    if (daysLeft >= 0 && daysLeft <= 3) {
+      exp1To3 = upsertInto(exp1To3, updatedStudent);
+    } else if (daysLeft >= 4 && daysLeft <= 6) {
+      exp4To7 = upsertInto(exp4To7, updatedStudent);
+    } else if (daysLeft >= 7 && daysLeft <= 10) {
+      exp8To10 = upsertInto(exp8To10, updatedStudent);
+    }
+
+    state = state.copyWith(
+      allStudents: _replaceStudentInList(state.allStudents, updatedStudent),
+      activeStudents: upsertInto(state.activeStudents, updatedStudent),
+
+      // Removed from all expired lists
+      expired1To3Days: removeFrom(state.expired1To3Days),
+      expired4To7Days: removeFrom(state.expired4To7Days),
+      expired8To10Days: removeFrom(state.expired8To10Days),
+
+      // Expiring lists updated based on remaining days
+      expiring1To3Days: exp1To3,
+      expiring4To7Days: exp4To7,
+      expiring8To10Days: exp8To10,
+    );
+  }
+
   // =========================
   // ACTIVE STUDENTS
   // =========================

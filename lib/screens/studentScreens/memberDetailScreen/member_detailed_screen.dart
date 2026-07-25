@@ -12,6 +12,7 @@ import 'package:library_management/screens/studentScreens/memberDetailScreen/mem
 import 'package:library_management/screens/studentScreens/memberDetailScreen/payement_card.dart';
 import 'package:library_management/screens/studentScreens/memberDetailScreen/profile_card.dart';
 import 'package:library_management/screens/studentScreens/memberDetailScreen/refund_bottom_sheet.dart';
+import 'package:library_management/screens/studentScreens/renewAdmission/renew_admission_screen.dart';
 import 'package:library_management/services/profile_photo_service.dart';
 import 'package:library_management/services/student_message_service.dart';
 
@@ -165,6 +166,22 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
     }
   }
 
+  void _handleRenew() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RenewAdmissionScreen(
+          member: _member,
+          onRenewed: (updatedStudent) {
+            setState(() {
+              _member = updatedStudent;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final libraryName = StudentMessageService.getLibraryName(
@@ -226,6 +243,7 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
                       expiryDate: _member.currentExpireDate ?? DateTime.now(),
                       onPendingAction: _handlePendingResolution,
                       onRefund: _handleRefund,
+                      onRenew: _handleRenew,
                     ),
 
                     SizedBox(height: 24 * scale),

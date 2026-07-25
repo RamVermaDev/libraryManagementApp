@@ -29,6 +29,7 @@ class ActionCard extends StatelessWidget {
     required this.expiryDate,
     this.onPendingAction,
     this.onRefund,
+    this.onRenew,
     this.onPause,
     this.onBlacklist,
   });
@@ -41,6 +42,7 @@ class ActionCard extends StatelessWidget {
   final DateTime expiryDate;
   final Future<void> Function(PendingResolutionResult result)? onPendingAction;
   final VoidCallback? onRefund;
+  final VoidCallback? onRenew;
   final VoidCallback? onPause;
   final VoidCallback? onBlacklist;
 
@@ -127,7 +129,7 @@ class ActionCard extends StatelessWidget {
                 label: 'Renew',
                 color: canRenew ? AppColors.purple : AppColors.grey200,
                 labelColor: canRenew ? AppColors.purple : AppColors.grey400,
-                onTap: canRenew ? () async {} : null,
+                onTap: canRenew ? onRenew : null,
               ),
             ),
 

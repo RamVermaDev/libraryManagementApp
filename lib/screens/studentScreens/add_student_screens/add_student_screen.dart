@@ -12,7 +12,7 @@ import 'package:library_management/provider/seat_availability_provider.dart';
 import 'package:library_management/screens/studentScreens/add_student_screens/additional_section.dart';
 import 'package:library_management/screens/studentScreens/add_student_screens/membership_section.dart';
 import 'package:library_management/screens/studentScreens/add_student_screens/personal_detail_section.dart';
-import 'package:library_management/screens/studentScreens/add_student_screens/student_added_dialog.dart';
+import 'package:library_management/screens/studentScreens/student_dialog_screen/student_added_dialog.dart';
 
 class AddStudentScreen extends ConsumerStatefulWidget {
   const AddStudentScreen({super.key});
@@ -86,13 +86,11 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
     _calculateExpireDate();
   }
 
-  Future<void> _addStudent() async {
+  Future<bool> _addStudent(String? photoPublicId) async {
     if (!_formKey.currentState!.validate()) {
-      return;
+      return false;
     }
 
-    // Read the CURRENT amount from the field (it may have been edited by
-    // the owner after being auto-filled) - not from any static plan data.
     final amount = double.tryParse(_amountController.text.trim()) ?? 0;
     final discount = double.tryParse(_discountController.text.trim()) ?? 0;
     final pending = double.tryParse(_pendingController.text.trim()) ?? 0;
@@ -101,43 +99,39 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
     final paidAmount = finalAmount - pending;
 
     final libraryId = ref.read(currentLibraryProvider);
-    if (libraryId == null) return;
+    if (libraryId == null) return false;
 
-    // The seat the owner picked on BookSlotAndSeat (or null if they
-    // explicitly chose to admit without one - counted as overbooking
-    // on the backend).
     final seatId = ref.read(selectedSeatIdProvider);
 
-    setState(() {
-      _isLoading = true;
-    });
+    final newStudent = await _studentController.addStudent(
+      context: context,
+      ref: ref,
+      libraryId: libraryId,
+      slotTemplateId: selectedSlot,
+      seatId: seatId,
+      name: _nameController.text.trim(),
+      phone: _phoneController.text.trim(),
+      idProof: _idController.text.trim().isEmpty
+          ? null
+          : _idController.text.trim(),
+      photoPublicId: photoPublicId,
+      currentPlanDays: _selectedPlanDays,
+      startDate: DateTime.utc(startDate.year, startDate.month, startDate.day),
+      expireDate: DateTime.utc(
+        expireDate.year,
+        expireDate.month,
+        expireDate.day,
+      ),
+      amount: amount,
+      discount: discount,
+      paidAmount: paidAmount,
+      paymentMode: paidAmount > 0 ? payementMode : null,
+      notes: _noteController.text.trim().isEmpty
+          ? null
+          : _noteController.text.trim(),
+    );
 
-    try {
-      await _studentController.addStudent(
-        context: context,
-        ref: ref,
-        libraryId: libraryId,
-        slotTemplateId: selectedSlot,
-        seatId: seatId,
-        name: _nameController.text.trim(),
-        phone: _phoneController.text.trim(),
-        idProof: _idController.text.trim().isEmpty
-            ? null
-            : _idController.text.trim(),
-        currentPlanDays: _selectedPlanDays,
-        startDate: startDate,
-        expireDate: expireDate,
-        amount: amount,
-        discount: discount,
-        paidAmount: paidAmount,
-        paymentMode: paidAmount > 0 ? payementMode : null,
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-        Navigator.popUntil(context, (route) => route.isFirst);
-      });
-    }
+    return newStudent != null;
   }
 
   void _calculateExpireDate() {
@@ -259,23 +253,44 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
                       if (!_formKey.currentState!.validate()) {
                         return;
                       }
-                      bool? confirm;
-                      try {
-                        confirm = await showDialog<bool>(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (_) => StudentAddedDialog(
-                            name: _nameController.text,
-                            phone: _phoneController.text,
-                            timming: slotAvailabilityModel.formattedTime,
-                            finalAmount: _amountController.text,
-                          ),
-                        ); // true or false
-                      } finally {
-                        print(confirm);
-                        if (confirm!) {
-                          _addStudent();
-                        }
+
+                      final seatId = ref.read(selectedSeatIdProvider);
+                      final seatName = seatId != null
+                          ? 'Assigned Seat'
+                          : 'No Seat (Overbooking)';
+
+                      final amount =
+                          double.tryParse(_amountController.text.trim()) ?? 0;
+                      final discount =
+                          double.tryParse(_discountController.text.trim()) ?? 0;
+                      final pending =
+                          double.tryParse(_pendingController.text.trim()) ?? 0;
+                      final finalAmountVal = amount - discount;
+                      final paidAmount = finalAmountVal - pending;
+
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) => StudentAddedDialog(
+                          name: _nameController.text.trim(),
+                          phone: _phoneController.text.trim(),
+                          timming: slotAvailabilityModel.formattedTime,
+                          seatName: seatName,
+                          planDays: _selectedPlanDays,
+                          expireDate: expireDate,
+                          amount: amount,
+                          discount: discount,
+                          finalAmount: finalAmountVal,
+                          pending: pending,
+                          paymentMode: paidAmount > 0 ? payementMode : null,
+                          onConfirm: (photoPublicId) =>
+                              _addStudent(photoPublicId),
+                        ),
+                      );
+
+                      if (!mounted) return;
+                      if (confirmed == true) {
+                        Navigator.popUntil(context, (route) => route.isFirst);
                       }
                     },
                     child: _isLoading
@@ -386,6 +401,7 @@ class _StudentForm extends StatelessWidget {
         SizedBox(height: _height),
 
         AdditionalSection(
+          amountController: amountController,
           discountController: discountController,
           pendingController: pendingController,
           noteController: noteController,

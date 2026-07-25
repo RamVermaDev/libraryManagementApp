@@ -195,6 +195,16 @@ class _BookSlotAndSeatState extends ConsumerState<BookSlotAndSeat> {
         ? seatConfig.columns
         : 5;
 
+    final bool noSeatAvailable =
+        !_isSeatLoading &&
+        seats.isNotEmpty &&
+        seats.every((s) => !s.isAvailable);
+
+    final bool showButton = selectedSeatId != null || noSeatAvailable;
+    final String buttonLabel = selectedSeatId != null
+        ? 'Continue to Student Details'
+        : 'Continue without seat';
+
     return Container(
       key: _seatSectionKey,
       child: Column(
@@ -240,9 +250,9 @@ class _BookSlotAndSeatState extends ConsumerState<BookSlotAndSeat> {
                 );
               },
             ),
-          if (selectedSeatId != null) ...[
+          if (showButton) ...[
             const SizedBox(height: 30),
-            _buildContinueButton(),
+            _buildContinueButton(label: buttonLabel),
             const SizedBox(height: 40),
           ],
         ],
@@ -250,7 +260,7 @@ class _BookSlotAndSeatState extends ConsumerState<BookSlotAndSeat> {
     );
   }
 
-  Widget _buildContinueButton() {
+  Widget _buildContinueButton({required String label}) {
     return SizedBox(
       key: _continueButtonKey,
       width: double.infinity,
@@ -263,8 +273,6 @@ class _BookSlotAndSeatState extends ConsumerState<BookSlotAndSeat> {
           ),
         ),
         onPressed: () {
-          // Next step: navigate to the student details form -
-          // to be wired up next.
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -274,9 +282,9 @@ class _BookSlotAndSeatState extends ConsumerState<BookSlotAndSeat> {
             ),
           );
         },
-        child: const Text(
-          'Continue to Student Details',
-          style: TextStyle(
+        child: Text(
+          label,
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
             fontSize: 15,

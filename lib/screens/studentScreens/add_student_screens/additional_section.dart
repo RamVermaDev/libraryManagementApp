@@ -6,12 +6,14 @@ import 'package:library_management/screens/taskScreen/field/title_text.dart';
 class AdditionalSection extends StatefulWidget {
   const AdditionalSection({
     super.key,
+    required this.amountController,
     required this.discountController,
     required this.pendingController,
     required this.scale,
     required this.noteController,
   });
 
+  final TextEditingController amountController;
   final TextEditingController discountController;
   final TextEditingController pendingController;
   final TextEditingController noteController;
@@ -109,6 +111,7 @@ class _AdditionalSectionState extends State<AdditionalSection>
                       SizedBox(height: 22 * scale),
 
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: Column(
@@ -133,6 +136,23 @@ class _AdditionalSectionState extends State<AdditionalSection>
                                     color: AppColors.iconMuted,
                                     size: 20 * scale,
                                   ),
+                                  validator: (value) {
+                                    if (value != null &&
+                                        value.trim().isNotEmpty) {
+                                      final val = double.tryParse(value.trim());
+                                      if (val == null) return "Invalid number";
+                                      if (val < 0) return "Cannot be negative";
+                                      final amount = double.tryParse(
+                                            widget.amountController.text
+                                                .trim(),
+                                          ) ??
+                                          0;
+                                      if (val > amount) {
+                                        return "Exceeds fee (₹${amount.toStringAsFixed(0)})";
+                                      }
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ],
                             ),
@@ -163,6 +183,34 @@ class _AdditionalSectionState extends State<AdditionalSection>
                                     color: AppColors.iconMuted,
                                     size: 20 * scale,
                                   ),
+                                  validator: (value) {
+                                    if (value != null &&
+                                        value.trim().isNotEmpty) {
+                                      final pending =
+                                          double.tryParse(value.trim());
+                                      if (pending == null) {
+                                        return "Invalid number";
+                                      }
+                                      if (pending < 0) {
+                                        return "Cannot be negative";
+                                      }
+                                      final amount = double.tryParse(
+                                            widget.amountController.text
+                                                .trim(),
+                                          ) ??
+                                          0;
+                                      final discount = double.tryParse(
+                                            widget.discountController.text
+                                                .trim(),
+                                          ) ??
+                                          0;
+                                      final finalFee = amount - discount;
+                                      if (pending > finalFee) {
+                                        return "Exceeds final fee (₹${finalFee.toStringAsFixed(0)})";
+                                      }
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ],
                             ),

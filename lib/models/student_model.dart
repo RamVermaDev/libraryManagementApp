@@ -13,7 +13,15 @@ class StudentModel {
   final String phone;
   final String? gender;
   final String? idProof;
+  final String? photoPublicId;
   final String? profileImage;
+
+  // Status & Metadata
+  final String status;
+  final String? pauseReason;
+  final DateTime? pausedAt;
+  final String? blacklistReason;
+  final DateTime? blacklistedAt;
 
   // Membership summary
   final DateTime? joiningDate;
@@ -43,7 +51,13 @@ class StudentModel {
     required this.phone,
     this.gender,
     this.idProof,
+    this.photoPublicId,
     this.profileImage,
+    this.status = 'active',
+    this.pauseReason,
+    this.pausedAt,
+    this.blacklistReason,
+    this.blacklistedAt,
     this.joiningDate,
     this.currentPlanDays,
     this.currentStartDate,
@@ -55,16 +69,12 @@ class StudentModel {
     this.notes,
     this.createdAt,
     this.updatedAt,
-    
   });
 
   factory StudentModel.fromMap(Map<String, dynamic> map) {
     return StudentModel(
       id: map['_id']?.toString() ?? map['id']?.toString(),
 
-      // libraryId/slotTemplateId/seatId can each arrive either as a plain
-      // ObjectId string OR as a populated object (if the backend ever does
-      // .populate() on these refs) - _parseRefId handles both shapes.
       libraryId: _parseRefId(map['libraryId']) ?? '',
       slotTemplateId: _parseRefId(map['slotTemplateId']) ?? '',
       seatId: _parseRefId(map['seatId']),
@@ -73,7 +83,14 @@ class StudentModel {
       phone: map['phone']?.toString() ?? '',
       gender: map['gender']?.toString(),
       idProof: map['idProof']?.toString(),
+      photoPublicId: map['photoPublicId']?.toString(),
       profileImage: map['profileImage']?.toString(),
+
+      status: map['status']?.toString() ?? 'active',
+      pauseReason: map['pauseReason']?.toString(),
+      pausedAt: _parseDate(map['pausedAt']),
+      blacklistReason: map['blacklistReason']?.toString(),
+      blacklistedAt: _parseDate(map['blacklistedAt']),
 
       joiningDate: _parseDate(map['joiningDate']),
 
@@ -94,12 +111,6 @@ class StudentModel {
     );
   }
 
-  /// Shape matching the Student schema itself - use this for displaying/
-  /// editing an existing student record. NOTE: this is NOT the same shape
-  /// the /addstudent endpoint expects (that request also carries
-  /// startDate/expireDate/amount/discount/paidAmount/paymentMode, which
-  /// belong to FeeRecord/Payment, not Student) - build that as a separate
-  /// request payload when we get to the controller.
   Map<String, dynamic> toMap() {
     return {
       'libraryId': libraryId,
@@ -109,7 +120,13 @@ class StudentModel {
       'phone': phone,
       'gender': gender,
       'idProof': idProof,
+      'photoPublicId': photoPublicId,
       'profileImage': profileImage,
+      'status': status,
+      'pauseReason': pauseReason,
+      'pausedAt': pausedAt?.toIso8601String(),
+      'blacklistReason': blacklistReason,
+      'blacklistedAt': blacklistedAt?.toIso8601String(),
       'joiningDate': joiningDate?.toIso8601String(),
       'currentPlanDays': currentPlanDays,
       'currentStartDate': currentStartDate?.toIso8601String(),
@@ -137,7 +154,13 @@ class StudentModel {
     String? phone,
     String? gender,
     String? idProof,
+    String? photoPublicId,
     String? profileImage,
+    String? status,
+    String? pauseReason,
+    DateTime? pausedAt,
+    String? blacklistReason,
+    DateTime? blacklistedAt,
     DateTime? joiningDate,
     int? currentPlanDays,
     DateTime? currentStartDate,
@@ -159,7 +182,13 @@ class StudentModel {
       phone: phone ?? this.phone,
       gender: gender ?? this.gender,
       idProof: idProof ?? this.idProof,
+      photoPublicId: photoPublicId ?? this.photoPublicId,
       profileImage: profileImage ?? this.profileImage,
+      status: status ?? this.status,
+      pauseReason: pauseReason ?? this.pauseReason,
+      pausedAt: pausedAt ?? this.pausedAt,
+      blacklistReason: blacklistReason ?? this.blacklistReason,
+      blacklistedAt: blacklistedAt ?? this.blacklistedAt,
       joiningDate: joiningDate ?? this.joiningDate,
       currentPlanDays: currentPlanDays ?? this.currentPlanDays,
       currentStartDate: currentStartDate ?? this.currentStartDate,

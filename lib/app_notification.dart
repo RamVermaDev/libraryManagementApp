@@ -10,7 +10,10 @@ class AppNotification {
     bool isSuccess = true,
     Duration duration = const Duration(seconds: 3),
   }) {
-    _currentOverlay?.remove();
+    if (_currentOverlay != null && _currentOverlay!.mounted) {
+      _currentOverlay!.remove();
+    }
+    _currentOverlay = null;
 
     final overlay = Overlay.of(context);
 
@@ -78,7 +81,9 @@ class AppNotification {
     overlay.insert(overlayEntry);
 
     Timer(duration, () {
-      overlayEntry.remove();
+      if (overlayEntry.mounted) {
+        overlayEntry.remove();
+      }
 
       if (_currentOverlay == overlayEntry) {
         _currentOverlay = null;

@@ -15,7 +15,7 @@ import 'package:library_management/screens/studentScreens/memberScrolable/member
 import 'package:library_management/services/manage_http_response.dart';
 
 class StudentController {
-  Future<void> addStudent({
+  Future<StudentModel?> addStudent({
     required BuildContext context,
     required WidgetRef ref,
     required String libraryId,
@@ -24,6 +24,7 @@ class StudentController {
     required String name,
     required String phone,
     String? idProof,
+    String? photoPublicId,
     required int currentPlanDays,
     required DateTime startDate,
     required DateTime expireDate,
@@ -38,7 +39,7 @@ class StudentController {
 
       if (token == null || token.isEmpty) {
         showSnackBar(context, 'Authentication required');
-        return;
+        return null;
       }
 
       final response = await http.post(
@@ -54,6 +55,7 @@ class StudentController {
           'name': name,
           'phone': phone,
           'idProof': idProof,
+          'photoPublicId': photoPublicId,
           'currentPlanDays': currentPlanDays,
           'startDate': startDate.toIso8601String(),
           'expireDate': expireDate.toIso8601String(),
@@ -65,35 +67,33 @@ class StudentController {
         }),
       );
 
-      if (!context.mounted) return;
+      if (!context.mounted) return null;
 
-      manageHttpResponse(
-        response: response,
-        context: context,
-        onSuccess: () {
-          final Map<String, dynamic> responseData = jsonDecode(response.body);
-          final data = responseData['data'] as Map<String, dynamic>;
-          final newStudent = StudentModel.fromMap(
-            data['student'] as Map<String, dynamic>,
-          );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        showSnackBar(context, getMessageFromResponse(response));
+        return null;
+      }
 
-          ref.read(studentProvider.notifier).addStudent(newStudent);
-          ref.read(studentProvider.notifier).addActiveStudent(newStudent);
-          ref.read(studentSummaryProvider.notifier).addActiveStudent();
-
-          final paymentData = data['payment'];
-          if (paymentData != null) {
-            final payment = PaymentModel.fromMap(
-              paymentData as Map<String, dynamic>,
-            );
-            ref.read(revenueProvider.notifier).addPayment(payment);
-          }
-
-          Navigator.pop(context);
-
-          AppNotification.show(context, message: 'Student added successfully');
-        },
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      final data = responseData['data'] as Map<String, dynamic>;
+      final newStudent = StudentModel.fromMap(
+        data['student'] as Map<String, dynamic>,
       );
+
+      ref.read(studentProvider.notifier).addStudent(newStudent);
+      ref.read(studentProvider.notifier).addActiveStudent(newStudent);
+      ref.read(studentSummaryProvider.notifier).onStudentAdded(newStudent);
+
+      final paymentData = data['payment'];
+      if (paymentData != null) {
+        final payment = PaymentModel.fromMap(
+          paymentData as Map<String, dynamic>,
+        );
+        ref.read(revenueProvider.notifier).addPayment(payment);
+      }
+
+      AppNotification.show(context, message: 'Student added successfully');
+      return newStudent;
     } catch (e, stackTrace) {
       debugPrint('Add Student Error: $e');
       debugPrintStack(stackTrace: stackTrace);
@@ -101,6 +101,7 @@ class StudentController {
       if (context.mounted) {
         showSnackBar(context, 'Unable to add student');
       }
+      return null;
     }
   }
 
@@ -282,7 +283,8 @@ class StudentController {
 
       AppNotification.show(
         context,
-        message: responseData['message']?.toString() ??
+        message:
+            responseData['message']?.toString() ??
             'Pending balance updated successfully',
       );
 
@@ -336,8 +338,7 @@ class StudentController {
         return null;
       }
 
-      final responseData =
-          jsonDecode(response.body) as Map<String, dynamic>;
+      final responseData = jsonDecode(response.body) as Map<String, dynamic>;
       final data = responseData['data'] as Map<String, dynamic>;
 
       final updatedStudent = StudentModel.fromMap(
@@ -362,7 +363,8 @@ class StudentController {
       AppNotification.show(
         context,
         message:
-            responseData['message']?.toString() ?? 'Refund processed successfully',
+            responseData['message']?.toString() ??
+            'Refund processed successfully',
       );
 
       return updatedStudent;
@@ -378,9 +380,103 @@ class StudentController {
     }
   }
 
+  Future<StudentModel?> renewStudent({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String libraryId,
+    required String studentId,
+    required StudentModel oldStudent,
+    required String slotTemplateId,
+    String? seatId,
+    required int currentPlanDays,
+    required DateTime startDate,
+    required DateTime expireDate,
+    required double amount,
+    double discount = 0,
+    double paidAmount = 0,
+    String? paymentMode,
+    String? notes,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+
+      if (token == null || token.isEmpty) {
+        showSnackBar(context, 'Authentication required');
+        return null;
+      }
+
+      final response = await http.patch(
+        Uri.parse('$uri/api/$libraryId/students/$studentId/renew'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'slotTemplateId': slotTemplateId,
+          'seatId': seatId,
+          'currentPlanDays': currentPlanDays,
+          'startDate': startDate.toIso8601String(),
+          'expireDate': expireDate.toIso8601String(),
+          'amount': amount,
+          'discount': discount,
+          'paidAmount': paidAmount,
+          'paymentMode': paymentMode,
+          'notes': notes,
+        }),
+      );
+
+      if (!context.mounted) return null;
+
+      if (response.statusCode != 200) {
+        showSnackBar(context, getMessageFromResponse(response));
+        return null;
+      }
+
+      final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = responseData['data'] as Map<String, dynamic>;
+
+      final updatedStudent = StudentModel.fromMap(
+        data['student'] as Map<String, dynamic>,
+      );
+
+      // Smart update student in RAM lists (all, active, expiring, expired)
+      ref.read(studentProvider.notifier).renewStudent(updatedStudent);
+
+      // Smart update dashboard counts (active, expiring 1-3/4-6/7-10, expired 1-3/4-6/7-10)
+      ref
+          .read(studentSummaryProvider.notifier)
+          .onStudentRenewed(oldStudent: oldStudent, newStudent: updatedStudent);
+
+      // Record the new payment in revenue provider
+      final paymentData = data['payment'];
+      if (paymentData != null) {
+        final payment = PaymentModel.fromMap(
+          paymentData as Map<String, dynamic>,
+        );
+        ref.read(revenueProvider.notifier).addPayment(payment);
+      }
+
+      AppNotification.show(
+        context,
+        message:
+            responseData['message']?.toString() ??
+            'Admission renewed successfully',
+      );
+
+      return updatedStudent;
+    } catch (e, stackTrace) {
+      debugPrint('Renew Student Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (context.mounted) {
+        showSnackBar(context, 'Unable to renew admission');
+      }
+
+      return null;
+    }
+  }
+
   String _getEndpoint({
-
-
     required String libraryId,
     required MemberStatus status,
   }) {

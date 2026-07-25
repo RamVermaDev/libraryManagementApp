@@ -110,7 +110,7 @@ class PersonalDetailsSection extends StatelessWidget {
             controller: phoneController,
             hintText: "e.g. 9999999999",
             keyboardType: TextInputType.phone,
-            textInputAction: TextInputAction.next,
+            textInputAction: TextInputAction.done,
             maxLength: 10,
             fillColor: AppColors.background,
             suffixIcon: Icon(

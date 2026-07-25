@@ -5,6 +5,8 @@ abstract final class AppColors {
   // BRAND
   // ==========================================================
 
+  static const Color textPrimary = Color(0xFF536FE7);
+
   static const Color primary = Color(0xFF536FE7);
   static const Color primarySoft = Color(0xFFEEF2FF);
 

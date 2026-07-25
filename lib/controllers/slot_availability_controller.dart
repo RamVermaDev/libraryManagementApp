@@ -19,12 +19,13 @@ class SlotAvailabilityController {
     required String libraryId,
     DateTime? date,
   }) async {
+    final DateTime targetDate = date ?? DateTime.now();
     try {
       final Uri url = Uri.parse('$uri/api/$libraryId/slots/availability')
           .replace(
-            queryParameters: date != null
-                ? {'date': _formatDateForApi(date)}
-                : null,
+            queryParameters: {
+              'date': _formatDateForApi(targetDate),
+            },
           );
 
       final response = await http.get(

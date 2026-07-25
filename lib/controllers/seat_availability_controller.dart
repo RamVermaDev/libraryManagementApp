@@ -18,11 +18,12 @@ class SeatAvailabilityController {
     required String slotTemplateId,
     DateTime? date,
   }) async {
+    final DateTime targetDate = date ?? DateTime.now();
     try {
       final Uri url = Uri.parse('$uri/api/$libraryId/seat-map').replace(
         queryParameters: {
           'slotTemplateId': slotTemplateId,
-          if (date != null) 'date': _formatDateForApi(date),
+          'date': _formatDateForApi(targetDate),
         },
       );
 

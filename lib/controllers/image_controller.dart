@@ -153,4 +153,40 @@ class ImageController {
       return null;
     }
   }
+
+  Future<bool> deleteImage({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String publicId,
+  }) async {
+    try {
+      debugPrint('Deleting Cloudinary image with publicId: $publicId');
+      final token = ref.read(tokenProvider);
+
+      if (token == null || token.isEmpty) {
+        debugPrint('DELETE IMAGE FAILED: No auth token');
+        return false;
+      }
+
+      final response = await http.delete(
+        Uri.parse('$uri/api/upload/image'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'publicId': publicId,
+        }),
+      );
+
+      debugPrint('DELETE IMAGE RESPONSE: ${response.statusCode} - ${response.body}');
+      return response.statusCode == 200;
+    } catch (e, stackTrace) {
+      debugPrint('DELETE IMAGE ERROR: $e');
+      debugPrintStack(stackTrace: stackTrace);
+      return false;
+    }
+  }
+
 }
+
