@@ -2,27 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:library_management/services/external_app_service.dart';
 
 class MemberActions extends StatelessWidget {
-  const MemberActions({super.key, required this.number, required this.message});
+  const MemberActions({
+    super.key,
+    required this.number,
+    required this.message,
+  });
 
   final String number;
   final String message;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _ActionIcon(
-          assetPath: 'assets/icons/call.png',
+        // Call Button
+        _ActionButton(
+          icon: Icons.phone_rounded,
+          backgroundColor: const Color(0xFFEFF6FF),
+          iconColor: const Color(0xFF1D4ED8),
           onTap: () async {
             await ExternalAppService.makePhoneCall(number);
           },
         ),
 
-        const SizedBox(height: 4),
+        const SizedBox(width: 8),
 
-        _ActionIcon(
+        // SMS Message Button
+        _ActionButton(
+          icon: Icons.chat_bubble_outline_rounded,
+          backgroundColor: const Color(0xFFEFF6FF),
+          iconColor: const Color(0xFF1D4ED8),
+          onTap: () async {
+            await ExternalAppService.sendSms(
+              phoneNumber: number,
+              message: message,
+            );
+          },
+        ),
+
+        const SizedBox(width: 8),
+
+        // WhatsApp Button
+        _ActionButton(
           assetPath: 'assets/icons/whatsapp.png',
+          icon: Icons.message_rounded,
+          backgroundColor: const Color(0xFFE8F5E9),
+          iconColor: const Color(0xFF2E7D32),
           onTap: () async {
             await ExternalAppService.openWhatsApp(
               phoneNumber: number,
@@ -35,26 +61,50 @@ class MemberActions extends StatelessWidget {
   }
 }
 
-class _ActionIcon extends StatelessWidget {
-  const _ActionIcon({required this.assetPath, required this.onTap});
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.backgroundColor,
+    required this.iconColor,
+    required this.onTap,
+    this.icon,
+    this.assetPath,
+  });
 
-  final String assetPath;
+  final Color backgroundColor;
+  final Color iconColor;
   final VoidCallback onTap;
+  final IconData? icon;
+  final String? assetPath;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: SizedBox(
-        width: 42,
-        height: 42,
-        child: Center(
-          child: Image.asset(
-            assetPath,
-            width: 25,
-            height: 25,
-            color: const Color(0xFF7D8796),
+    return Material(
+      color: backgroundColor,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: SizedBox(
+          width: 38,
+          height: 38,
+          child: Center(
+            child: assetPath != null
+                ? Image.asset(
+                    assetPath!,
+                    width: 20,
+                    height: 20,
+                    color: iconColor,
+                    errorBuilder: (_, __, ___) => Icon(
+                      icon ?? Icons.message_rounded,
+                      size: 19,
+                      color: iconColor,
+                    ),
+                  )
+                : Icon(
+                    icon,
+                    size: 19,
+                    color: iconColor,
+                  ),
           ),
         ),
       ),

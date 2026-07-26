@@ -66,8 +66,46 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       final libraries = userLib['libraries'] as List<dynamic>;
 
       if (libraries.isNotEmpty) {
-        final String currentLibraryId = libraries.first.toString();
-        ref.read(currentLibraryProvider.notifier).setLibrary(currentLibraryId);
+        final savedLibraryId = await LocalStorage.getCurrentLibrary();
+        final savedLibraryName = await LocalStorage.getCurrentLibraryName();
+
+        String? activeId;
+        String? activeName;
+
+        for (final item in libraries) {
+          if (item is Map<String, dynamic>) {
+            final id = item['_id']?.toString() ?? item['id']?.toString();
+            final name = item['libraryName']?.toString();
+            if (id != null) {
+              if (savedLibraryId != null && id == savedLibraryId) {
+                activeId = id;
+                activeName = name;
+                break;
+              }
+              if (activeId == null) {
+                activeId = id;
+                activeName = name;
+              }
+            }
+          } else {
+            final id = item.toString();
+            if (savedLibraryId != null && id == savedLibraryId) {
+              activeId = id;
+              activeName = savedLibraryName;
+              break;
+            }
+            if (activeId == null) {
+              activeId = id;
+              activeName = savedLibraryName;
+            }
+          }
+        }
+
+        if (activeId != null) {
+          ref.read(currentLibraryProvider.notifier).setLibrary(activeId);
+          ref.read(currentLibraryNameProvider.notifier).setLibraryName(activeName);
+          await LocalStorage.saveCurrentLibrary(libraryId: activeId, libraryName: activeName);
+        }
       }
 
       await LocalStorage.saveLogin(token: token, userJson: userJson);

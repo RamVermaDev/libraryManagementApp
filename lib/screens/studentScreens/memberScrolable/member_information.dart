@@ -1,19 +1,95 @@
 import 'package:flutter/material.dart';
-import 'package:library_management/app_colors.dart';
 
 class MemberInformation extends StatelessWidget {
   const MemberInformation({
     super.key,
-    required this.memberName,
-    required this.expireDate,
     required this.plan,
-    required this.statusColor,
+    required this.expireDate,
+    this.slotTiming,
+    this.seatNumber,
   });
 
-  final String memberName;
-  final DateTime? expireDate;
   final String plan;
-  final Color statusColor;
+  final DateTime? expireDate;
+  final String? slotTiming;
+  final String? seatNumber;
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'N/A';
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final formattedExpire = _formatDate(expireDate);
+    final timingText = (slotTiming != null && slotTiming!.trim().isNotEmpty)
+        ? slotTiming!.trim()
+        : 'Not Set';
+    final seatText = (seatNumber != null && seatNumber!.trim().isNotEmpty)
+        ? seatNumber!.trim()
+        : 'Unassigned';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Row 1: Plan & Expires
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _InfoCell(
+                label: 'Plan',
+                value: plan,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _InfoCell(
+                label: 'Expires',
+                value: formattedExpire,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 12),
+
+        // Row 2: Timing & Seat
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _InfoCell(
+                label: 'Timing',
+                value: timingText,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _InfoCell(
+                label: 'Seat',
+                value: seatText,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoCell extends StatelessWidget {
+  const _InfoCell({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
@@ -21,80 +97,26 @@ class MemberInformation extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Member name
         Text(
-          memberName,
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF94A3B8), // Muted grey caption
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-            color: AppColors.heading,
-            fontSize: 17,
+            fontSize: 14,
             fontWeight: FontWeight.w700,
-          ),
-        ),
-
-        const SizedBox(height: 4),
-
-        // Expiry date
-        Text(
-          'Expire on : ${_formatDate(expireDate)}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            //color: AppColors.body,
-            color: statusColor,
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-
-        const SizedBox(height: 2),
-
-        // Member plan
-        Text(
-          'Plan : $plan',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: AppColors.body,
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-
-        //WILL TKE FOR BACKEND
-        Text(
-          'Timming : 6AM - 12PM',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: AppColors.body,
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
+            color: Color(0xFF1E293B), // Dark heading value
           ),
         ),
       ],
     );
-  }
-
-  String _formatDate(DateTime? date) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    final day = date?.day.toString().padLeft(2, '0');
-
-    return '$day ${months[date!.month - 1]} ${date.year}';
   }
 }

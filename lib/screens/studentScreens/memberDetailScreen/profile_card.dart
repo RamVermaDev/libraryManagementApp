@@ -12,6 +12,8 @@ class ProfileCard extends StatefulWidget {
     required this.phone,
     required this.id,
     required this.number,
+    this.status = 'active',
+    this.expireDate,
     this.imageUrl,
     this.onSave,
     this.onChangePhoto,
@@ -23,6 +25,8 @@ class ProfileCard extends StatefulWidget {
   final String phone;
   final String? id;
   final int number;
+  final String status;
+  final DateTime? expireDate;
   final String? imageUrl;
   final bool isUploadingPhoto;
 
@@ -165,9 +169,69 @@ class _ProfileCardState extends State<ProfileCard> {
     );
   }
 
+  Widget _buildStatusBadge(double scale) {
+    final String rawStatus = widget.status.toLowerCase();
+    final bool isExpired =
+        widget.expireDate != null &&
+        widget.expireDate!.isBefore(DateTime.now());
+
+    Color bg;
+    Color textColor;
+    String label;
+
+    if (rawStatus == 'paused') {
+      bg = const Color(0xFFFFF8E1);
+      textColor = const Color(0xFFF57F17);
+      label = 'Paused';
+    } else if (rawStatus == 'blacklisted') {
+      bg = const Color(0xFFFFEBEE);
+      textColor = const Color(0xFFD32F2F);
+      label = 'Blacklisted';
+    } else if (isExpired || rawStatus == 'expired') {
+      bg = const Color(0xFFFFEBEE);
+      textColor = const Color(0xFFC62828);
+      label = 'Expired';
+    } else {
+      bg = const Color(0xFFE8F5E9);
+      textColor = const Color(0xFF2E7D32);
+      label = 'Active';
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: 10 * scale,
+        vertical: 4 * scale,
+      ),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12 * scale),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 7 * scale,
+            height: 7 * scale,
+            decoration: BoxDecoration(color: textColor, shape: BoxShape.circle),
+          ),
+          SizedBox(width: 6 * scale),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12 * scale,
+              fontWeight: FontWeight.w700,
+              color: textColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final scale = widget.scale;
+    final bool isBlacklisted = widget.status.toLowerCase() == 'blacklisted';
 
     return Container(
       width: double.infinity,
@@ -177,13 +241,35 @@ class _ProfileCardState extends State<ProfileCard> {
         16 * scale,
         32 * scale,
       ),
-      decoration: cardDecoration(radius: 20 * scale),
+      decoration: isBlacklisted
+          ? BoxDecoration(
+              color: const Color(0xFFFFF5F5),
+              borderRadius: BorderRadius.circular(20 * scale),
+              border: Border.all(color: const Color(0xFFFFCDD2), width: 1.5),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x1ADB0000),
+                  blurRadius: 24,
+                  offset: Offset(0, 7),
+                ),
+              ],
+            )
+          : cardDecoration(radius: 20 * scale),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: 4 * scale),
-          if (!_isEditing) _buildEditButton(scale),
-          if (_isEditing) ...[_buildEditActions(scale)],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildStatusBadge(scale),
+              if (!_isEditing)
+                _buildEditButton(scale)
+              else ...[
+                _buildEditActions(scale),
+              ],
+            ],
+          ),
           SizedBox(height: 12 * scale),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,

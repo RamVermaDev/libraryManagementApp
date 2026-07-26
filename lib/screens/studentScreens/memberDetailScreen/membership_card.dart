@@ -9,17 +9,18 @@ class MembershipCard extends StatelessWidget {
     required this.joinDate,
     required this.expireDate,
     required this.planDuration,
-    required this.slotId,
+    this.slot,
   });
 
   final double scale;
   final String joinDate;
   final String expireDate;
-  final String slotId;
+  final String? slot;
   final String planDuration;
 
   @override
   Widget build(BuildContext context) {
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(
@@ -56,16 +57,7 @@ class MembershipCard extends StatelessWidget {
             scale: scale,
             iconString: 'slot',
             label: 'Slot',
-            value: slotId,
-          ),
-
-          SizedBox(height: 20 * scale),
-
-          MembershipRow(
-            scale: scale,
-            iconString: 'timming',
-            label: 'Timming',
-            value: slotId,
+            value: slot,
           ),
 
           SizedBox(height: 20 * scale),

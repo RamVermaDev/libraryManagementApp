@@ -67,9 +67,15 @@ class LibraryController {
           ref
               .read(currentLibraryProvider.notifier)
               .setLibrary(createdLibrary.id);
+          ref
+              .read(currentLibraryNameProvider.notifier)
+              .setLibraryName(createdLibrary.libraryName);
           if (createdLibrary.id != null) {
             unawaited(
-              LocalStorage.saveCurrentLibrary(libraryId: createdLibrary.id!),
+              LocalStorage.saveCurrentLibrary(
+                libraryId: createdLibrary.id!,
+                libraryName: createdLibrary.libraryName,
+              ),
             );
           }
           Navigator.pop(context, true);
@@ -142,6 +148,20 @@ class LibraryController {
           );
 
           ref.read(libraryProvider.notifier).updateLibrary(updatedLibrary);
+          final currentId = ref.read(currentLibraryProvider);
+          if (currentId == updatedLibrary.id) {
+            ref
+                .read(currentLibraryNameProvider.notifier)
+                .setLibraryName(updatedLibrary.libraryName);
+            if (updatedLibrary.id != null) {
+              unawaited(
+                LocalStorage.saveCurrentLibrary(
+                  libraryId: updatedLibrary.id!,
+                  libraryName: updatedLibrary.libraryName,
+                ),
+              );
+            }
+          }
           Navigator.pop(context, true);
 
           AppNotification.show(context, message: 'Library Updated');
@@ -189,6 +209,35 @@ class LibraryController {
             .toList();
 
         ref.read(libraryProvider.notifier).setLibraries(libraries);
+
+        if (libraries.isNotEmpty) {
+          final currentId = ref.read(currentLibraryProvider);
+          final savedId = await LocalStorage.getCurrentLibrary();
+
+          final activeId = currentId ?? savedId;
+
+          LibraryModel? matchingLibrary;
+          if (activeId != null) {
+            matchingLibrary =
+                libraries.where((l) => l.id == activeId).firstOrNull;
+          }
+
+          matchingLibrary ??= libraries.first;
+
+          ref
+              .read(currentLibraryProvider.notifier)
+              .setLibrary(matchingLibrary.id);
+          ref
+              .read(currentLibraryNameProvider.notifier)
+              .setLibraryName(matchingLibrary.libraryName);
+
+          if (matchingLibrary.id != null) {
+            await LocalStorage.saveCurrentLibrary(
+              libraryId: matchingLibrary.id!,
+              libraryName: matchingLibrary.libraryName,
+            );
+          }
+        }
         return;
       }
 

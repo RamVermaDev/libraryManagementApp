@@ -16,11 +16,7 @@ import 'package:library_management/screens/studentScreens/renewAdmission/renew_s
 import 'package:library_management/screens/studentScreens/renewAdmission/renew_step2_membership_details.dart';
 
 class RenewAdmissionScreen extends ConsumerStatefulWidget {
-  const RenewAdmissionScreen({
-    super.key,
-    required this.member,
-    this.onRenewed,
-  });
+  const RenewAdmissionScreen({super.key, required this.member, this.onRenewed});
 
   final StudentModel member;
   final void Function(StudentModel updatedStudent)? onRenewed;
@@ -155,13 +151,14 @@ class _RenewAdmissionScreenState extends ConsumerState<RenewAdmissionScreen> {
     });
   }
 
-  double _roundUpToNext50(double amount) =>
-      (amount / 50).ceil() * 50.0;
+  double _roundUpToNext50(double amount) => (amount / 50).ceil() * 50.0;
 
   void _autoFillAmount() {
     final slot = _selectedSlotModel;
     if (slot == null) return;
-    final amount = _roundUpToNext50((slot.monthlyPrice / 30) * _selectedPlanDays);
+    final amount = _roundUpToNext50(
+      (slot.monthlyPrice / 30) * _selectedPlanDays,
+    );
     _amountController.text = amount.toStringAsFixed(0);
   }
 
@@ -197,7 +194,9 @@ class _RenewAdmissionScreenState extends ConsumerState<RenewAdmissionScreen> {
     if (!mounted) return;
 
     final slots = ref.read(slotAvailabilityProvider);
-    final oldSlotList = slots.where((s) => s.slotTemplateId == widget.member.slotTemplateId);
+    final oldSlotList = slots.where(
+      (s) => s.slotTemplateId == widget.member.slotTemplateId,
+    );
     if (oldSlotList.isNotEmpty) {
       final oldSlot = oldSlotList.first;
       _previousSlotDisplay = '${oldSlot.name} (${oldSlot.formattedTime})';
@@ -220,7 +219,8 @@ class _RenewAdmissionScreenState extends ConsumerState<RenewAdmissionScreen> {
     SlotAvailabilityModel slot, {
     bool isPreselect = false,
   }) async {
-    final initialSeat = (isPreselect && slot.slotTemplateId == widget.member.slotTemplateId)
+    final initialSeat =
+        (isPreselect && slot.slotTemplateId == widget.member.slotTemplateId)
         ? widget.member.seatId
         : null;
 
@@ -262,7 +262,8 @@ class _RenewAdmissionScreenState extends ConsumerState<RenewAdmissionScreen> {
         _previousSeatDisplay = 'Seat ${oldSeat.displayLabel}';
 
         // Pre-select old seat ONLY if free in this slot OR if same slot & occupied by this student!
-        if (oldSeat.isAvailable || (isSameSlot && oldSeat.seatId == widget.member.seatId)) {
+        if (oldSeat.isAvailable ||
+            (isSameSlot && oldSeat.seatId == widget.member.seatId)) {
           ref.read(selectedSeatIdProvider.notifier).state = oldSeatId;
           setState(() {
             _selectedSeatId = oldSeatId;
@@ -290,8 +291,9 @@ class _RenewAdmissionScreenState extends ConsumerState<RenewAdmissionScreen> {
     if (!seat.isAvailable && seat.seatId != widget.member.seatId) return;
     final current = ref.read(selectedSeatIdProvider);
     final isDeselecting = current == seat.seatId;
-    ref.read(selectedSeatIdProvider.notifier).state =
-        isDeselecting ? null : seat.seatId;
+    ref.read(selectedSeatIdProvider.notifier).state = isDeselecting
+        ? null
+        : seat.seatId;
     setState(() {
       _selectedSeatId = isDeselecting ? null : seat.seatId;
       _seatTakenWarning = false;
@@ -303,9 +305,9 @@ class _RenewAdmissionScreenState extends ConsumerState<RenewAdmissionScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedSlotId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a slot')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a slot')));
       return;
     }
 
@@ -317,12 +319,28 @@ class _RenewAdmissionScreenState extends ConsumerState<RenewAdmissionScreen> {
 
     // Show confirmation dialog before submitting renewal
     final slotDisplay = _selectedSlotModel?.formattedTime ?? 'Selected Slot';
+    final seats = ref.read(seatAvailabilityProvider);
+    final selectedSeatModel = _selectedSeatId != null
+        ? seats.where((s) => s.seatId == _selectedSeatId).firstOrNull
+        : null;
+    final seatDisplay = _selectedSeatId != null
+        ? (selectedSeatModel != null
+              ? selectedSeatModel.displayLabel
+              : 'Seat Selected')
+        : 'No Seat (Overbooking)';
+
     final bool? confirm = await RenewConfirmDialog.show(
       context,
       member: widget.member,
       slotDisplay: slotDisplay,
-      amountText: _amountController.text,
+      seatDisplay: seatDisplay,
       planDays: _selectedPlanDays,
+      startDate: _startDate,
+      expireDate: _expireDate,
+      amountText: _amountController.text,
+      discountText: _discountController.text,
+      paidAmountText: paidAmount.toStringAsFixed(0),
+      pendingText: _pendingController.text,
     );
 
     if (confirm != true || !mounted) return;
@@ -342,8 +360,16 @@ class _RenewAdmissionScreenState extends ConsumerState<RenewAdmissionScreen> {
         slotTemplateId: _selectedSlotId!,
         seatId: _selectedSeatId,
         currentPlanDays: _selectedPlanDays,
-        startDate: DateTime.utc(_startDate.year, _startDate.month, _startDate.day),
-        expireDate: DateTime.utc(_expireDate.year, _expireDate.month, _expireDate.day),
+        startDate: DateTime.utc(
+          _startDate.year,
+          _startDate.month,
+          _startDate.day,
+        ),
+        expireDate: DateTime.utc(
+          _expireDate.year,
+          _expireDate.month,
+          _expireDate.day,
+        ),
         amount: amount,
         discount: discount,
         paidAmount: paidAmount,
@@ -444,16 +470,16 @@ class _RenewAdmissionScreenState extends ConsumerState<RenewAdmissionScreen> {
                   setState(() {
                     _selectedPlan = value;
                     _selectedPlanDays = _planDays[value]!;
-                    _planDurationController.text =
-                        _selectedPlanDays.toString();
+                    _planDurationController.text = _selectedPlanDays.toString();
                     _calculateExpireDate();
                     _autoFillAmount();
                   });
                 },
                 onPlanValueChanged: (value) {
                   setState(() {
-                    _selectedPlanDays =
-                        value.isEmpty ? 0 : (int.tryParse(value) ?? 0);
+                    _selectedPlanDays = value.isEmpty
+                        ? 0
+                        : (int.tryParse(value) ?? 0);
                     _calculateExpireDate();
                     _autoFillAmount();
                   });
@@ -468,8 +494,7 @@ class _RenewAdmissionScreenState extends ConsumerState<RenewAdmissionScreen> {
                   setState(() {
                     _expireDate = value;
                     _calculateSelectedPlanDays();
-                    _planDurationController.text =
-                        _selectedPlanDays.toString();
+                    _planDurationController.text = _selectedPlanDays.toString();
                     _autoFillAmount();
                   });
                 },

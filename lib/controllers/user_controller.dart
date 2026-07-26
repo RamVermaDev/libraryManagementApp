@@ -115,13 +115,31 @@ class UserController {
           //saving data to local storage
           await LocalStorage.saveLogin(token: token, userJson: userJson);
 
-          //saving current library id there
+          //saving current library id and name
           if (libraries.isNotEmpty) {
-            final String currentLibraryId = libraries.first.toString();
-            await LocalStorage.saveCurrentLibrary(libraryId: currentLibraryId);
-            ref
-                .read(currentLibraryProvider.notifier)
-                .setLibrary(currentLibraryId);
+            final firstLib = libraries.first;
+            String? currentLibraryId;
+            String? currentLibraryName;
+
+            if (firstLib is Map<String, dynamic>) {
+              currentLibraryId = firstLib['_id']?.toString() ?? firstLib['id']?.toString();
+              currentLibraryName = firstLib['libraryName']?.toString();
+            } else {
+              currentLibraryId = firstLib.toString();
+            }
+
+            if (currentLibraryId != null) {
+              await LocalStorage.saveCurrentLibrary(
+                libraryId: currentLibraryId,
+                libraryName: currentLibraryName,
+              );
+              ref
+                  .read(currentLibraryProvider.notifier)
+                  .setLibrary(currentLibraryId);
+              ref
+                  .read(currentLibraryNameProvider.notifier)
+                  .setLibraryName(currentLibraryName);
+            }
           }
 
           //update riverpod

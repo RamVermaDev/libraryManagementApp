@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/models/student_model.dart';
 
@@ -23,15 +24,16 @@ class RefundResult {
 // Public entry point
 // ─────────────────────────────────────────────────────────────────────────────
 
-Future<RefundResult?> showRefundBottomSheet({
+Future<StudentModel?> showRefundBottomSheet({
   required BuildContext context,
   required StudentModel member,
+  required Future<StudentModel?> Function(RefundResult result) onRefund,
 }) {
-  return showModalBottomSheet<RefundResult>(
+  return showModalBottomSheet<StudentModel>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (_) => _RefundSheet(member: member),
+    builder: (_) => _RefundSheet(member: member, onRefund: onRefund),
   );
 }
 
@@ -40,8 +42,9 @@ Future<RefundResult?> showRefundBottomSheet({
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _RefundSheet extends StatefulWidget {
-  const _RefundSheet({required this.member});
+  const _RefundSheet({required this.member, required this.onRefund});
   final StudentModel member;
+  final Future<StudentModel?> Function(RefundResult result) onRefund;
 
   @override
   State<_RefundSheet> createState() => _RefundSheetState();
@@ -98,17 +101,24 @@ class _RefundSheetState extends State<_RefundSheet> {
     super.dispose();
   }
 
-  void _confirm() {
-    if (!_formKey.currentState!.validate()) return;
+  bool _isSubmitting = false;
+
+  void _confirm() async {
+    if (!_formKey.currentState!.validate() || _isSubmitting) return;
     final amount = double.tryParse(_amountCtrl.text.trim()) ?? 0;
-    Navigator.pop(
-      context,
+    setState(() => _isSubmitting = true);
+
+    final updatedStudent = await widget.onRefund(
       RefundResult(
         refundAmount: amount,
         paymentMode: _paymentMode,
         note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
       ),
     );
+
+    if (mounted) {
+      Navigator.pop(context, updatedStudent);
+    }
   }
 
   // ── UI helpers ─────────────────────────────────────────────────────────────
@@ -509,9 +519,9 @@ class _RefundSheetState extends State<_RefundSheet> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: _confirm,
+                      onPressed: _isSubmitting ? null : _confirm,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.error,
+                        backgroundColor: _isSubmitting ? AppColors.grey300 : AppColors.error,
                         disabledBackgroundColor: AppColors.grey200,
                         foregroundColor: Colors.white,
                         elevation: 0,
@@ -519,13 +529,18 @@ class _RefundSheetState extends State<_RefundSheet> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      child: const Text(
-                        'Confirm Refund',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                      child: _isSubmitting
+                          ? const SpinKitThreeBounce(
+                              color: Colors.white,
+                              size: 20,
+                            )
+                          : const Text(
+                              'Confirm Refund',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                     ),
                   ),
                 ],

@@ -140,6 +140,7 @@ class _MyLibraryScreenState extends ConsumerState<MyLibraryScreen> {
                         // Save locally
                         await LocalStorage.saveCurrentLibrary(
                           libraryId: library.id!,
+                          libraryName: library.libraryName,
                         );
 
                         _clearLibraryScopedProviders();
@@ -149,6 +150,9 @@ class _MyLibraryScreenState extends ConsumerState<MyLibraryScreen> {
                         ref
                             .read(currentLibraryProvider.notifier)
                             .setLibrary(library.id);
+                        ref
+                            .read(currentLibraryNameProvider.notifier)
+                            .setLibraryName(library.libraryName);
                       },
                       onEdit: () {
                         Navigator.push(

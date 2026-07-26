@@ -6,6 +6,7 @@ class StudentModel {
   // Ownership / booking links
   final String libraryId;
   final String slotTemplateId;
+  final String? slotTiming;
   final String? seatId;
 
   // Personal details
@@ -46,6 +47,7 @@ class StudentModel {
     this.id,
     required this.libraryId,
     required this.slotTemplateId,
+    this.slotTiming,
     this.seatId,
     required this.name,
     required this.phone,
@@ -77,6 +79,7 @@ class StudentModel {
 
       libraryId: _parseRefId(map['libraryId']) ?? '',
       slotTemplateId: _parseRefId(map['slotTemplateId']) ?? '',
+      slotTiming: map['slotTiming']?.toString(),
       seatId: _parseRefId(map['seatId']),
 
       name: map['name']?.toString() ?? '',
@@ -115,6 +118,7 @@ class StudentModel {
     return {
       'libraryId': libraryId,
       'slotTemplateId': slotTemplateId,
+      'slotTiming': slotTiming,
       'seatId': seatId,
       'name': name,
       'phone': phone,

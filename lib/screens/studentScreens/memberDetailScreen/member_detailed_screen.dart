@@ -13,6 +13,10 @@ import 'package:library_management/screens/studentScreens/memberDetailScreen/pay
 import 'package:library_management/screens/studentScreens/memberDetailScreen/profile_card.dart';
 import 'package:library_management/screens/studentScreens/memberDetailScreen/refund_bottom_sheet.dart';
 import 'package:library_management/screens/studentScreens/renewAdmission/renew_admission_screen.dart';
+import 'package:library_management/screens/studentScreens/pauseResume/pause_student_sheet.dart';
+import 'package:library_management/screens/studentScreens/pauseResume/resume_student_sheet.dart';
+import 'package:library_management/screens/studentScreens/pauseResume/blacklist_student_sheet.dart';
+import 'package:library_management/screens/studentScreens/pauseResume/unblock_student_sheet.dart';
 import 'package:library_management/services/profile_photo_service.dart';
 import 'package:library_management/services/student_message_service.dart';
 
@@ -74,8 +78,13 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
     if (givenDate == null) {
       return 'Select date';
     }
-    final date = givenDate;
-    return '${date.day}-${date.month}-${date.year}';
+    final date = givenDate as DateTime;
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    final monthName = months[date.month - 1];
+    return '${date.day} $monthName ${date.year}';
   }
 
   Future<bool> _updateProfile({
@@ -141,22 +150,20 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
       return;
     }
 
-    // Open the bottom sheet — it computes and pre-fills the refund amount.
-    final result = await showRefundBottomSheet(
+    final updatedStudent = await showRefundBottomSheet(
       context: context,
       member: _member,
-    );
-
-    if (result == null || !mounted) return;
-
-    final updatedStudent = await _studentController.refundStudent(
-      context: context,
-      ref: ref,
-      libraryId: _member.libraryId,
-      studentId: studentId,
-      refundAmount: result.refundAmount,
-      paymentMode: result.paymentMode,
-      note: result.note,
+      onRefund: (result) async {
+        return await _studentController.refundStudent(
+          context: context,
+          ref: ref,
+          libraryId: _member.libraryId,
+          studentId: studentId,
+          refundAmount: result.refundAmount,
+          paymentMode: result.paymentMode,
+          note: result.note,
+        );
+      },
     );
 
     if (updatedStudent != null && mounted) {
@@ -182,6 +189,210 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
     );
   }
 
+  Future<void> _handlePause(double scale) async {
+    final studentId = _member.id;
+    if (studentId == null || studentId.isEmpty) return;
+
+    final updatedStudent = await PauseStudentSheet.show(
+      context: context,
+      member: _member,
+      scale: scale,
+      onPause: (reason) async {
+        return await _studentController.pauseStudent(
+          context: context,
+          ref: ref,
+          libraryId: _member.libraryId,
+          studentId: studentId,
+          reason: reason,
+        );
+      },
+    );
+
+    if (updatedStudent != null && mounted) {
+      setState(() {
+        _member = updatedStudent;
+      });
+    }
+  }
+
+  Future<void> _handleResume(double scale) async {
+    final studentId = _member.id;
+    if (studentId == null || studentId.isEmpty) return;
+
+    final updatedStudent = await ResumeStudentSheet.show(
+      context: context,
+      member: _member,
+      scale: scale,
+      onResume: (result) async {
+        return await _studentController.resumeStudent(
+          context: context,
+          ref: ref,
+          libraryId: _member.libraryId,
+          studentId: studentId,
+          extensionDays: result.extensionDays,
+          seatId: result.seatId,
+        );
+      },
+    );
+
+    if (updatedStudent != null && mounted) {
+      setState(() {
+        _member = updatedStudent;
+      });
+    }
+  }
+
+  Future<void> _handleBlacklist(double scale) async {
+    final studentId = _member.id;
+    if (studentId == null || studentId.isEmpty) return;
+
+    final updatedStudent = await BlacklistStudentSheet.show(
+      context: context,
+      member: _member,
+      scale: scale,
+      onBlacklist: (reason) async {
+        return await _studentController.blacklistStudent(
+          context: context,
+          ref: ref,
+          libraryId: _member.libraryId,
+          studentId: studentId,
+          reason: reason,
+        );
+      },
+    );
+
+    if (updatedStudent != null && mounted) {
+      setState(() {
+        _member = updatedStudent;
+      });
+    }
+  }
+
+  Future<void> _handleUnblock(double scale) async {
+    final studentId = _member.id;
+    if (studentId == null || studentId.isEmpty) return;
+
+    final confirmed = await UnblockStudentSheet.show(
+      context: context,
+      member: _member,
+      scale: scale,
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final updatedStudent = await _studentController.unblockStudent(
+      context: context,
+      ref: ref,
+      libraryId: _member.libraryId,
+      studentId: studentId,
+    );
+
+    if (updatedStudent != null && mounted) {
+      setState(() {
+        _member = updatedStudent;
+      });
+    }
+  }
+
+  Future<void> _handleDeleteStudent() async {
+    final studentId = _member.id;
+    if (studentId == null || studentId.isEmpty) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.delete_outline_rounded, color: Colors.red, size: 26),
+            SizedBox(width: 8),
+            Text(
+              'Delete Student?',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Are you sure you want to delete ${_member.name}? Their seat will be released immediately.',
+              style: const TextStyle(fontSize: 14, color: Color(0xFF1E293B)),
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFEBEE),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFFFCDD2)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Color(0xFFD32F2F), size: 18),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'This action is irreversible!',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFD32F2F),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          OutlinedButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            style: OutlinedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'Delete',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    final success = await _studentController.deleteStudent(
+      context: context,
+      ref: ref,
+      libraryId: _member.libraryId,
+      studentId: studentId,
+      student: _member,
+    );
+
+    if (success && mounted) {
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final libraryName = StudentMessageService.getLibraryName(
@@ -194,12 +405,15 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
       libraryName: libraryName,
     );
 
+    final bool isPaused = _member.status == 'paused';
+    final bool isBlacklisted = _member.status == 'blacklisted';
+
     return Scaffold(
       appBar: AppBarWidget(
         title: 'Member Info',
         actionIcon: Icons.delete_outline_rounded,
         color: Colors.red,
-        onActionPressed: () {},
+        onActionPressed: _handleDeleteStudent,
       ),
 
       body: SafeArea(
@@ -226,6 +440,8 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
                       phone: _member.phone,
                       id: _member.idProof,
                       number: 1,
+                      status: _member.status,
+                      expireDate: _member.currentExpireDate,
                       onSave: _updateProfile,
                       imageUrl: _member.profileImage,
                       onChangePhoto: _changePhoto,
@@ -241,19 +457,24 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
                       pending: _member.totalPending,
                       totalPaid: _member.totalPaid,
                       expiryDate: _member.currentExpireDate ?? DateTime.now(),
+                      isPaused: isPaused,
+                      isBlacklisted: isBlacklisted,
                       onPendingAction: _handlePendingResolution,
                       onRefund: _handleRefund,
                       onRenew: _handleRenew,
+                      onPause: () => _handlePause(scale),
+                      onResume: () => _handleResume(scale),
+                      onBlacklist: () => _handleBlacklist(scale),
+                      onUnblock: () => _handleUnblock(scale),
                     ),
 
                     SizedBox(height: 24 * scale),
 
-                    //JOIN-DATE, EXPIRE-DATE, PLAN & PROGRAM
                     MembershipCard(
                       scale: scale,
                       joinDate: _formattedDate(_member.joiningDate),
                       expireDate: _formattedDate(_member.currentExpireDate),
-                      slotId: _member.slotTemplateId,
+                      slot: _member.slotTiming ?? 'Not Available',
                       planDuration:
                           '${_member.currentPlanDays.toString()} Days',
                     ),

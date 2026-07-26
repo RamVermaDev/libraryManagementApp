@@ -2,118 +2,157 @@ import 'package:flutter/material.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/member_actions.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/member_avatar.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/member_card_footer.dart';
-import 'package:library_management/screens/studentScreens/memberScrolable/member_card_style.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/member_information.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/members.dart';
 
 class MemberCard extends StatelessWidget {
-  // final MemberListItem member;
-  // final MemberStatus status;
-  // final VoidCallback onTap;
-  //
-
   const MemberCard({
     super.key,
-    // required this.member,
-    // required this.status,
-    // required this.onTap,
-    // required this.onCall,
-    // required this.onMessage,
     required this.onTap,
     this.img,
     this.expireDate,
     required this.memberNumber,
+    this.idProof,
     required this.name,
     required this.plan,
+    this.slotTiming,
+    this.seatNumber,
     required this.status,
+    this.rawStatus,
     required this.number,
     required this.message,
     this.pendingAmount,
     this.onRenew,
-    this.onPaid,
-    this.onGiveDiscount,
+    this.onPause,
+    this.onResume,
+    this.onUnblock,
   });
 
   final VoidCallback onTap;
   final String? img;
   final int memberNumber;
+  final String? idProof;
   final String name;
   final DateTime? expireDate;
   final String plan;
+  final String? slotTiming;
+  final String? seatNumber;
 
   final MemberStatus status;
+  final String? rawStatus;
   final String number;
   final String message;
 
   final double? pendingAmount;
 
   final VoidCallback? onRenew;
-  final VoidCallback? onPaid;
-  final VoidCallback? onGiveDiscount;
+  final VoidCallback? onPause;
+  final VoidCallback? onResume;
+  final VoidCallback? onUnblock;
 
   @override
   Widget build(BuildContext context) {
-    final style = MemberCardStyle.fromStatus(status);
+    final String displayId = (idProof != null && idProof!.trim().isNotEmpty)
+        ? 'ID: ${idProof!.trim()}'
+        : 'ID: ${memberNumber.toString().padLeft(3, '0')}';
 
-    return Material(
-      color: style.background,
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: style.border),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFF1F5F9), width: 1),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0C000000),
+            blurRadius: 16,
+            offset: Offset(0, 4),
           ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  MemberAvatar(
-                    imageUrl: img,
-                    backgroundColor: style.avatarBackground,
-                    memberNumber: memberNumber,
-                  ),
-
-                  const SizedBox(width: 20),
-
-                  Expanded(
-                    child: MemberInformation(
-                      statusColor: style.accent,
-                      expireDate: expireDate,
-                      memberName: name,
-                      plan: plan,
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. Header Row: Avatar + Name/ID + Call/Message/WhatsApp
+                Row(
+                  children: [
+                    MemberAvatar(
+                      imageUrl: img,
+                      size: 52,
                     ),
-                  ),
 
-                  const SizedBox(width: 8),
+                    const SizedBox(width: 14),
 
-                  MemberActions(number: number, message: message),
-                ],
-              ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1E293B),
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            displayId,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
 
-              if (status == MemberStatus.expired ||
-                  status == MemberStatus.expiring)
-              //status == MemberStatus.pending)
-              ...[
-                const SizedBox(height: 12),
+                    const SizedBox(width: 8),
 
-                Divider(height: 1, color: style.border),
+                    // Quick Action Buttons (Call, Message, WhatsApp)
+                    MemberActions(
+                      number: number,
+                      message: message,
+                    ),
+                  ],
+                ),
 
-                const SizedBox(height: 8),
+                const SizedBox(height: 18),
 
+                // 2. Middle Info Grid (Plan, Expires, Timing, Seat)
+                MemberInformation(
+                  plan: plan,
+                  expireDate: expireDate,
+                  slotTiming: slotTiming,
+                  seatNumber: seatNumber,
+                ),
+
+                const SizedBox(height: 18),
+
+                // 3. Footer Row: Status Pill Badge + Dynamic Action Button
                 MemberCardFooter(
                   status: status,
-                  pendingAmount: pendingAmount,
+                  rawStatus: rawStatus,
+                  expireDate: expireDate,
                   onRenew: onRenew,
-                  onPaid: onPaid,
-                  onGiveDiscount: onGiveDiscount,
-                  date: expireDate,
+                  onPause: onPause,
+                  onResume: onResume,
+                  onUnblock: onUnblock,
                 ),
               ],
-            ],
+            ),
           ),
         ),
       ),

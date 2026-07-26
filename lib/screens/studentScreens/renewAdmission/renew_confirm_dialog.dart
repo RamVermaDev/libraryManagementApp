@@ -7,21 +7,61 @@ class RenewConfirmDialog extends StatelessWidget {
     super.key,
     required this.member,
     required this.slotDisplay,
-    required this.amountText,
+    required this.seatDisplay,
     required this.planDays,
+    required this.startDate,
+    required this.expireDate,
+    required this.amountText,
+    this.discountText,
+    this.paidAmountText,
+    this.pendingText,
   });
 
   final StudentModel member;
   final String slotDisplay;
-  final String amountText;
+  final String seatDisplay;
   final int planDays;
+  final DateTime startDate;
+  final DateTime expireDate;
+  final String amountText;
+  final String? discountText;
+  final String? paidAmountText;
+  final String? pendingText;
+
+  static String _formatDateRange(DateTime start, DateTime expire) {
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'June',
+      'July',
+      'Aug',
+      'Sept',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+    final startStr =
+        '${start.day} ${months[start.month - 1]} ${start.year.toString().substring(2)}';
+    final expireStr =
+        '${expire.day} ${months[expire.month - 1]} ${expire.year.toString().substring(2)}';
+    return '$startStr - $expireStr';
+  }
 
   static Future<bool?> show(
     BuildContext context, {
     required StudentModel member,
     required String slotDisplay,
-    required String amountText,
+    required String seatDisplay,
     required int planDays,
+    required DateTime startDate,
+    required DateTime expireDate,
+    required String amountText,
+    String? discountText,
+    String? paidAmountText,
+    String? pendingText,
   }) {
     return showDialog<bool>(
       context: context,
@@ -29,14 +69,25 @@ class RenewConfirmDialog extends StatelessWidget {
       builder: (_) => RenewConfirmDialog(
         member: member,
         slotDisplay: slotDisplay,
-        amountText: amountText,
+        seatDisplay: seatDisplay,
         planDays: planDays,
+        startDate: startDate,
+        expireDate: expireDate,
+        amountText: amountText,
+        discountText: discountText,
+        paidAmountText: paidAmountText,
+        pendingText: pendingText,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final double discountVal =
+        discountText != null ? (double.tryParse(discountText!) ?? 0) : 0;
+    final double pendingVal =
+        pendingText != null ? (double.tryParse(pendingText!) ?? 0) : 0;
+
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       title: const Text(
@@ -48,10 +99,28 @@ class RenewConfirmDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _ConfirmRow(label: 'Name', value: member.name),
-          _ConfirmRow(label: 'Phone', value: member.phone),
           _ConfirmRow(label: 'Slot', value: slotDisplay),
-          _ConfirmRow(label: 'Amount', value: '₹$amountText'),
+          _ConfirmRow(label: 'Seat', value: seatDisplay),
           _ConfirmRow(label: 'Plan', value: '$planDays days'),
+          _ConfirmRow(
+            label: 'Validity',
+            value: _formatDateRange(startDate, expireDate),
+          ),
+          _ConfirmRow(label: 'Total Fee', value: '₹$amountText'),
+          if (discountVal > 0)
+            _ConfirmRow(
+              label: 'Discount',
+              value: '₹$discountText',
+              valueColor: Colors.green.shade700,
+            ),
+          if (paidAmountText != null && paidAmountText!.isNotEmpty)
+            _ConfirmRow(label: 'Paid', value: '₹$paidAmountText'),
+          if (pendingVal > 0)
+            _ConfirmRow(
+              label: 'Pending',
+              value: '₹$pendingText',
+              valueColor: AppColors.error,
+            ),
         ],
       ),
       actions: [
@@ -76,10 +145,15 @@ class RenewConfirmDialog extends StatelessWidget {
 }
 
 class _ConfirmRow extends StatelessWidget {
-  const _ConfirmRow({required this.label, required this.value});
+  const _ConfirmRow({
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
 
   final String label;
   final String value;
+  final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +163,7 @@ class _ConfirmRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 70,
+            width: 72,
             child: Text(
               label,
               style: const TextStyle(
@@ -103,10 +177,10 @@ class _ConfirmRow extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: AppColors.heading,
+                color: valueColor ?? AppColors.heading,
               ),
             ),
           ),

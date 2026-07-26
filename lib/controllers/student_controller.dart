@@ -498,6 +498,244 @@ class StudentController {
     }
   }
 
+  Future<StudentModel?> pauseStudent({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String libraryId,
+    required String studentId,
+    String? reason,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+      if (token == null || token.isEmpty) {
+        showSnackBar(context, 'Authentication required');
+        return null;
+      }
+
+      final response = await http.patch(
+        Uri.parse('$uri/api/$libraryId/students/$studentId/pause'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
+        }),
+      );
+
+      if (!context.mounted) return null;
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final studentMap = (data['data'] as Map<String, dynamic>?)?['student'] as Map<String, dynamic>?;
+        if (studentMap != null) {
+          final updatedStudent = StudentModel.fromMap(studentMap);
+          ref.read(studentProvider.notifier).updateStudent(updatedStudent);
+          ref.read(studentProvider.notifier).removeStudentFromActiveAndExpiring(studentId);
+          ref.read(studentSummaryProvider.notifier).onStudentRemovedOrDeactivated(updatedStudent);
+          AppNotification.show(context, message: 'Membership Paused');
+          return updatedStudent;
+        }
+      }
+
+      showSnackBar(context, getMessageFromResponse(response));
+      return null;
+    } catch (e, stackTrace) {
+      debugPrint('Pause Student Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+      if (context.mounted) showSnackBar(context, 'Unable to pause student');
+      return null;
+    }
+  }
+
+  Future<StudentModel?> resumeStudent({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String libraryId,
+    required String studentId,
+    required int extensionDays,
+    String? seatId,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+      if (token == null || token.isEmpty) {
+        showSnackBar(context, 'Authentication required');
+        return null;
+      }
+
+      final response = await http.patch(
+        Uri.parse('$uri/api/$libraryId/students/$studentId/resume'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'extensionDays': extensionDays,
+          if (seatId != null) 'seatId': seatId,
+        }),
+      );
+
+      if (!context.mounted) return null;
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final studentMap = (data['data'] as Map<String, dynamic>?)?['student'] as Map<String, dynamic>?;
+        if (studentMap != null) {
+          final updatedStudent = StudentModel.fromMap(studentMap);
+          ref.read(studentProvider.notifier).resumeStudent(updatedStudent);
+          ref.read(studentSummaryProvider.notifier).onStudentResumed(updatedStudent);
+          AppNotification.show(context, message: 'Membership Resumed');
+          return updatedStudent;
+        }
+      }
+
+      showSnackBar(context, getMessageFromResponse(response));
+      return null;
+    } catch (e, stackTrace) {
+      debugPrint('Resume Student Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+      if (context.mounted) showSnackBar(context, 'Unable to resume student');
+      return null;
+    }
+  }
+
+  Future<StudentModel?> blacklistStudent({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String libraryId,
+    required String studentId,
+    String? reason,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+      if (token == null || token.isEmpty) {
+        showSnackBar(context, 'Authentication required');
+        return null;
+      }
+
+      final response = await http.patch(
+        Uri.parse('$uri/api/$libraryId/students/$studentId/blacklist'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
+        }),
+      );
+
+      if (!context.mounted) return null;
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final studentMap = (data['data'] as Map<String, dynamic>?)?['student'] as Map<String, dynamic>?;
+        if (studentMap != null) {
+          final updatedStudent = StudentModel.fromMap(studentMap);
+          ref.read(studentProvider.notifier).updateStudent(updatedStudent);
+          ref.read(studentProvider.notifier).removeStudentFromActiveAndExpiring(studentId);
+          ref.read(studentSummaryProvider.notifier).onStudentRemovedOrDeactivated(updatedStudent);
+          AppNotification.show(context, message: 'Student Blacklisted');
+          return updatedStudent;
+        }
+      }
+
+      showSnackBar(context, getMessageFromResponse(response));
+      return null;
+    } catch (e, stackTrace) {
+      debugPrint('Blacklist Student Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+      if (context.mounted) showSnackBar(context, 'Unable to blacklist student');
+      return null;
+    }
+  }
+
+  Future<StudentModel?> unblockStudent({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String libraryId,
+    required String studentId,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+      if (token == null || token.isEmpty) {
+        showSnackBar(context, 'Authentication required');
+        return null;
+      }
+
+      final response = await http.patch(
+        Uri.parse('$uri/api/$libraryId/students/$studentId/unblock'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (!context.mounted) return null;
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final studentMap = (data['data'] as Map<String, dynamic>?)?['student'] as Map<String, dynamic>?;
+        if (studentMap != null) {
+          final updatedStudent = StudentModel.fromMap(studentMap);
+          ref.read(studentProvider.notifier).updateStudent(updatedStudent);
+          AppNotification.show(context, message: 'Student Unblocked');
+          return updatedStudent;
+        }
+      }
+
+      showSnackBar(context, getMessageFromResponse(response));
+      return null;
+    } catch (e, stackTrace) {
+      debugPrint('Unblock Student Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+      if (context.mounted) showSnackBar(context, 'Unable to unblock student');
+      return null;
+    }
+  }
+
+  Future<bool> deleteStudent({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String libraryId,
+    required String studentId,
+    StudentModel? student,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+      if (token == null || token.isEmpty) {
+        showSnackBar(context, 'Authentication required');
+        return false;
+      }
+
+      final response = await http.delete(
+        Uri.parse('$uri/api/$libraryId/students/$studentId'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (!context.mounted) return false;
+
+      if (response.statusCode == 200) {
+        ref.read(studentProvider.notifier).removeStudentFromActiveAndExpiring(studentId);
+        if (student != null) {
+          ref.read(studentSummaryProvider.notifier).onStudentRemovedOrDeactivated(student);
+        }
+        AppNotification.show(context, message: 'Student Deleted');
+        return true;
+      }
+
+      showSnackBar(context, getMessageFromResponse(response));
+      return false;
+    } catch (e, stackTrace) {
+      debugPrint('Delete Student Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+      if (context.mounted) showSnackBar(context, 'Unable to delete student');
+      return false;
+    }
+  }
+
   void _saveStudentsToProvider({
     required WidgetRef ref,
     required MemberStatus status,

@@ -53,6 +53,10 @@ class StudentSummaryNotifier extends StateNotifier<StudentSummaryModel?> {
     );
   }
 
+  void onStudentResumed(StudentModel student) {
+    onStudentAdded(student);
+  }
+
   void removeActiveStudent() {
     final currentState = state;
     if (currentState == null) return;
@@ -123,6 +127,58 @@ class StudentSummaryNotifier extends StateNotifier<StudentSummaryModel?> {
         exp4To7 = exp4To7 + 1;
       } else if (newDays >= 7 && newDays <= 10) {
         exp8To10 = exp8To10 + 1;
+      }
+    }
+
+    state = currentState.copyWith(
+      active: active,
+      expiring1To3Days: exp1To3,
+      expiring4To7Days: exp4To7,
+      expiring8To10Days: exp8To10,
+      expired1To3Days: expired1To3,
+      expired4To7Days: expired4To7,
+      expired8To10Days: expired8To10,
+    );
+  }
+
+  void onStudentRemovedOrDeactivated(StudentModel student) {
+    final currentState = state;
+    if (currentState == null) return;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final daysLeft = _getDaysLeft(student.currentExpireDate, today);
+
+    int active = currentState.active;
+    int exp1To3 = currentState.expiring1To3Days;
+    int exp4To7 = currentState.expiring4To7Days;
+    int exp8To10 = currentState.expiring8To10Days;
+
+    int expired1To3 = currentState.expired1To3Days;
+    int expired4To7 = currentState.expired4To7Days;
+    int expired8To10 = currentState.expired8To10Days;
+
+    if (daysLeft != null) {
+      if (daysLeft >= 0) {
+        // Was Active -> decrement active count
+        active = (active - 1).clamp(0, active);
+        if (daysLeft >= 0 && daysLeft <= 3) {
+          exp1To3 = (exp1To3 - 1).clamp(0, exp1To3);
+        } else if (daysLeft >= 4 && daysLeft <= 6) {
+          exp4To7 = (exp4To7 - 1).clamp(0, exp4To7);
+        } else if (daysLeft >= 7 && daysLeft <= 10) {
+          exp8To10 = (exp8To10 - 1).clamp(0, exp8To10);
+        }
+      } else {
+        // Was Expired -> decrement expired count
+        final pastDays = daysLeft.abs();
+        if (pastDays >= 1 && pastDays <= 3) {
+          expired1To3 = (expired1To3 - 1).clamp(0, expired1To3);
+        } else if (pastDays >= 4 && pastDays <= 7) {
+          expired4To7 = (expired4To7 - 1).clamp(0, expired4To7);
+        } else if (pastDays >= 8) {
+          expired8To10 = (expired8To10 - 1).clamp(0, expired8To10);
+        }
       }
     }
 

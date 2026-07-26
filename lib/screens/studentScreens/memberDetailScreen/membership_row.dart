@@ -33,6 +33,7 @@ class MembershipRow extends StatelessWidget {
         SizedBox(width: 14 * scale),
 
         Expanded(
+          flex: 1,
           child: Text(
             label,
             style: TextStyle(
@@ -46,6 +47,7 @@ class MembershipRow extends StatelessWidget {
         SizedBox(width: 10 * scale),
 
         Expanded(
+          flex: 2,
           child: Text(
             value == null ? 'Not Avaliable' : value!,
             maxLines: 1,
@@ -53,7 +55,7 @@ class MembershipRow extends StatelessWidget {
             textAlign: TextAlign.right,
             style: TextStyle(
               color: AppColors.heading,
-              fontSize: 16 * scale,
+              fontSize: 15 * scale,
               fontWeight: FontWeight.w500,
             ),
           ),

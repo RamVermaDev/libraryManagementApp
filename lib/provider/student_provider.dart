@@ -76,6 +76,25 @@ class StudentNotifier extends StateNotifier<StudentState> {
     );
   }
 
+  void removeStudentFromActiveAndExpiring(String studentId) {
+    List<StudentModel> removeFrom(List<StudentModel> list) =>
+        list.where((s) => s.id != studentId).toList();
+
+    state = state.copyWith(
+      activeStudents: removeFrom(state.activeStudents),
+      expiring1To3Days: removeFrom(state.expiring1To3Days),
+      expiring4To7Days: removeFrom(state.expiring4To7Days),
+      expiring8To10Days: removeFrom(state.expiring8To10Days),
+      expired1To3Days: removeFrom(state.expired1To3Days),
+      expired4To7Days: removeFrom(state.expired4To7Days),
+      expired8To10Days: removeFrom(state.expired8To10Days),
+    );
+  }
+
+  void resumeStudent(StudentModel updatedStudent) {
+    renewStudent(updatedStudent);
+  }
+
   void renewStudent(StudentModel updatedStudent) {
     if (updatedStudent.id == null) return;
 

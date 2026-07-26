@@ -102,6 +102,10 @@ class MembersBody extends StatelessWidget {
           }
 
           final member = members[index];
+          final planDisplay = (member.currentPlanDays ?? 0) > 0
+              ? '${member.currentPlanDays} Days'
+              : 'Monthly';
+
           return MemberCard(
             onTap: () {
               Navigator.push(
@@ -114,10 +118,15 @@ class MembersBody extends StatelessWidget {
               );
             },
             memberNumber: index + 1,
+            idProof: member.idProof,
+            img: member.profileImage,
             name: member.name,
-            plan: member.slotTemplateId,
+            plan: planDisplay,
+            slotTiming: member.slotTiming,
+            seatNumber: member.seatId,
             status: _statusForMember(member),
-            message: 'Hello',
+            rawStatus: member.status,
+            message: 'Hello ${member.name}, your library membership reminder.',
             number: member.phone,
             expireDate: member.currentExpireDate,
           );

@@ -1,202 +1,166 @@
 import 'package:flutter/material.dart';
-import 'package:library_management/screens/studentScreens/memberScrolable/member_card_style.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/members.dart';
 
 class MemberCardFooter extends StatelessWidget {
   final MemberStatus status;
-  final double? pendingAmount;
-  final DateTime? date;
+  final String? rawStatus;
+  final DateTime? expireDate;
   final VoidCallback? onRenew;
-  final VoidCallback? onPaid;
-  final VoidCallback? onGiveDiscount;
+  final VoidCallback? onPause;
+  final VoidCallback? onResume;
+  final VoidCallback? onUnblock;
+  final bool isLoading;
 
   const MemberCardFooter({
     super.key,
     required this.status,
-    this.pendingAmount,
-    this.date,
+    this.rawStatus,
+    this.expireDate,
     this.onRenew,
-    this.onPaid,
-    this.onGiveDiscount,
+    this.onPause,
+    this.onResume,
+    this.onUnblock,
+    this.isLoading = false,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    final style = MemberCardStyle.fromStatus(status);
-    final int days = _calculateDays(date);
-
-    final bool hasPending = (pendingAmount ?? 0) > 0;
-
-    final List<Widget> footers = [];
-
-    // 1. First show expired or expiring status
-    if (status == MemberStatus.expired) {
-      footers.add(
-        _FooterLayout(
-          left: _StatusText(
-            text: days == 0
-                ? 'Expired today'
-                : 'Expired since ${days.abs()} ${_dayText(days)}',
-            color: style.accent,
-          ),
-          actions: [
-            _FooterButton(label: 'Renew', color: style.accent, onTap: onRenew),
-          ],
-        ),
-      );
-    }
-
-    if (status == MemberStatus.expiring) {
-      footers.add(
-        _FooterLayout(
-          left: _StatusText(
-            text: days == 0
-                ? 'Expiring today'
-                : 'Expiring in ${days.abs()} ${_dayText(days)}',
-            color: style.accent,
-          ),
-          actions: [
-            _FooterButton(label: 'Renew', color: style.accent, onTap: onRenew),
-          ],
-        ),
-      );
-    }
-
-    // 2. Then show pending status
-    if (hasPending) {
-      if (footers.isNotEmpty) {
-        footers.add(const SizedBox(height: 8));
-      }
-
-      footers.add(
-        _FooterLayout(
-          left: Text.rich(
-            TextSpan(
-              children: [
-                const TextSpan(text: 'Pending: '),
-                TextSpan(
-                  text: '₹${pendingAmount!.toStringAsFixed(0)}',
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-              ],
-            ),
-            style: TextStyle(
-              color: style.accent,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          actions: [
-            _FooterButton(label: 'Paid', color: style.accent, onTap: onPaid),
-            _FooterButton(
-              label: 'Give Discount',
-              color: style.accent,
-              onTap: onGiveDiscount,
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (footers.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(mainAxisSize: MainAxisSize.min, children: footers);
-  }
 
   int _calculateDays(DateTime? date) {
     if (date == null) return 0;
-
     final now = DateTime.now();
-
     final today = DateTime(now.year, now.month, now.day);
-
-    final targetDate = DateTime(date.year, date.month, date.day);
-
-    return targetDate.difference(today).inDays;
+    final target = DateTime(date.year, date.month, date.day);
+    return target.difference(today).inDays;
   }
-
-  String _dayText(int days) {
-    return days.abs() == 1 ? 'day' : 'days';
-  }
-}
-
-class _StatusText extends StatelessWidget {
-  final String text;
-  final Color color;
-
-  const _StatusText({required this.text, required this.color});
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600),
-    );
-  }
-}
+    final days = _calculateDays(expireDate);
+    final isBlacklisted = rawStatus == 'blacklisted';
+    final isPaused = rawStatus == 'paused';
+    final isExpired =
+        status == MemberStatus.expired ||
+        (expireDate != null && expireDate!.isBefore(DateTime.now()));
+    final isExpiring = status == MemberStatus.expiring;
 
-class _FooterLayout extends StatelessWidget {
-  final Widget left;
-  final List<Widget> actions;
+    // Status Pill Configuration
+    Color pillBg;
+    Color dotColor;
+    Color textColor;
+    String pillText;
 
-  const _FooterLayout({required this.left, required this.actions});
+    // Button Configuration
+    String buttonLabel;
+    Color buttonColor;
+    VoidCallback? buttonAction;
 
-  @override
-  Widget build(BuildContext context) {
+    if (isBlacklisted) {
+      pillBg = const Color(0xFFECEFF1);
+      dotColor = const Color(0xFF455A64);
+      textColor = const Color(0xFF37474F);
+      pillText = 'Blacklisted';
+
+      buttonLabel = 'Unblock';
+      buttonColor = const Color(0xFF16A34A);
+      buttonAction = onUnblock;
+    } else if (isPaused) {
+      pillBg = const Color(0xFFFFF8E1);
+      dotColor = const Color(0xFFF57F17);
+      textColor = const Color(0xFFB76E00);
+      pillText = 'Paused';
+
+      buttonLabel = 'Resume';
+      buttonColor = const Color(0xFF2E7D32);
+      buttonAction = onResume;
+    } else if (isExpired) {
+      pillBg = const Color(0xFFFFEBEE);
+      dotColor = const Color(0xFFD32F2F);
+      textColor = const Color(0xFFC62828);
+      pillText = days == 0
+          ? 'Expired today'
+          : 'Expired ${days.abs()} ${days.abs() == 1 ? 'day' : 'days'} ago';
+
+      buttonLabel = 'Renew';
+      buttonColor = const Color(0xFF0052CC); // Match reference blue button
+      buttonAction = onRenew;
+    } else if (isExpiring) {
+      pillBg = const Color(0xFFFFF8E1);
+      dotColor = const Color(0xFFF57F17);
+      textColor = const Color(0xFFB76E00);
+      pillText = days == 0
+          ? 'Expiring today'
+          : 'Expiring in ${days.abs()} ${days.abs() == 1 ? 'day' : 'days'}';
+
+      buttonLabel = 'Renew';
+      buttonColor = const Color(0xFF0052CC); // Match reference blue button
+      buttonAction = onRenew;
+    } else {
+      pillBg = const Color(0xFFE8F5E9);
+      dotColor = const Color(0xFF2E7D32);
+      textColor = const Color(0xFF1B5E20);
+      pillText = 'Active';
+
+      buttonLabel = 'Pause';
+      buttonColor = const Color(0xFFD97706);
+      buttonAction = onPause;
+    }
+
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(child: left),
-        const SizedBox(width: 10),
-        ...actions.map(
-          (action) =>
-              Padding(padding: const EdgeInsets.only(left: 6), child: action),
+        // Left: Status Pill Badge
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: pillBg,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: dotColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                pillText,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Right: Dynamic Action Button
+        ElevatedButton(
+          onPressed: buttonAction,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: buttonColor,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 0,
+          ),
+          child: isLoading
+              ? const SpinKitThreeBounce(color: Colors.white, size: 18)
+              : Text(
+                  buttonLabel,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
         ),
       ],
-    );
-  }
-}
-
-class _FooterButton extends StatelessWidget {
-  final String label;
-  final Color color;
-  final VoidCallback? onTap;
-
-  const _FooterButton({
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: color.withValues(alpha: 0.10),
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: color.withValues(alpha: 0.15),
-              width: 0.8,
-            ),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              height: 1,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

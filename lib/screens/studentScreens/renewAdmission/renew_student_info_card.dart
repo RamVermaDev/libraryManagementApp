@@ -21,6 +21,16 @@ class RenewStudentInfoCard extends StatelessWidget {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
+  String _timingOnly(String? text) {
+    if (text == null || text.isEmpty) return 'Loading timing...';
+    final regExp = RegExp(r'\(([^)]+)\)');
+    final match = regExp.firstMatch(text);
+    if (match != null && match.group(1) != null) {
+      return match.group(1)!;
+    }
+    return text;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isExpired = member.currentExpireDate != null &&
@@ -189,7 +199,7 @@ class RenewStudentInfoCard extends StatelessWidget {
                       SizedBox(width: 6 * scale),
                       Expanded(
                         child: Text(
-                          slotDisplay ?? 'Loading slot...',
+                          _timingOnly(slotDisplay),
                           style: TextStyle(
                             fontSize: 12 * scale,
                             fontWeight: FontWeight.w600,

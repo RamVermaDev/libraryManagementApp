@@ -27,11 +27,15 @@ class ActionCard extends StatelessWidget {
     required this.pending,
     required this.totalPaid,
     required this.expiryDate,
+    this.isPaused = false,
+    this.isBlacklisted = false,
     this.onPendingAction,
     this.onRefund,
     this.onRenew,
     this.onPause,
+    this.onResume,
     this.onBlacklist,
+    this.onUnblock,
   });
 
   final double scale;
@@ -40,17 +44,22 @@ class ActionCard extends StatelessWidget {
   final double pending;
   final double totalPaid;
   final DateTime expiryDate;
+  final bool isPaused;
+  final bool isBlacklisted;
   final Future<void> Function(PendingResolutionResult result)? onPendingAction;
   final VoidCallback? onRefund;
   final VoidCallback? onRenew;
   final VoidCallback? onPause;
+  final VoidCallback? onResume;
   final VoidCallback? onBlacklist;
+  final VoidCallback? onUnblock;
 
   @override
   Widget build(BuildContext context) {
     final bool isExpired = expiryDate.isBefore(DateTime.now());
     final bool isActive = !isExpired;
-    final bool canRenew = expiryDate.difference(DateTime.now()).inDays <= 10;
+    final bool canRenew =
+        expiryDate.difference(DateTime.now()).inDays <= 10 && !isBlacklisted;
     return Container(
       height: 90 * scale,
       decoration: BoxDecoration(
@@ -147,14 +156,14 @@ class ActionCard extends StatelessWidget {
                     ? () async {
                         final result =
                             await showModalBottomSheet<PendingResolutionResult>(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (_) => PendingResolutionBottomSheet(
-                            totalPending: pending,
-                            onSubmit: onPendingAction,
-                          ),
-                        );
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (_) => PendingResolutionBottomSheet(
+                                totalPending: pending,
+                                onSubmit: onPendingAction,
+                              ),
+                            );
 
                         if (result != null && onPendingAction != null) {
                           await onPendingAction!(result);
@@ -184,11 +193,17 @@ class ActionCard extends StatelessWidget {
               width: 90 * scale,
               child: ActionItem(
                 scale: scale,
-                icon: Icons.pause_circle_outline_rounded,
-                label: 'Pause',
-                color: isActive ? AppColors.warning : AppColors.grey200,
-                labelColor: isActive ? AppColors.warning : AppColors.grey400,
-                onTap: isActive ? onPause : null,
+                icon: isPaused
+                    ? Icons.play_circle_outline_rounded
+                    : Icons.pause_circle_outline_rounded,
+                label: isPaused ? 'Resume' : 'Pause',
+                color: isPaused
+                    ? AppColors.success
+                    : (isActive ? AppColors.warning : AppColors.grey200),
+                labelColor: isPaused
+                    ? AppColors.success
+                    : (isActive ? AppColors.warning : AppColors.grey400),
+                onTap: isPaused ? onResume : (isActive ? onPause : null),
               ),
             ),
 
@@ -198,11 +213,19 @@ class ActionCard extends StatelessWidget {
               width: 90 * scale,
               child: ActionItem(
                 scale: scale,
-                icon: Icons.block_rounded,
-                label: 'Blacklist',
-                color: isActive ? AppColors.error : AppColors.grey200,
-                labelColor: isActive ? AppColors.error : AppColors.grey400,
-                onTap: isActive ? onBlacklist : null,
+                icon: isBlacklisted
+                    ? Icons.lock_open_rounded
+                    : Icons.block_rounded,
+                label: isBlacklisted ? 'Unblock' : 'Blacklist',
+                color: isBlacklisted
+                    ? AppColors.success
+                    : (isActive ? AppColors.error : AppColors.grey200),
+                labelColor: isBlacklisted
+                    ? AppColors.success
+                    : (isActive ? AppColors.error : AppColors.grey400),
+                onTap: isBlacklisted
+                    ? onUnblock
+                    : (isActive ? onBlacklist : null),
               ),
             ),
           ],
@@ -210,9 +233,7 @@ class ActionCard extends StatelessWidget {
       ),
     );
   }
-
 }
-
 
 class PendingResolutionBottomSheet extends StatefulWidget {
   final double totalPending;
@@ -245,8 +266,8 @@ class _PendingResolutionBottomSheetState
     _amountController = TextEditingController(
       text: widget.totalPending > 0
           ? (widget.totalPending % 1 == 0
-              ? widget.totalPending.toInt().toString()
-              : widget.totalPending.toStringAsFixed(0))
+                ? widget.totalPending.toInt().toString()
+                : widget.totalPending.toStringAsFixed(0))
           : '0',
     );
     _noteController = TextEditingController();
@@ -381,8 +402,9 @@ class _PendingResolutionBottomSheetState
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                            color:
-                                isPaid ? AppColors.primary : Colors.transparent,
+                            color: isPaid
+                                ? AppColors.primary
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           alignment: Alignment.center,
@@ -391,8 +413,9 @@ class _PendingResolutionBottomSheetState
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color:
-                                  isPaid ? Colors.white : Colors.grey.shade700,
+                              color: isPaid
+                                  ? Colors.white
+                                  : Colors.grey.shade700,
                             ),
                           ),
                         ),
@@ -420,8 +443,9 @@ class _PendingResolutionBottomSheetState
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color:
-                                  !isPaid ? Colors.white : Colors.grey.shade700,
+                              color: !isPaid
+                                  ? Colors.white
+                                  : Colors.grey.shade700,
                             ),
                           ),
                         ),
@@ -584,10 +608,7 @@ class _PendingResolutionBottomSheetState
                     elevation: 0,
                   ),
                   child: _isLoading
-                      ? const SpinKitThreeBounce(
-                          color: Colors.white,
-                          size: 24,
-                        )
+                      ? const SpinKitThreeBounce(color: Colors.white, size: 24)
                       : Text(
                           isPaid ? "Confirm Payment" : "Confirm Discount",
                           style: const TextStyle(
@@ -604,10 +625,7 @@ class _PendingResolutionBottomSheetState
     );
   }
 
-  Widget _buildPaymentModeChip({
-    required String mode,
-    required IconData icon,
-  }) {
+  Widget _buildPaymentModeChip({required String mode, required IconData icon}) {
     final isSelected = _selectedPaymentMode == mode;
     return GestureDetector(
       onTap: () {
