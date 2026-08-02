@@ -124,8 +124,14 @@ class _SlotStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String label = seats < 0
+        ? "${seats.abs()} Overbooked"
+        : seats == 0
+            ? "0 Available"
+            : "$seats ${seats == 1 ? 'slot' : 'slots'} left";
+
     return Text(
-      "$seats seats left",
+      label,
       textAlign: TextAlign.right,
       style: TextStyle(
         fontSize: 13 * scale,

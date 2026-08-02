@@ -29,7 +29,11 @@ class PauseStudentSheet extends StatefulWidget {
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
-        child: PauseStudentSheet(member: member, scale: scale, onPause: onPause),
+        child: PauseStudentSheet(
+          member: member,
+          scale: scale,
+          onPause: onPause,
+        ),
       ),
     );
   }
@@ -61,9 +65,7 @@ class _PauseStudentSheetState extends State<PauseStudentSheet> {
       ),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(24 * scale),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24 * scale)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -93,10 +95,7 @@ class _PauseStudentSheetState extends State<PauseStudentSheet> {
           SizedBox(height: 6 * scale),
           Text(
             'Pausing ${widget.member.name}\'s membership will release their seat. Their countdown will pause today until resumed.',
-            style: TextStyle(
-              fontSize: 13 * scale,
-              color: AppColors.caption,
-            ),
+            style: TextStyle(fontSize: 13 * scale, color: AppColors.caption),
           ),
 
           SizedBox(height: 18 * scale),
@@ -131,7 +130,9 @@ class _PauseStudentSheetState extends State<PauseStudentSheet> {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: _isSubmitting ? null : () => Navigator.pop(context),
+                  onPressed: _isSubmitting
+                      ? null
+                      : () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 14 * scale),
                     shape: RoundedRectangleBorder(
@@ -148,13 +149,17 @@ class _PauseStudentSheetState extends State<PauseStudentSheet> {
                       ? null
                       : () async {
                           setState(() => _isSubmitting = true);
-                          final updatedStudent = await widget.onPause(_reasonController.text.trim());
+                          final updatedStudent = await widget.onPause(
+                            _reasonController.text.trim(),
+                          );
                           if (context.mounted) {
                             Navigator.pop(context, updatedStudent);
                           }
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _isSubmitting ? AppColors.grey300 : AppColors.warning,
+                    backgroundColor: _isSubmitting
+                        ? AppColors.grey300
+                        : AppColors.warning,
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(vertical: 14 * scale),
                     shape: RoundedRectangleBorder(
@@ -163,10 +168,7 @@ class _PauseStudentSheetState extends State<PauseStudentSheet> {
                     elevation: 0,
                   ),
                   child: _isSubmitting
-                      ? const SpinKitThreeBounce(
-                          color: Colors.white,
-                          size: 20,
-                        )
+                      ? const SpinKitThreeBounce(color: Colors.white, size: 20)
                       : const Text(
                           'Pause Now',
                           style: TextStyle(fontWeight: FontWeight.bold),

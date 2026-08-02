@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/context_extension.dart';
 import 'package:library_management/controllers/image_controller.dart';
+import 'package:library_management/models/student_model.dart';
 import 'package:library_management/screens/studentScreens/student_dialog_screen/dialog_action_buttons.dart';
 import 'package:library_management/screens/studentScreens/student_dialog_screen/photo_avatar_section.dart';
 import 'package:library_management/screens/studentScreens/student_dialog_screen/student_detailed_box.dart';
@@ -41,9 +42,9 @@ class StudentAddedDialog extends ConsumerStatefulWidget {
   final double pending;
   final String? paymentMode;
 
-  /// Returns true if backend student creation succeeded, false if error.
+  /// Returns StudentModel if backend creation succeeded, null if error.
   /// Passes the photoPublicId string (or null if no photo uploaded).
-  final Future<bool> Function(String? photoPublicId) onConfirm;
+  final Future<StudentModel?> Function(String? photoPublicId) onConfirm;
 
   @override
   ConsumerState<StudentAddedDialog> createState() => _StudentAddedDialogState();
@@ -172,9 +173,9 @@ class _StudentAddedDialogState extends ConsumerState<StudentAddedDialog> {
     });
 
     try {
-      final success = await widget.onConfirm(_photoPublicId);
-      if (success && mounted) {
-        Navigator.pop(context, true);
+      final student = await widget.onConfirm(_photoPublicId);
+      if (student != null && mounted) {
+        Navigator.pop(context, student);
       }
     } finally {
       if (mounted) {

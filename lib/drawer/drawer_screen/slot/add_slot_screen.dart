@@ -229,12 +229,15 @@ class _SlotForm extends StatelessWidget {
         TaskTextField(
           hintText: 'e.g. Morning 6 Hrs',
           controller: slotName,
+          maxLength: 18,
           textInputAction: TextInputAction.next,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
               return 'Enter slot name';
-            } else if (value.length < 4) {
-              return 'Length must be  > 3';
+            } else if (value.trim().length < 3) {
+              return 'Length must be at least 3 characters';
+            } else if (value.trim().length > 18) {
+              return 'Slot name cannot exceed 18 characters';
             }
             return null;
           },

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:library_management/app_colors.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/members.dart';
 
-class StatusTabs extends StatelessWidget {
+class StatusTabs extends StatefulWidget {
   final PageController pageController;
   final ValueChanged<MemberStatus> onChanged;
 
@@ -12,110 +13,136 @@ class StatusTabs extends StatelessWidget {
   });
 
   @override
+  State<StatusTabs> createState() => _StatusTabsState();
+}
+
+class _StatusTabsState extends State<StatusTabs> {
+  final ScrollController _tabScrollController = ScrollController();
+  final Map<MemberStatus, GlobalKey> _tabKeys = {
+    for (final status in MemberStatus.values) status: GlobalKey(),
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    widget.pageController.addListener(_onPageScroll);
+  }
+
+  @override
+  void dispose() {
+    widget.pageController.removeListener(_onPageScroll);
+    _tabScrollController.dispose();
+    super.dispose();
+  }
+
+  void _onPageScroll() {
+    if (!widget.pageController.hasClients) return;
+    final page = widget.pageController.page?.round() ?? 0;
+    if (page >= 0 && page < MemberStatus.values.length) {
+      _scrollToTab(MemberStatus.values[page]);
+    }
+  }
+
+  void _scrollToTab(MemberStatus status) {
+    final key = _tabKeys[status];
+    if (key?.currentContext == null) return;
+    Scrollable.ensureVisible(
+      key!.currentContext!,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+      alignment: 0.5,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 58,
+      height: 52,
       child: AnimatedBuilder(
-        animation: pageController,
+        animation: widget.pageController,
         builder: (context, child) {
-          final double currentPage = pageController.hasClients
-              ? pageController.page ?? pageController.initialPage.toDouble()
-              : pageController.initialPage.toDouble();
+          final double currentPage = widget.pageController.hasClients
+              ? widget.pageController.page ??
+                  widget.pageController.initialPage.toDouble()
+              : widget.pageController.initialPage.toDouble();
 
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final double tabWidth =
-                  constraints.maxWidth / MemberStatus.values.length;
-
-              return Stack(
-                children: [
-                  // 1. TAB LABELS
-                  Row(
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: _tabScrollController,
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
                     children: MemberStatus.values.map((status) {
                       final int index = status.index;
+                      final double distance =
+                          (currentPage - index).abs().clamp(0.0, 1.0);
+                      final bool isSelected = distance < 0.5;
 
-                      // Distance of this tab from current page.
-                      final double distance = (currentPage - index).abs().clamp(
-                        0.0,
-                        1.0,
-                      );
-
-                      // Smooth text color during swipe.
                       final Color textColor = Color.lerp(
-                        const Color(0xFF6B6B6B),
-                        const Color(0xFF171717),
+                        const Color(0xFF64748B),
+                        const Color(0xFF1E293B),
                         1 - distance,
                       )!;
 
-                      return Expanded(
+                      return Container(
+                        key: _tabKeys[status],
+                        margin: const EdgeInsets.only(right: 12),
                         child: InkWell(
                           onTap: () {
-                            onChanged(status);
+                            widget.onChanged(status);
+                            _scrollToTab(status);
                           },
-                          child: Center(
-                            child: Text(
-                              status.label,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.lerp(
-                                  FontWeight.w400,
-                                  FontWeight.w600,
-                                  1 - distance,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  status.label,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                    color: textColor,
+                                    letterSpacing: -0.2,
+                                  ),
                                 ),
-                                color: textColor,
-                              ),
+                                const SizedBox(height: 5),
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 180),
+                                  height: 2.0,
+                                  width: isSelected ? 34 : 0,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary,
+                                    borderRadius: BorderRadius.circular(99),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       );
                     }).toList(),
                   ),
-
-                  // 2. BOTTOM BORDER
-                  const Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: Color(0xFFE5E7EB),
-                    ),
-                  ),
-
-                  // 3. ANIMATED INDICATOR
-                  Positioned(
-                    left: currentPage * tabWidth,
-                    bottom: 0,
-                    width: tabWidth,
-                    child: const _TabIndicator(),
-                  ),
-                ],
-              );
-            },
+                ),
+              ),
+              const Divider(
+                height: 1,
+                thickness: 1,
+                color: Color(0xFFF1F5F9),
+              ),
+            ],
           );
         },
-      ),
-    );
-  }
-}
-
-class _TabIndicator extends StatelessWidget {
-  const _TabIndicator();
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.center,
-      child: FractionallySizedBox(
-        widthFactor: 0.72,
-        child: Container(
-          height: 3,
-          decoration: BoxDecoration(
-            color: const Color(0xFF91AA9D),
-            borderRadius: BorderRadius.circular(999),
-          ),
-        ),
       ),
     );
   }

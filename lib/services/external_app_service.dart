@@ -15,18 +15,30 @@ class ExternalAppService {
     required String phoneNumber,
     required String message,
   }) async {
-    final String cleanPhoneNumber = phoneNumber.replaceAll(
+    String cleanPhoneNumber = phoneNumber.replaceAll(
       RegExp(r'[^0-9]'),
       '',
     );
 
-    final Uri uri = Uri.parse(
-      'https://wa.me/$cleanPhoneNumber'
-      '?text=${Uri.encodeComponent(message)}',
+    // Prepend country code 91 if 10-digit mobile number
+    if (cleanPhoneNumber.length == 10) {
+      cleanPhoneNumber = '91$cleanPhoneNumber';
+    }
+
+    final Uri whatsappAppUri = Uri.parse(
+      'whatsapp://send?phone=$cleanPhoneNumber&text=${Uri.encodeComponent(message)}',
     );
 
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      throw Exception('Could not open WhatsApp');
+    final Uri whatsappWebUri = Uri.parse(
+      'https://api.whatsapp.com/send?phone=$cleanPhoneNumber&text=${Uri.encodeComponent(message)}',
+    );
+
+    if (await canLaunchUrl(whatsappAppUri)) {
+      await launchUrl(whatsappAppUri, mode: LaunchMode.externalApplication);
+    } else if (await canLaunchUrl(whatsappWebUri)) {
+      await launchUrl(whatsappWebUri, mode: LaunchMode.externalApplication);
+    } else {
+      throw Exception('Could not open WhatsApp for $phoneNumber');
     }
   }
 

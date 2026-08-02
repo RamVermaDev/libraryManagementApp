@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:library_management/app_colors.dart';
 import 'package:library_management/drawer/drawer_footer.dart';
 import 'package:library_management/drawer/drawer_heading.dart';
 import 'package:library_management/drawer/drawer_list.dart';
@@ -8,13 +9,13 @@ class DrawerLayout extends StatelessWidget {
 
   final menuItems = [
     {
-      'icon': Icons.person_2_outlined,
-      'title': 'My Profile',
+      'icon': Icons.person_outline_rounded,
+      'title': 'Profile',
       'route': '/profile',
     },
     {
       'icon': Icons.local_library_outlined,
-      'title': 'My Library',
+      'title': 'Library',
       'route': '/library',
     },
     {
@@ -23,20 +24,10 @@ class DrawerLayout extends StatelessWidget {
       'route': '/subscription',
     },
     {
-      'icon': Icons.payment_outlined,
-      'title': 'Enrolement Fee',
-      'route': '/enrolement',
-    },
-    {
       'icon': Icons.assignment_ind_outlined,
       'title': 'Slot Setup',
       'route': '/slot',
     },
-    // {
-    //   'icon': Icons.schedule_outlined,
-    //   'title': 'Program Setup',
-    //   'route': '/program',
-    // },
     {
       'icon': Icons.event_seat_outlined,
       'title': 'Available Seat',
@@ -47,17 +38,17 @@ class DrawerLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      width: MediaQuery.of(context).size.width * 0.7,
-      backgroundColor: Color(0xFFD0E6FF),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      width: MediaQuery.of(context).size.width * 0.78,
+      backgroundColor: AppColors.surface,
+      elevation: 4,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       child: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DrawerHeading(libraryName: 'SVADHYAYA LIBRARY'),
-            Divider(thickness: 1),
-            DrawerList(menuItems: menuItems),
-            DrawerFooter(),
+            const DrawerHeading(),
+            const Divider(height: 1, thickness: 1, color: AppColors.border),
+            Expanded(child: DrawerList(menuItems: menuItems)),
+            const DrawerFooter(),
           ],
         ),
       ),

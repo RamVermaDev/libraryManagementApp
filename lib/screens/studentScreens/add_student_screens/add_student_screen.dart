@@ -12,7 +12,9 @@ import 'package:library_management/provider/seat_availability_provider.dart';
 import 'package:library_management/screens/studentScreens/add_student_screens/additional_section.dart';
 import 'package:library_management/screens/studentScreens/add_student_screens/membership_section.dart';
 import 'package:library_management/screens/studentScreens/add_student_screens/personal_detail_section.dart';
+import 'package:library_management/models/student_model.dart';
 import 'package:library_management/screens/studentScreens/student_dialog_screen/student_added_dialog.dart';
+import 'package:library_management/screens/studentScreens/student_dialog_screen/student_success_sheet.dart';
 
 class AddStudentScreen extends ConsumerStatefulWidget {
   const AddStudentScreen({super.key});
@@ -86,9 +88,9 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
     _calculateExpireDate();
   }
 
-  Future<bool> _addStudent(String? photoPublicId) async {
+  Future<StudentModel?> _addStudent(String? photoPublicId) async {
     if (!_formKey.currentState!.validate()) {
-      return false;
+      return null;
     }
 
     final amount = double.tryParse(_amountController.text.trim()) ?? 0;
@@ -99,11 +101,11 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
     final paidAmount = finalAmount - pending;
 
     final libraryId = ref.read(currentLibraryProvider);
-    if (libraryId == null) return false;
+    if (libraryId == null) return null;
 
     final seatId = ref.read(selectedSeatIdProvider);
 
-    final newStudent = await _studentController.addStudent(
+    return await _studentController.addStudent(
       context: context,
       ref: ref,
       libraryId: libraryId,
@@ -130,8 +132,6 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
           ? null
           : _noteController.text.trim(),
     );
-
-    return newStudent != null;
   }
 
   void _calculateExpireDate() {
@@ -268,7 +268,7 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
                       final finalAmountVal = amount - discount;
                       final paidAmount = finalAmountVal - pending;
 
-                      final confirmed = await showDialog<bool>(
+                      final createdStudent = await showDialog<StudentModel>(
                         context: context,
                         barrierDismissible: false,
                         builder: (_) => StudentAddedDialog(
@@ -289,8 +289,16 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
                       );
 
                       if (!mounted) return;
-                      if (confirmed == true) {
-                        Navigator.popUntil(context, (route) => route.isFirst);
+                      if (createdStudent != null) {
+                        await showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => StudentSuccessSheet(student: createdStudent),
+                        );
+                        if (mounted) {
+                          Navigator.popUntil(context, (route) => route.isFirst);
+                        }
                       }
                     },
                     child: _isLoading

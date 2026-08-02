@@ -202,14 +202,20 @@ class _SlotStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isOverbookedOrFull = seats <= 0;
+    final String label = seats < 0
+        ? "${seats.abs()} Overbooked"
+        : seats == 0
+            ? "0 Available"
+            : "$seats ${seats == 1 ? 'slot' : 'slots'} left";
+
     return Text(
-      //isFull ? "Full" : "$seats seats left",
-      "$seats seats left",
+      label,
       textAlign: TextAlign.right,
       style: TextStyle(
         fontSize: 13 * scale,
         fontWeight: FontWeight.w500,
-        color: isFull
+        color: isOverbookedOrFull
             ? const Color(0xffF04438)
             : selected
             ? Colors.white

@@ -4,8 +4,15 @@ import 'package:library_management/screens/studentScreens/memberScrolable/member
 
 class EmptyState extends StatelessWidget {
   final MemberStatus status;
+  final String? title;
+  final String? subtitle;
 
-  const EmptyState({super.key, required this.status});
+  const EmptyState({
+    super.key,
+    required this.status,
+    this.title,
+    this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,37 +23,37 @@ class EmptyState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 68,
-              height: 68,
+              width: 64,
+              height: 64,
               decoration: const BoxDecoration(
                 color: AppColors.primarySoft,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.people_outline_rounded,
+              child: Icon(
+                title != null ? Icons.search_off_rounded : Icons.people_outline_rounded,
                 color: AppColors.primary,
-                size: 30,
+                size: 28,
               ),
             ),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 16),
 
             Text(
-              'No ${status.label.toLowerCase()} members',
+              title ?? 'No ${status.label.toLowerCase()} members',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: AppColors.heading,
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
             ),
 
-            const SizedBox(height: 7),
+            const SizedBox(height: 6),
 
-            const Text(
-              'Members will appear here when available.',
+            Text(
+              subtitle ?? (title != null ? 'Try a different name or phone number' : 'Members will appear here when available.'),
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.grey300, fontSize: 14),
+              style: const TextStyle(color: AppColors.grey300, fontSize: 13),
             ),
           ],
         ),

@@ -12,7 +12,9 @@ import 'package:library_management/models/slot_availability_model.dart';
 import 'package:library_management/models/seat_availability_model.dart';
 import 'package:library_management/provider/seat_config_provider.dart';
 import 'package:library_management/screens/studentScreens/add_student_screens/add_student_screen.dart';
+import 'package:library_management/context_extension.dart';
 import 'package:library_management/screens/studentScreens/add_student_screens/slot_card_avalibility.dart';
+import 'package:library_management/screens/studentScreens/bulk_import/widgets/bulk_import_banner.dart';
 import 'package:library_management/screens/seat_box.dart';
 
 class BookSlotAndSeat extends ConsumerStatefulWidget {
@@ -129,6 +131,7 @@ class _BookSlotAndSeatState extends ConsumerState<BookSlotAndSeat> {
 
   @override
   Widget build(BuildContext context) {
+    final double scale = context.scale;
     final slots = ref.watch(slotAvailabilityProvider);
     final selectedSlotId = ref.watch(selectedSlotIdProvider);
     final seats = ref.watch(seatAvailabilityProvider);
@@ -140,10 +143,12 @@ class _BookSlotAndSeatState extends ConsumerState<BookSlotAndSeat> {
       body: SingleChildScrollView(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 30),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            BulkImportBanner(scale: scale),
+            const SizedBox(height: 20),
             const Text(
               'Available Slots',
               style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),

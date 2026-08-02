@@ -2,6 +2,7 @@ import 'dart:convert';
 
 class StudentSummaryModel {
   final int active;
+  final double totalPendingAmount;
 
   final int expiring1To3Days;
   final int expiring4To7Days;
@@ -13,6 +14,7 @@ class StudentSummaryModel {
 
   const StudentSummaryModel({
     this.active = 0,
+    this.totalPendingAmount = 0.0,
     this.expiring1To3Days = 0,
     this.expiring4To7Days = 0,
     this.expiring8To10Days = 0,
@@ -24,6 +26,7 @@ class StudentSummaryModel {
   factory StudentSummaryModel.fromMap(Map<String, dynamic> map) {
     return StudentSummaryModel(
       active: map['active'] ?? 0,
+      totalPendingAmount: (map['totalPendingAmount'] ?? 0).toDouble(),
 
       expiring1To3Days: map['expiring']?['days1To3'] ?? 0,
 
@@ -45,6 +48,7 @@ class StudentSummaryModel {
 
   StudentSummaryModel copyWith({
     int? active,
+    double? totalPendingAmount,
     int? expiring1To3Days,
     int? expiring4To7Days,
     int? expiring8To10Days,
@@ -54,6 +58,7 @@ class StudentSummaryModel {
   }) {
     return StudentSummaryModel(
       active: active ?? this.active,
+      totalPendingAmount: totalPendingAmount ?? this.totalPendingAmount,
       expiring1To3Days: expiring1To3Days ?? this.expiring1To3Days,
       expiring4To7Days: expiring4To7Days ?? this.expiring4To7Days,
       expiring8To10Days: expiring8To10Days ?? this.expiring8To10Days,

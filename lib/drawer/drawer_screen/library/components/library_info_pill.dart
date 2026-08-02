@@ -12,69 +12,62 @@ class LibraryInfoPill extends StatelessWidget {
 
   final int seats;
   final bool isCurrent;
-
   final ValueChanged<bool> onChanged;
   final double scale;
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: isCurrent ? const Color(0xffF5F9FF) : AppColors.grey50,
-        borderRadius: BorderRadius.circular(18),
+        color: isCurrent ? AppColors.primarySoft : AppColors.background,
+        borderRadius: BorderRadius.circular(14 * scale),
       ),
       child: Row(
         children: [
-          SizedBox(width: 6 * scale),
-          Container(
-            height: 34 * scale,
-            width: 34 * scale,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: .10),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.event_seat_outlined,
-              color: AppColors.primary,
-              size: 20 * scale,
-            ),
+          // Simple minimal seat icon without heavy 3D background box
+          Icon(
+            Icons.event_seat_outlined,
+            color: isCurrent ? AppColors.primary : AppColors.caption,
+            size: 20 * scale,
           ),
 
-          SizedBox(width: 12 * scale),
+          SizedBox(width: 8 * scale),
 
           Text(
-            "$seats",
-            style: TextStyle(fontSize: 22 * scale, fontWeight: FontWeight.w700),
+            '$seats Seats',
+            style: TextStyle(
+              fontSize: 14 * scale,
+              fontWeight: FontWeight.bold,
+              color: AppColors.heading,
+            ),
           ),
 
           const Spacer(),
 
+          // Minimal "Active" status badge using AppColors and few words
           if (isCurrent)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: .12),
-                borderRadius: BorderRadius.circular(30),
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.check_circle,
-                    size: 12 * scale,
-                    color: AppColors.primary,
+                  const Icon(
+                    Icons.check_rounded,
+                    size: 13,
+                    color: Colors.white,
                   ),
-
-                  SizedBox(width: 3 * scale),
-
+                  const SizedBox(width: 4),
                   Text(
-                    "Current",
+                    'Active',
                     style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 10 * scale,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11 * scale,
                     ),
                   ),
                 ],
@@ -83,11 +76,12 @@ class LibraryInfoPill extends StatelessWidget {
 
           SizedBox(width: 6 * scale),
 
+          // Clean switch toggle
           Transform.scale(
-            scale: .68 * scale,
+            scale: 0.75 * scale,
             child: Switch.adaptive(
               value: isCurrent,
-              //activeColor: Colors.white,
+              activeColor: Colors.white,
               activeTrackColor: AppColors.primary,
               onChanged: onChanged,
             ),

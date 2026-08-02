@@ -26,20 +26,7 @@ class MemberActions extends StatelessWidget {
           },
         ),
 
-        const SizedBox(width: 8),
 
-        // SMS Message Button
-        _ActionButton(
-          icon: Icons.chat_bubble_outline_rounded,
-          backgroundColor: const Color(0xFFEFF6FF),
-          iconColor: const Color(0xFF1D4ED8),
-          onTap: () async {
-            await ExternalAppService.sendSms(
-              phoneNumber: number,
-              message: message,
-            );
-          },
-        ),
 
         const SizedBox(width: 8),
 

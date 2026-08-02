@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/components/create_library_required_dialog.dart';
 import 'package:library_management/controllers/slot_controller.dart';
+import 'package:library_management/drawer/drawerWidgets/app_bar_widget.dart';
 import 'package:library_management/drawer/drawer_screen/slot/add_slot_screen.dart';
 import 'package:library_management/drawer/drawer_screen/slot/delete_slot_dialog.dart';
 import 'package:library_management/drawer/drawer_screen/slot/slot_card.dart';
@@ -83,6 +84,7 @@ class _SlotSetupScreenState extends ConsumerState<SlotSetupScreen> {
     final slots = ref.watch(slotProvider);
 
     return Scaffold(
+      appBar: const AppBarWidget(title: 'Slot Management'),
       backgroundColor: AppColors.background,
 
       floatingActionButton: FloatingActionButton.extended(
@@ -118,7 +120,7 @@ class _SlotSetupScreenState extends ConsumerState<SlotSetupScreen> {
           : RefreshIndicator(
               onRefresh: _loadSlots,
               child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(12, 30, 12, 100),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                 itemCount: slots.length,
                 itemBuilder: (context, index) {
                   final slot = slots[index];

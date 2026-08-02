@@ -86,175 +86,202 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsetsGeometry.symmetric(
-              horizontal: _horrizontalPadding,
-              vertical: _verticalPadding,
+        child: RefreshIndicator(
+          onRefresh: () async {
+            final libraryId = ref.read(currentLibraryProvider);
+            if (libraryId != null) {
+              await _getStudentSummary(libraryId);
+            }
+          },
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
             ),
-            child: Column(
-              children: [
-                ActiveMemberButton(
-                  activeStudent: activeStudent,
-                  isLoading: isLoading,
-                  scale: scale,
-                ),
-                SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(child: TotalStudentButton(scale: scale)),
-                    SizedBox(width: 20),
-                    Expanded(child: AddMemberButton(scale: scale)),
-                  ],
-                ),
-                SizedBox(height: 40),
-                MembershipContainer(
-                  scale: scale,
-                  onTapeOne: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return MembersScreen(
-                            args: MembersScreenArgs(
-                              initialStatus: MemberStatus.expiring,
-                              initialDayFilter: MemberDayFilter.oneToThree,
-                            ),
-                            appBarTitle: 'Expiring Member',
-                          );
-                        },
-                      ),
-                    );
-                  },
-                  onTapeTwo: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return MembersScreen(
-                            args: MembersScreenArgs(
-                              initialStatus: MemberStatus.expiring,
-                              initialDayFilter: MemberDayFilter.fourToSix,
-                            ),
-                            appBarTitle: 'Expiring Member',
-                          );
-                        },
-                      ),
-                    );
-                  },
-                  onTapeThree: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return MembersScreen(
-                            args: MembersScreenArgs(
-                              initialStatus: MemberStatus.expiring,
-                              initialDayFilter: MemberDayFilter.sevenToTen,
-                            ),
-                            appBarTitle: 'Expiring Member',
-                          );
-                        },
-                      ),
-                    );
-                  },
+            child: Padding(
+              padding: EdgeInsetsGeometry.symmetric(
+                horizontal: _horrizontalPadding,
+                vertical: _verticalPadding,
+              ),
+              child: Column(
+                children: [
+                  ActiveMemberButton(
+                    activeStudent: activeStudent,
+                    isLoading: isLoading,
+                    scale: scale,
+                  ),
+                  SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: TotalStudentButton(scale: scale)),
+                      SizedBox(width: 20),
+                      Expanded(child: AddMemberButton(scale: scale)),
+                    ],
+                  ),
+                  SizedBox(height: 40),
+                  MembershipContainer(
+                    scale: scale,
+                    onTapeOne: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return MembersScreen(
+                              args: MembersScreenArgs(
+                                initialStatus: MemberStatus.expiring,
+                                initialDayFilter: MemberDayFilter.oneToThree,
+                              ),
+                              appBarTitle: 'Expiring Member',
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    onTapeTwo: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return MembersScreen(
+                              args: MembersScreenArgs(
+                                initialStatus: MemberStatus.expiring,
+                                initialDayFilter: MemberDayFilter.fourToSix,
+                              ),
+                              appBarTitle: 'Expiring Member',
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    onTapeThree: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return MembersScreen(
+                              args: MembersScreenArgs(
+                                initialStatus: MemberStatus.expiring,
+                                initialDayFilter: MemberDayFilter.sevenToTen,
+                              ),
+                              appBarTitle: 'Expiring Member',
+                            );
+                          },
+                        ),
+                      );
+                    },
 
-                  title: 'Expiring Soon',
-                  cardTitle: 'MEMBERS',
-                  dayNumber: ['1-3 DAYS ', '4-6 DAYS', '7-10 DAYS'],
-                  dayCount: [
-                    expiring1To3Days,
-                    expiring4To7Days,
-                    expiring8To10Days,
-                  ],
+                    title: 'Expiring Soon',
+                    cardTitle: 'MEMBERS',
+                    dayNumber: ['1-3 DAYS ', '4-6 DAYS', '7-10 DAYS'],
+                    dayCount: [
+                      expiring1To3Days,
+                      expiring4To7Days,
+                      expiring8To10Days,
+                    ],
 
-                  conatinerColor: AppColors.warningLight,
-                  isLoading: isLoading,
-                ),
-                SizedBox(height: 20),
-                MembershipContainer(
-                  scale: scale,
-                  onTapeOne: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return MembersScreen(
-                            args: MembersScreenArgs(
-                              initialStatus: MemberStatus.expired,
-                              initialDayFilter: MemberDayFilter.oneToThree,
+                    conatinerColor: AppColors.warningLight,
+                    isLoading: isLoading,
+                  ),
+                  SizedBox(height: 20),
+                  MembershipContainer(
+                    scale: scale,
+                    onTapeOne: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return MembersScreen(
+                              args: MembersScreenArgs(
+                                initialStatus: MemberStatus.expired,
+                                initialDayFilter: MemberDayFilter.oneToThree,
+                              ),
+                              appBarTitle: 'Expiring Member',
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    onTapeTwo: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return MembersScreen(
+                              args: MembersScreenArgs(
+                                initialStatus: MemberStatus.expired,
+                                initialDayFilter: MemberDayFilter.fourToSix,
+                              ),
+                              appBarTitle: 'Expiring Member',
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    onTapeThree: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return MembersScreen(
+                              args: MembersScreenArgs(
+                                initialStatus: MemberStatus.expired,
+                                initialDayFilter: MemberDayFilter.sevenToTen,
+                              ),
+                              appBarTitle: 'Expiring Member',
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    title: 'Recently Expired',
+                    conatinerColor: AppColors.expiredContainerTwo,
+
+                    cardTitle: 'MEMBERS',
+                    dayNumber: ['1-3 DAYS', '4-6 DAYS', '7-10 DAYS'],
+                    dayCount: [
+                      expired1To3Days,
+                      expired4To7Days,
+                      expired8To10Days,
+                    ],
+
+                    isLoading: isLoading,
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    children: [
+                      IconButtonStudent(
+                        scale: scale,
+                        icon: Icons.payment,
+                        text: 'Due Amount',
+                        badgeText:
+                            '₹${(studentSummary?.totalPendingAmount ?? 0) % 1 == 0 ? (studentSummary?.totalPendingAmount ?? 0).toInt() : (studentSummary?.totalPendingAmount ?? 0).toStringAsFixed(0)}',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return MembersScreen(
+                                  args: const MembersScreenArgs(
+                                    initialStatus: MemberStatus.pending,
+                                  ),
+                                  appBarTitle: 'Due Amount',
+                                );
+                              },
                             ),
-                            appBarTitle: 'Expiring Member',
                           );
                         },
                       ),
-                    );
-                  },
-                  onTapeTwo: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return MembersScreen(
-                            args: MembersScreenArgs(
-                              initialStatus: MemberStatus.expired,
-                              initialDayFilter: MemberDayFilter.fourToSix,
-                            ),
-                            appBarTitle: 'Expiring Member',
-                          );
-                        },
+                      SizedBox(width: 12),
+                      IconButtonStudent(
+                        scale: scale,
+                        icon: Icons.schedule,
+                        text: 'Follow Up',
+                        onTap: () {},
                       ),
-                    );
-                  },
-                  onTapeThree: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return MembersScreen(
-                            args: MembersScreenArgs(
-                              initialStatus: MemberStatus.expired,
-                              initialDayFilter: MemberDayFilter.sevenToTen,
-                            ),
-                            appBarTitle: 'Expiring Member',
-                          );
-                        },
-                      ),
-                    );
-                  },
-                  title: 'Recently Expired',
-                  conatinerColor: AppColors.expiredContainerTwo,
-
-                  cardTitle: 'MEMBERS',
-                  dayNumber: ['1-3 DAYS', '4-6 DAYS', '7-10 DAYS'],
-                  dayCount: [
-                    expired1To3Days,
-                    expired4To7Days,
-                    expired8To10Days,
-                  ],
-
-                  isLoading: isLoading,
-                ),
-                SizedBox(height: 20),
-                Row(
-                  children: [
-                    IconButtonStudent(
-                      scale: scale,
-                      icon: Icons.payment,
-                      text: 'Due Amount',
-                      onTap: () {},
-                    ),
-                    SizedBox(width: 12),
-                    IconButtonStudent(
-                      scale: scale,
-                      icon: Icons.schedule,
-                      text: 'Follow Up',
-                      onTap: () {},
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-              ],
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),

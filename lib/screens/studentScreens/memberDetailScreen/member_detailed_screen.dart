@@ -492,7 +492,7 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
                     SizedBox(height: 18 * scale),
 
                     //ALL STUDENT ADMISSION
-                    AdmissionsCard(scale: scale),
+                    AdmissionsCard(scale: scale, student: _member),
 
                     //ReceiptContainer(),
                   ],

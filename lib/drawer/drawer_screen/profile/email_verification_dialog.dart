@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:library_management/app_colors.dart';
 import 'package:library_management/controllers/user_controller.dart';
 
 Future<void> showEmailVerificationOtpDialogBox({
@@ -39,7 +41,8 @@ class _EmailVerificationOtpDialogState
   }
 
   Future<void> _verifyOtp() async {
-    if (_otpController.text.trim().length != 6 || _isLoading) return;
+    final otpText = _otpController.text.trim();
+    if (otpText.length != 6 || _isLoading) return;
 
     setState(() {
       _isLoading = true;
@@ -48,7 +51,7 @@ class _EmailVerificationOtpDialogState
     final isVerified = await _userController.verifyEmailOtp(
       context: context,
       ref: widget.ref,
-      otp: _otpController.text,
+      otp: otpText,
     );
 
     if (!mounted) return;
@@ -58,6 +61,8 @@ class _EmailVerificationOtpDialogState
       return;
     }
 
+    _otpController.clear();
+
     setState(() {
       _isLoading = false;
     });
@@ -65,39 +70,166 @@ class _EmailVerificationOtpDialogState
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Email Verification'),
-      content: TextField(
-        controller: _otpController,
-        enabled: !_isLoading,
-        keyboardType: TextInputType.number,
-        maxLength: 6,
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-          LengthLimitingTextInputFormatter(6),
-        ],
-        decoration: const InputDecoration(
-          labelText: 'Enter OTP',
-          counterText: '',
-          border: OutlineInputBorder(),
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+      ),
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      child: Padding(
+        padding: const EdgeInsets.all(22),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Top Soft Icon Badge
+            Container(
+              width: 54,
+              height: 54,
+              decoration: const BoxDecoration(
+                color: AppColors.primarySoft,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.mark_email_read_outlined,
+                color: AppColors.primary,
+                size: 26,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            const Text(
+              'Verify Email Address',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.heading,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            const Text(
+              'Enter the 6-digit OTP sent to your email',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.caption,
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // OTP Input Field
+            TextField(
+              controller: _otpController,
+              enabled: !_isLoading,
+              keyboardType: TextInputType.number,
+              maxLength: 6,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 8,
+                color: AppColors.heading,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(6),
+              ],
+              decoration: InputDecoration(
+                hintText: '000000',
+                hintStyle: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 8,
+                  color: AppColors.caption.withValues(alpha: 0.4),
+                ),
+                counterText: '',
+                filled: true,
+                fillColor: const Color(0xFFF8FAFC),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Actions Row
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 46,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.border),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: _isLoading
+                          ? null
+                          : () => Navigator.pop(context, false),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: AppColors.heading,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                Expanded(
+                  child: SizedBox(
+                    height: 46,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.buttonPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: _isLoading ? null : _verifyOtp,
+                      child: _isLoading
+                          ? const SpinKitThreeBounce(
+                              color: Colors.white,
+                              size: 16,
+                            )
+                          : const Text(
+                              'Verify',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: _isLoading ? null : _verifyOtp,
-          child: _isLoading
-              ? const SizedBox(
-                  height: 18,
-                  width: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Verify'),
-        ),
-      ],
     );
   }
 }

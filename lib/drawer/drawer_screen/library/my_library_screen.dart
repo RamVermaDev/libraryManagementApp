@@ -67,12 +67,11 @@ class _MyLibraryScreenState extends ConsumerState<MyLibraryScreen> {
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          showModalBottomSheet<bool>(
-            context: context,
-            isScrollControlled: true,
-            useSafeArea: true,
-            backgroundColor: Colors.transparent,
-            builder: (_) => const LibrarySetupScreen(),
+          Navigator.push<bool>(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const LibrarySetupScreen(),
+            ),
           ).then((saved) {
             if (saved == true) {
               _fetchLibraries();
@@ -94,39 +93,39 @@ class _MyLibraryScreenState extends ConsumerState<MyLibraryScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBarWidget(title: 'My Libraries'),
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _fetchLibraries,
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : libraries.isEmpty
-              ? ListView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 16,
-                  ),
-                  children: const [
-                    SizedBox(height: 180),
-                    Icon(
-                      Icons.local_library_outlined,
-                      size: 56,
-                      color: AppColors.caption,
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : libraries.isEmpty
+                ? ListView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 16,
                     ),
-                    SizedBox(height: 12),
-                    Center(
-                      child: Text(
-                        'No libraries found',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.heading,
+                    children: const [
+                      SizedBox(height: 180),
+                      Icon(
+                        Icons.local_library_outlined,
+                        size: 56,
+                        color: AppColors.caption,
+                      ),
+                      SizedBox(height: 12),
+                      Center(
+                        child: Text(
+                          'No libraries found',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.heading,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  itemCount: libraries.length,
+                    ],
+                  )
+                : ListView.separated(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(0, 8, 0, 90),
+                    itemCount: libraries.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 2),
                   itemBuilder: (context, index) {
                     final library = libraries[index];
@@ -166,7 +165,6 @@ class _MyLibraryScreenState extends ConsumerState<MyLibraryScreen> {
                     );
                   },
                 ),
-        ),
       ),
     );
   }

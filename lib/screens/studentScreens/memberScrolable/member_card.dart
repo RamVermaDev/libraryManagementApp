@@ -26,6 +26,7 @@ class MemberCard extends StatelessWidget {
     this.onPause,
     this.onResume,
     this.onUnblock,
+    this.onPending,
   });
 
   final VoidCallback onTap;
@@ -49,6 +50,7 @@ class MemberCard extends StatelessWidget {
   final VoidCallback? onPause;
   final VoidCallback? onResume;
   final VoidCallback? onUnblock;
+  final VoidCallback? onPending;
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +131,9 @@ class MemberCard extends StatelessWidget {
                   ],
                 ),
 
-                const SizedBox(height: 18),
+                const SizedBox(height: 14),
+                const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
+                const SizedBox(height: 14),
 
                 // 2. Middle Info Grid (Plan, Expires, Timing, Seat)
                 MemberInformation(
@@ -139,17 +143,21 @@ class MemberCard extends StatelessWidget {
                   seatNumber: seatNumber,
                 ),
 
-                const SizedBox(height: 18),
+                const SizedBox(height: 14),
+                const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
+                const SizedBox(height: 14),
 
                 // 3. Footer Row: Status Pill Badge + Dynamic Action Button
                 MemberCardFooter(
                   status: status,
                   rawStatus: rawStatus,
                   expireDate: expireDate,
+                  pendingAmount: pendingAmount,
                   onRenew: onRenew,
                   onPause: onPause,
                   onResume: onResume,
                   onUnblock: onUnblock,
+                  onPending: onPending,
                 ),
               ],
             ),

@@ -34,6 +34,7 @@ class StudentSummaryNotifier extends StateNotifier<StudentSummaryModel?> {
     int exp1To3 = currentState.expiring1To3Days;
     int exp4To7 = currentState.expiring4To7Days;
     int exp8To10 = currentState.expiring8To10Days;
+    double totalPending = currentState.totalPendingAmount + student.totalPending;
 
     if (daysLeft != null && daysLeft >= 0 && daysLeft <= 10) {
       if (daysLeft >= 0 && daysLeft <= 3) {
@@ -47,6 +48,7 @@ class StudentSummaryNotifier extends StateNotifier<StudentSummaryModel?> {
 
     state = currentState.copyWith(
       active: active,
+      totalPendingAmount: totalPending,
       expiring1To3Days: exp1To3,
       expiring4To7Days: exp4To7,
       expiring8To10Days: exp8To10,
@@ -191,6 +193,17 @@ class StudentSummaryNotifier extends StateNotifier<StudentSummaryModel?> {
       expired4To7Days: expired4To7,
       expired8To10Days: expired8To10,
     );
+  }
+
+  void onPendingAmountUpdated({
+    required double oldAmount,
+    required double newAmount,
+  }) {
+    final currentState = state;
+    if (currentState == null) return;
+    final double diff = newAmount - oldAmount;
+    final double updated = (currentState.totalPendingAmount + diff).clamp(0.0, double.infinity);
+    state = currentState.copyWith(totalPendingAmount: updated);
   }
 
   void clearSummary() {

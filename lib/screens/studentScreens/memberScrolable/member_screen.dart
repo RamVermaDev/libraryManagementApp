@@ -9,7 +9,7 @@ import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/provider/student_provider.dart';
 import 'package:library_management/provider/student_state.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/day_filter_section.dart';
-import 'package:library_management/screens/studentScreens/memberScrolable/member_search_app_bar.dart';
+import 'package:library_management/screens/studentScreens/memberScrolable/search_field.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/members_body.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/members.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/members_screen_args.dart';
@@ -49,6 +49,10 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
 
   /// Currently selected day filter
   MemberDayFilter _selectedDayFilter = MemberDayFilter.oneToThree;
+
+  /// Global search state
+  List<StudentModel>? _globalSearchResults;
+  bool _isGlobalSearching = false;
 
   /// Screen state
   bool _isLoading = false;
@@ -327,6 +331,41 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
     }
   }
 
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+
+    final query = value.trim();
+    if (query.isEmpty) {
+      if (mounted) {
+        setState(() {
+          _globalSearchResults = null;
+          _isGlobalSearching = false;
+        });
+      }
+      return;
+    }
+
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () async {
+      final libraryId = ref.read(currentLibraryProvider);
+      if (libraryId == null) return;
+
+      if (mounted) setState(() => _isGlobalSearching = true);
+
+      final results = await _studentController.searchLibraryStudents(
+        ref: ref,
+        libraryId: libraryId,
+        query: query,
+      );
+
+      if (mounted) {
+        setState(() {
+          _globalSearchResults = results;
+          _isGlobalSearching = false;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<String?>(currentLibraryProvider, (previous, next) {
@@ -335,60 +374,117 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
     });
 
     final studentState = ref.watch(studentProvider);
+    final isSearching = _searchController.text.trim().isNotEmpty;
 
-    return Scaffold(
-      appBar: MemberSearchAppBar(onSearchChanged: (value) => 'a'),
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            SizedBox(height: 12),
-            StatusTabs(
-              pageController: _pageController,
-              onChanged: _onStatusChanged,
-            ),
-
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
-              switchInCurve: Curves.easeOut,
-              switchOutCurve: Curves.easeIn,
-              child: _selectedStatus.hasDayFilter
-                  ? DayFilterSection(
-                      key: ValueKey(_selectedStatus),
-                      selectedFilter: _selectedDayFilter,
-                      onChanged: _onDayFilterChanged,
-                    )
-                  : const SizedBox(key: ValueKey('no-filter'), height: 18),
-            ),
-
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: MemberStatus.values.length,
-                onPageChanged: _onPageChanged,
-                itemBuilder: (context, index) {
-                  final pageStatus = MemberStatus.values[index];
-                  final pageMembers = getMembersByStatus(
-                    studentState,
-                    pageStatus,
-                    _selectedDayFilter,
-                  );
-
-                  return MembersBody(
-                    members: pageMembers,
-                    isLoading: _isLoading,
-                    isLoadingMore:
-                        _isLoadingMore && pageStatus == _selectedStatus,
-                    errorMessage: _errorMessage,
-                    selectedStatus: pageStatus,
-                    scrollController: _scrollControllers[pageStatus]!,
-                    onRefresh: _onRefresh,
-                    onRetry: _fetchMembers,
-                  );
-                },
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: AppColors.background,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          titleSpacing: 0,
+          title: SearchField(
+            controller: _searchController,
+            hintText: 'Search name/phone',
+            onChanged: _onSearchChanged,
+            onClear: () {
+              _searchController.clear();
+              _onSearchChanged('');
+            },
+          ),
+        ),
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Smooth status tabs collapse animation when searching
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                switchInCurve: Curves.easeOut,
+                switchOutCurve: Curves.easeIn,
+                transitionBuilder: (child, animation) => SizeTransition(
+                  sizeFactor: animation,
+                  axisAlignment: -1.0,
+                  child: child,
+                ),
+                child: isSearching
+                    ? const SizedBox(
+                        key: ValueKey('searching-tabs-hidden'),
+                        height: 14,
+                      )
+                    : Column(
+                        key: const ValueKey('normal-tabs-visible'),
+                        children: [
+                          const SizedBox(height: 4),
+                          StatusTabs(
+                            pageController: _pageController,
+                            onChanged: _onStatusChanged,
+                          ),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 220),
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeIn,
+                            child: _selectedStatus.hasDayFilter
+                                ? DayFilterSection(
+                                    key: ValueKey(_selectedStatus),
+                                    selectedFilter: _selectedDayFilter,
+                                    onChanged: _onDayFilterChanged,
+                                  )
+                                : const SizedBox(
+                                    key: ValueKey('no-filter'),
+                                    height: 18,
+                                  ),
+                          ),
+                        ],
+                      ),
               ),
-            ),
-          ],
+
+              Expanded(
+                child: isSearching
+                    ? MembersBody(
+                        members: _globalSearchResults ?? [],
+                        isLoading: _isGlobalSearching,
+                        isLoadingMore: false,
+                        errorMessage: _errorMessage,
+                        selectedStatus: MemberStatus.all,
+                        scrollController: ScrollController(),
+                        onRefresh: () async {
+                          _onSearchChanged(_searchController.text);
+                        },
+                        onRetry: () {
+                          _onSearchChanged(_searchController.text);
+                        },
+                        isSearching: true,
+                      )
+                    : PageView.builder(
+                        controller: _pageController,
+                        itemCount: MemberStatus.values.length,
+                        onPageChanged: _onPageChanged,
+                        itemBuilder: (context, index) {
+                          final pageStatus = MemberStatus.values[index];
+                          final pageMembers = getMembersByStatus(
+                            studentState,
+                            pageStatus,
+                            _selectedDayFilter,
+                          );
+
+                          return MembersBody(
+                            members: pageMembers,
+                            isLoading: _isLoading,
+                            isLoadingMore:
+                                _isLoadingMore && pageStatus == _selectedStatus,
+                            errorMessage: _errorMessage,
+                            selectedStatus: pageStatus,
+                            scrollController: _scrollControllers[pageStatus]!,
+                            onRefresh: _onRefresh,
+                            onRetry: _fetchMembers,
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );

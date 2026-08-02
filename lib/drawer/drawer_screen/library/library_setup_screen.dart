@@ -22,55 +22,30 @@ class LibrarySetupScreen extends ConsumerStatefulWidget {
   ConsumerState<LibrarySetupScreen> createState() => _LibrarySetupScreenState();
 }
 
-class _LibrarySetupScreenState extends ConsumerState<LibrarySetupScreen>
-    with SingleTickerProviderStateMixin {
-  //==========================
-  // Controllers
-  //==========================
-
+class _LibrarySetupScreenState extends ConsumerState<LibrarySetupScreen> {
   final _libraryController = LibraryController();
-
-  final _pageController = PageController();
+  final ScrollController _scrollController = ScrollController();
 
   final _formKeyStep1 = GlobalKey<FormState>();
   final _formKeyStep2 = GlobalKey<FormState>();
 
   final TextEditingController libraryNameController = TextEditingController();
-
   final TextEditingController whatsappController = TextEditingController();
-
   final TextEditingController cityController = TextEditingController();
-
   final TextEditingController totalSeatsController = TextEditingController();
-
-  final TextEditingController prefixController = TextEditingController(
-    text: "A",
-  );
-
-  //==========================
-  // Variables
-  //==========================
+  final TextEditingController prefixController = TextEditingController(text: "A");
 
   int currentStep = 0;
-
   bool autoGenerateSeats = true;
-
   bool isLoading = false;
-
   File? logoImage;
 
   bool get isEditMode => widget.library != null;
-
   String get submitLabel => isEditMode ? "Update Library" : "Create Library";
-
-  //==========================
-  // Dispose
-  //==========================
 
   @override
   void initState() {
     super.initState();
-
     final library = widget.library;
     if (library == null) return;
 
@@ -82,22 +57,22 @@ class _LibrarySetupScreenState extends ConsumerState<LibrarySetupScreen>
 
   @override
   void dispose() {
-    _pageController.dispose();
-
+    _scrollController.dispose();
     libraryNameController.dispose();
     whatsappController.dispose();
     cityController.dispose();
     totalSeatsController.dispose();
     prefixController.dispose();
-
     super.dispose();
   }
 
-  //==========================
-  // Navigation
-  //==========================
+  void nextStep() async {
+    if (isEditMode) {
+      if (!_formKeyStep1.currentState!.validate()) return;
+      _submitUpdate();
+      return;
+    }
 
-  Future<void> nextStep() async {
     if (currentStep == 0) {
       if (!_formKeyStep1.currentState!.validate()) return;
 
@@ -105,48 +80,69 @@ class _LibrarySetupScreenState extends ConsumerState<LibrarySetupScreen>
         currentStep = 1;
       });
 
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 350),
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
-
       return;
     }
 
     if (!_formKeyStep2.currentState!.validate()) return;
+    _submitCreate();
+  }
 
+  Future<void> _submitUpdate() async {
     setState(() {
       isLoading = true;
     });
 
     try {
-      if (isEditMode) {
-        await _libraryController.updateLibrary(
-          context: context,
-          ref: ref,
-          libraryId: widget.library!.id!,
-          libraryName: libraryNameController.text.trim(),
-          whatsappNumber: whatsappController.text.trim(),
-          city: cityController.text.trim(),
-          totalSeats: int.tryParse(totalSeatsController.text.trim()) ?? 0,
-          tagLine: widget.library!.tagLine,
-          state: widget.library!.state,
-          pinCode: widget.library!.pinCode,
-        );
-      } else {
-        await _libraryController.createLibrary(
-          context: context,
-          ref: ref,
-          libraryName: libraryNameController.text.trim(),
-          whatsappNumber: whatsappController.text.trim(),
-          city: cityController.text.trim(),
-          totalSeats: int.tryParse(totalSeatsController.text.trim()) ?? 0,
+      await _libraryController.updateLibrary(
+        context: context,
+        ref: ref,
+        libraryId: widget.library!.id!,
+        libraryName: libraryNameController.text.trim(),
+        whatsappNumber: whatsappController.text.trim(),
+        city: cityController.text.trim(),
+        totalSeats: widget.library!.totalSeats, // Retain existing seats
+        tagLine: widget.library!.tagLine,
+        state: widget.library!.state,
+        pinCode: widget.library!.pinCode,
+      );
 
-          // Optional fields
-          tagLine: "",
-          state: "",
-          pinCode: "",
-        );
+      if (mounted) {
+        Navigator.pop(context, true);
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _submitCreate() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      await _libraryController.createLibrary(
+        context: context,
+        ref: ref,
+        libraryName: libraryNameController.text.trim(),
+        whatsappNumber: whatsappController.text.trim(),
+        city: cityController.text.trim(),
+        totalSeats: int.tryParse(totalSeatsController.text.trim()) ?? 0,
+        tagLine: "",
+        state: "",
+        pinCode: "",
+      );
+
+      if (mounted) {
+        Navigator.pop(context, true);
       }
     } finally {
       if (mounted) {
@@ -162,8 +158,9 @@ class _LibrarySetupScreenState extends ConsumerState<LibrarySetupScreen>
       currentStep = 0;
     });
 
-    _pageController.previousPage(
-      duration: const Duration(milliseconds: 350),
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
   }
@@ -187,9 +184,7 @@ class _LibrarySetupScreenState extends ConsumerState<LibrarySetupScreen>
                   "Choose Logo",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-
                 const SizedBox(height: 24),
-
                 Row(
                   children: [
                     Expanded(
@@ -197,12 +192,10 @@ class _LibrarySetupScreenState extends ConsumerState<LibrarySetupScreen>
                         borderRadius: BorderRadius.circular(16),
                         onTap: () async {
                           Navigator.pop(context);
-
                           final XFile? image = await _picker.pickImage(
                             source: ImageSource.camera,
                             imageQuality: 85,
                           );
-
                           if (image != null) {
                             setState(() {
                               logoImage = File(image.path);
@@ -217,32 +210,24 @@ class _LibrarySetupScreenState extends ConsumerState<LibrarySetupScreen>
                           ),
                           child: const Column(
                             children: [
-                              Icon(
-                                Icons.photo_camera,
-                                size: 34,
-                                color: Colors.indigo,
-                              ),
-                              SizedBox(height: 10),
-                              Text("Camera"),
+                              Icon(Icons.camera_alt_outlined, color: Colors.indigo, size: 28),
+                              SizedBox(height: 8),
+                              Text("Camera", style: TextStyle(fontWeight: FontWeight.w600)),
                             ],
                           ),
                         ),
                       ),
                     ),
-
                     const SizedBox(width: 16),
-
                     Expanded(
                       child: InkWell(
                         borderRadius: BorderRadius.circular(16),
                         onTap: () async {
                           Navigator.pop(context);
-
                           final XFile? image = await _picker.pickImage(
                             source: ImageSource.gallery,
                             imageQuality: 85,
                           );
-
                           if (image != null) {
                             setState(() {
                               logoImage = File(image.path);
@@ -257,13 +242,9 @@ class _LibrarySetupScreenState extends ConsumerState<LibrarySetupScreen>
                           ),
                           child: const Column(
                             children: [
-                              Icon(
-                                Icons.photo_library,
-                                size: 34,
-                                color: Colors.indigo,
-                              ),
-                              SizedBox(height: 10),
-                              Text("Gallery"),
+                              Icon(Icons.photo_library_outlined, color: Colors.indigo, size: 28),
+                              SizedBox(height: 8),
+                              Text("Gallery", style: TextStyle(fontWeight: FontWeight.w600)),
                             ],
                           ),
                         ),
@@ -271,8 +252,6 @@ class _LibrarySetupScreenState extends ConsumerState<LibrarySetupScreen>
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -281,10 +260,6 @@ class _LibrarySetupScreenState extends ConsumerState<LibrarySetupScreen>
     );
   }
 
-  //==========================
-  // UI
-  //==========================
-
   @override
   Widget build(BuildContext context) {
     final double scale = context.scale;
@@ -292,57 +267,100 @@ class _LibrarySetupScreenState extends ConsumerState<LibrarySetupScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBarWidget(
-        title: widget.library == null ? 'Create Library' : 'Update Library',
+        title: isEditMode ? 'Update Library' : 'Create Library',
       ),
-
       body: SafeArea(
         child: Column(
           children: [
-            SizedBox(height: 20 * scale),
-
-            buildStepper(currentStep),
-
-            SizedBox(height: 24 * scale),
-
             Expanded(
-              child: PageView(
-                controller: _pageController,
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  buildBasicStep(
-                    formKeyStep1: _formKeyStep1,
-                    logoImage: logoImage,
-                    libraryNameController: libraryNameController,
-                    whatsappController: whatsappController,
-                    cityController: cityController,
-                    pickLogo: pickLogo,
-                  ),
-                  buildSeatStep(
-                    formKeyStep2: _formKeyStep2,
-                    totalSeatsController: totalSeatsController,
-                    prefixController: prefixController,
-                    autoGenerateSeats: autoGenerateSeats,
-                    onAutoGenerateChanged: (value) {
-                      setState(() {
-                        autoGenerateSeats = value;
-                      });
-                    },
-                    scale: scale,
-                  ),
-                ],
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (!isEditMode) ...[
+                      buildStepper(currentStep),
+                      const SizedBox(height: 20),
+                    ],
+
+                    if (isEditMode)
+                      buildBasicStep(
+                        formKeyStep1: _formKeyStep1,
+                        logoImage: logoImage,
+                        libraryNameController: libraryNameController,
+                        whatsappController: whatsappController,
+                        cityController: cityController,
+                        pickLogo: pickLogo,
+                        scale: scale,
+                      )
+                    else
+                      AnimatedCrossFade(
+                        firstChild: buildBasicStep(
+                          formKeyStep1: _formKeyStep1,
+                          logoImage: logoImage,
+                          libraryNameController: libraryNameController,
+                          whatsappController: whatsappController,
+                          cityController: cityController,
+                          pickLogo: pickLogo,
+                          scale: scale,
+                        ),
+                        secondChild: buildSeatStep(
+                          formKeyStep2: _formKeyStep2,
+                          totalSeatsController: totalSeatsController,
+                          prefixController: prefixController,
+                          autoGenerateSeats: autoGenerateSeats,
+                          onAutoGenerateChanged: (value) {
+                            setState(() {
+                              autoGenerateSeats = value;
+                            });
+                          },
+                          scale: scale,
+                        ),
+                        crossFadeState: currentStep == 0
+                            ? CrossFadeState.showFirst
+                            : CrossFadeState.showSecond,
+                        duration: const Duration(milliseconds: 300),
+                      ),
+                  ],
+                ),
               ),
             ),
 
-            buildBottomButtons(
-              currentStep: currentStep,
-              nextStep: nextStep,
-              previousStep: previousStep,
-              isLoading: isLoading,
-              submitLabel: submitLabel,
-              scale: scale,
+            // Fixed Bottom Buttons
+            Container(
+              color: AppColors.background,
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+              child: isEditMode
+                  ? SizedBox(
+                      width: double.infinity,
+                      height: 52 * scale,
+                      child: FilledButton(
+                        onPressed: isLoading ? () {} : nextStep,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.buttonPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Text(
+                          "Update Library",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15 * scale,
+                          ),
+                        ),
+                      ),
+                    )
+                  : buildBottomButtons(
+                      currentStep: currentStep,
+                      nextStep: nextStep,
+                      previousStep: previousStep,
+                      isLoading: isLoading,
+                      submitLabel: submitLabel,
+                      scale: scale,
+                    ),
             ),
-
-            const SizedBox(height: 18),
           ],
         ),
       ),

@@ -20,7 +20,12 @@ class StudentNotifier extends StateNotifier<StudentState> {
   }
 
   void addStudent(StudentModel student) {
-    state = state.copyWith(allStudents: [student, ...state.allStudents]);
+    state = state.copyWith(
+      allStudents: [student, ...state.allStudents],
+      pendingStudents: student.totalPending > 0
+          ? [student, ...state.pendingStudents]
+          : state.pendingStudents,
+    );
   }
 
   void addMoreAllStudents(List<StudentModel> students) {
@@ -39,16 +44,18 @@ class StudentNotifier extends StateNotifier<StudentState> {
   void updateStudent(StudentModel updatedStudent) {
     if (updatedStudent.id == null) return;
 
+    final bool hasPending = updatedStudent.totalPending > 0;
+    final List<StudentModel> updatedPending = hasPending
+        ? _replaceStudentInList(state.pendingStudents, updatedStudent)
+        : state.pendingStudents.where((s) => s.id != updatedStudent.id).toList();
+
     state = state.copyWith(
       allStudents: _replaceStudentInList(state.allStudents, updatedStudent),
       activeStudents: _replaceStudentInList(
         state.activeStudents,
         updatedStudent,
       ),
-      pendingStudents: _replaceStudentInList(
-        state.pendingStudents,
-        updatedStudent,
-      ),
+      pendingStudents: updatedPending,
       expiring1To3Days: _replaceStudentInList(
         state.expiring1To3Days,
         updatedStudent,

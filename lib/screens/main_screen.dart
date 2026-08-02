@@ -34,15 +34,24 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //Appbar
       appBar: AppBar(
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(
+              Icons.notes_rounded,
+              color: AppColors.heading,
+              size: 22,
+            ),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
         title: Text(
           screnName[_selectedIndex],
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
         ),
         backgroundColor: AppColors.background,
         centerTitle: true,
-        //forceMaterialTransparency: true,
+        scrolledUnderElevation: 0,
       ),
 
       //Drawer

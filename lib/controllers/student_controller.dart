@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:library_management/app_notification.dart';
 import 'package:library_management/global_varaible.dart';
+import 'package:library_management/models/fee_record_model.dart';
 import 'package:library_management/models/payemnt_model.dart';
 import 'package:library_management/models/student_model.dart';
 import 'package:library_management/provider/revenue_provider.dart';
@@ -271,7 +272,15 @@ class StudentController {
         data['student'] as Map<String, dynamic>,
       );
 
+      final oldStudent = ref.read(studentProvider).allStudents.firstWhere(
+        (s) => s.id == updatedStudent.id,
+        orElse: () => updatedStudent,
+      );
       ref.read(studentProvider.notifier).updateStudent(updatedStudent);
+      ref.read(studentSummaryProvider.notifier).onPendingAmountUpdated(
+        oldAmount: oldStudent.totalPending,
+        newAmount: updatedStudent.totalPending,
+      );
 
       final paymentData = data['payment'];
       if (paymentData != null) {
@@ -494,7 +503,7 @@ class StudentController {
         return '/api/$libraryId/getexpiredstudents';
 
       case MemberStatus.pending:
-        return '/api/$libraryId/getrecentpending';
+        return '/api/$libraryId/getpendingstudents';
     }
   }
 
@@ -813,6 +822,69 @@ class StudentController {
             throw UnimplementedError();
         }
         break;
+    }
+  }
+
+  /// Global Library Student Search across all status groups
+  /// Does NOT mutate studentProvider state!
+  Future<List<StudentModel>> searchLibraryStudents({
+    required WidgetRef ref,
+    required String libraryId,
+    required String query,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+      final response = await http.get(
+        Uri.parse(
+          '$uri/api/$libraryId/students/search?query=${Uri.encodeComponent(query)}',
+        ),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode != 200) return [];
+
+      final data = jsonDecode(response.body)['data'];
+      final studentList = data['students'] as List<dynamic>? ?? [];
+
+      return studentList
+          .map((student) => StudentModel.fromMap(student))
+          .toList();
+    } catch (e) {
+      debugPrint('GLOBAL SEARCH CONTROLLER ERROR: $e');
+      return [];
+    }
+  }
+
+  /// Fetches fee records / admissions history for a student
+  Future<List<FeeRecordModel>> fetchStudentFeeRecords({
+    required WidgetRef ref,
+    required String libraryId,
+    required String studentId,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+      final response = await http.get(
+        Uri.parse('$uri/api/$libraryId/students/$studentId/feerecords'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode != 200) return [];
+
+      final data = jsonDecode(response.body)['data'];
+      final recordList = data['feeRecords'] as List<dynamic>? ?? [];
+
+      return recordList
+          .map((rec) => FeeRecordModel.fromMap(rec as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      debugPrint('FETCH FEE RECORDS ERROR: $e');
+      return [];
     }
   }
 }
