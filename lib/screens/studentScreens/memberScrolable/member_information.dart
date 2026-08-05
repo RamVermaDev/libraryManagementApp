@@ -111,7 +111,7 @@ class _InfoCell extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 12.5,
             fontWeight: FontWeight.w700,
             color: Color(0xFF1E293B), // Dark heading value
           ),

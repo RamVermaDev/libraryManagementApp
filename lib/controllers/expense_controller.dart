@@ -10,6 +10,8 @@ import 'package:library_management/provider/revenue_provider.dart';
 import 'package:library_management/provider/token_provider.dart';
 import 'package:library_management/services/manage_http_response.dart';
 
+import 'package:library_management/services/api_headers.dart';
+
 class ExpenseController {
   Future<void> addExpense({
     required BuildContext context,
@@ -31,20 +33,10 @@ class ExpenseController {
         description: description,
       );
 
-      final token = ref.read(tokenProvider);
-
-      if (token == null || token.isEmpty) {
-        showSnackBar(context, 'Authentication required');
-        return;
-      }
-
       final response = await http.post(
         Uri.parse('$uri/api/addexpense'),
         body: expenseModel.toJson(),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $token',
-        },
+        headers: getApiHeaders(ref),
       );
 
       if (!context.mounted) return;

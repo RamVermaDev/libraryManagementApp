@@ -31,6 +31,7 @@ void showSnackBar(
   BuildContext context,
   String message, {
   bool isSuccess = false,
+  bool showIcon = true,
 }) {
   final messenger = ScaffoldMessenger.of(context);
 
@@ -46,11 +47,13 @@ void showSnackBar(
       duration: const Duration(seconds: 3),
       content: Row(
         children: [
-          Icon(
-            isSuccess ? Icons.check_circle : Icons.error,
-            color: Colors.white,
-          ),
-          const SizedBox(width: 12),
+          if (showIcon) ...[
+            Icon(
+              isSuccess ? Icons.check_circle : Icons.error,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 12),
+          ],
           Expanded(
             child: Text(
               message,

@@ -56,29 +56,14 @@ class SeatStatsOverview extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        '${config.totalSeats}',
-                        style: const TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.heading,
-                          height: 1.0,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'configured',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey.shade500,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    '${config.totalSeats}',
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.heading,
+                      height: 1.0,
+                    ),
                   ),
                 ],
               ),
@@ -95,7 +80,7 @@ class SeatStatsOverview extends StatelessWidget {
                   border: Border.all(color: AppColors.border),
                 ),
                 child: Text(
-                  'Prefix: $prefix',
+                  'Label: $prefix',
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,

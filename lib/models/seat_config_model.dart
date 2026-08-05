@@ -38,8 +38,11 @@ class SeatConfigModel {
     return SeatConfigModel(
       totalSeats: (map['totalSeats'] ?? 0) as int,
       availableSeats: (map['availableSeats'] ?? 0) as int,
-      rows: (map['rows'] ?? 5) as int,
-      columns: (map['columns'] ?? 10) as int,
+      rows: (map['rows'] ??
+          (map['totalSeats'] != null && (map['totalSeats'] as int) > 0
+              ? ((map['totalSeats'] as int) / 6).ceil()
+              : 1)) as int,
+      columns: (map['columns'] ?? 6) as int,
       prefix: detectedPrefix,
       seats: seatsList,
     );

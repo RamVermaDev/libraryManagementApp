@@ -8,6 +8,7 @@ import 'package:library_management/controllers/revenue_summary_controller.dart';
 import 'package:library_management/models/chart_point_model.dart' as backend;
 import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/provider/revenue_provider.dart';
+import 'package:library_management/provider/user_provider.dart';
 import 'package:library_management/screens/revenueScreen/addExpense/add_expense_screen.dart';
 import 'package:library_management/screens/revenueScreen/chart/chart_models.dart';
 import 'package:library_management/screens/revenueScreen/chart/earnings_trend_card.dart';
@@ -15,6 +16,8 @@ import 'package:library_management/screens/revenueScreen/monthlyPerformance/mont
 import 'package:library_management/screens/revenueScreen/earningSummary/revenue_overview.dart';
 import 'package:library_management/screens/revenueScreen/recentPayement/recent_payements_section.dart';
 import 'package:library_management/screens/revenueScreen/revenue_formatters.dart';
+import 'package:library_management/services/subscription_guard.dart';
+import 'package:library_management/provider/app_mode_provider.dart';
 
 class RevenueAnalyticsScreen extends ConsumerStatefulWidget {
   const RevenueAnalyticsScreen({super.key});
@@ -118,6 +121,7 @@ class _RevenueAnalyticsScreenState
     });
 
     final scale = context.scale;
+    final isReceptionistMode = ref.watch(appModeProvider) == AppMode.reception;
     final hasLibrary = ref.watch(currentLibraryProvider) != null;
     final revenue = ref.watch(revenueProvider);
     final monthSummary = revenue.currentMonth;
@@ -127,10 +131,24 @@ class _RevenueAnalyticsScreenState
         ? _dailyPoints(revenue.thirtyDayTrend)
         : _monthlyPoints(revenue.twelveMonthTrend);
 
+    final allExpenses = monthSummary?.expenses ?? const [];
+    final isExpired = SubscriptionGuard.isExpired(ref.watch(userProvider));
+    final filteredExpenses = isReceptionistMode
+        ? allExpenses.where((e) => e.addedBy == 'reception').toList()
+        : allExpenses;
+
+    final paymentsList = isReceptionistMode
+        ? recentPayment?.take(7).toList()
+        : recentPayment;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFE),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
+          if (isExpired) {
+            SubscriptionGuard.showExpiredSheet(context);
+            return;
+          }
           if (ref.read(currentLibraryProvider) == null) {
             showCreateLibraryRequiredDialog(context);
             return;
@@ -144,13 +162,11 @@ class _RevenueAnalyticsScreenState
             builder: (_) => const AddExpenseScreen(),
           );
         },
-        backgroundColor: AppColors.primary,
+        backgroundColor: isExpired ? const Color(0xFF94A3B8) : AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 6,
-        // shape: const CircleBorder(),
-        // child: const Icon(Icons.add_rounded, size: 30),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        icon: const Icon(Icons.add_rounded, size: 18),
+        icon: Icon(isExpired ? Icons.lock_rounded : Icons.add_rounded, size: 14),
         label: const Text(
           'Expense',
           style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
@@ -163,18 +179,19 @@ class _RevenueAnalyticsScreenState
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(22, 28, 22, 0),
-                sliver: SliverToBoxAdapter(
-                  child: RevenueOverview(
-                    today: hasLibrary ? summary?.todayIncome : 0,
-                    month: hasLibrary ? summary?.monthlyIncome : 0,
-                    year: hasLibrary ? summary?.yearlyIncome : 0,
-                    allTime: hasLibrary ? summary?.allTimeIncome : 0,
-                    scale: scale,
+              if (!isReceptionistMode)
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(22, 28, 22, 0),
+                  sliver: SliverToBoxAdapter(
+                    child: RevenueOverview(
+                      today: hasLibrary ? summary?.todayIncome : 0,
+                      month: hasLibrary ? summary?.monthlyIncome : 0,
+                      year: hasLibrary ? summary?.yearlyIncome : 0,
+                      allTime: hasLibrary ? summary?.allTimeIncome : 0,
+                      scale: scale,
+                    ),
                   ),
                 ),
-              ),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(22, 22, 22, 0),
                 sliver: SliverToBoxAdapter(
@@ -182,39 +199,40 @@ class _RevenueAnalyticsScreenState
                     selectedMonth: _selectedMonth,
                     revenue: hasLibrary ? monthSummary?.income : 0,
                     expenses: hasLibrary ? monthSummary?.expense : 0,
-                    expenseItems: hasLibrary
-                        ? monthSummary?.expenses
-                        : const [],
-                    refundItems: hasLibrary
-                        ? monthSummary?.refunds
-                        : const [],
+                    expenseItems: hasLibrary ? filteredExpenses : const [],
+                    refundItems: isReceptionistMode
+                        ? const []
+                        : (hasLibrary ? monthSummary?.refunds : const []),
                     canGoPrevious: _canGoPrevious,
                     canGoNext: _canGoNext,
                     onPreviousMonth: () => _changeMonth(-1),
                     onNextMonth: () => _changeMonth(1),
                     scale: scale,
+                    isReceptionist: isReceptionistMode,
                   ),
                 ),
               ),
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(22, 22, 22, 0),
-                sliver: SliverToBoxAdapter(
-                  child: EarningsTrendCard(
-                    points: chartPoints,
-                    period: _selectedPeriod,
-                    onPeriodChanged: (period) {
-                      setState(() => _selectedPeriod = period);
-                    },
-                    scale: scale,
+              if (!isReceptionistMode)
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(22, 22, 22, 0),
+                  sliver: SliverToBoxAdapter(
+                    child: EarningsTrendCard(
+                      points: chartPoints,
+                      period: _selectedPeriod,
+                      onPeriodChanged: (period) {
+                        setState(() => _selectedPeriod = period);
+                      },
+                      scale: scale,
+                    ),
                   ),
                 ),
-              ),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(22, 34, 22, 110),
                 sliver: SliverToBoxAdapter(
                   child: RecentPaymentsSection(
-                    payments: recentPayment,
+                    payments: paymentsList,
                     scale: scale,
+                    hideViewAll: isReceptionistMode,
                   ),
                 ),
               ),

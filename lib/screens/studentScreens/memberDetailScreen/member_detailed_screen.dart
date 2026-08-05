@@ -17,6 +17,7 @@ import 'package:library_management/screens/studentScreens/pauseResume/pause_stud
 import 'package:library_management/screens/studentScreens/pauseResume/resume_student_sheet.dart';
 import 'package:library_management/screens/studentScreens/pauseResume/blacklist_student_sheet.dart';
 import 'package:library_management/screens/studentScreens/pauseResume/unblock_student_sheet.dart';
+import 'package:library_management/provider/app_mode_provider.dart';
 import 'package:library_management/services/profile_photo_service.dart';
 import 'package:library_management/services/student_message_service.dart';
 
@@ -395,6 +396,8 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isReceptionistMode = ref.watch(appModeProvider) == AppMode.reception;
+
     final libraryName = StudentMessageService.getLibraryName(
       ref,
       targetLibraryId: _member.libraryId,
@@ -411,9 +414,9 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
     return Scaffold(
       appBar: AppBarWidget(
         title: 'Member Info',
-        actionIcon: Icons.delete_outline_rounded,
+        actionIcon: isReceptionistMode ? null : Icons.delete_outline_rounded,
         color: Colors.red,
-        onActionPressed: _handleDeleteStudent,
+        onActionPressed: isReceptionistMode ? null : _handleDeleteStudent,
       ),
 
       body: SafeArea(
@@ -475,6 +478,7 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
                       joinDate: _formattedDate(_member.joiningDate),
                       expireDate: _formattedDate(_member.currentExpireDate),
                       slot: _member.slotTiming ?? 'Not Available',
+                      seatLabel: _member.seatLabel ?? _member.seatId,
                       planDuration:
                           '${_member.currentPlanDays.toString()} Days',
                     ),
@@ -482,14 +486,15 @@ class _MemberDetailedScreenState extends ConsumerState<MemberDetailedScreen> {
                     SizedBox(height: 24 * scale),
 
                     //AMOUNT, PENDING, & DISCOUNT
-                    PaymentCard(
-                      scale: scale,
-                      amount: _member.totalPaid.toInt().toString(),
-                      discount: _member.totalDiscount.toInt().toString(),
-                      pending: _member.totalPending.toInt().toString(),
-                    ),
-
-                    SizedBox(height: 18 * scale),
+                    if (!isReceptionistMode) ...[
+                      PaymentCard(
+                        scale: scale,
+                        amount: _member.totalPaid.toInt().toString(),
+                        discount: _member.totalDiscount.toInt().toString(),
+                        pending: _member.totalPending.toInt().toString(),
+                      ),
+                      SizedBox(height: 18 * scale),
+                    ],
 
                     //ALL STUDENT ADMISSION
                     AdmissionsCard(scale: scale, student: _member),

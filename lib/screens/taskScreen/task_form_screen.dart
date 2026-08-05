@@ -5,6 +5,7 @@ import 'package:library_management/app_colors.dart';
 import 'package:library_management/context_extension.dart';
 import 'package:library_management/controllers/task_controller.dart';
 import 'package:library_management/models/task_model.dart';
+import 'package:library_management/provider/app_mode_provider.dart';
 import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/screens/revenueScreen/section_header.dart';
 import 'package:library_management/screens/taskScreen/field/task_assign_toggle.dart';
@@ -56,25 +57,52 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
     super.dispose();
   }
 
+  void _updateUrgencyAndDate(String newUrgency) {
+    final anchor = widget.task?.createdAt ?? DateTime.now();
+    DateTime newDueDate;
+
+    switch (newUrgency.toLowerCase()) {
+      case 'low':
+        newDueDate = anchor.add(const Duration(days: 7));
+        break;
+
+      case 'medium':
+        newDueDate = anchor.add(const Duration(days: 4));
+        break;
+
+      case 'high':
+        newDueDate = anchor.add(const Duration(days: 2));
+        break;
+
+      default:
+        newDueDate = anchor.add(const Duration(days: 2));
+    }
+
+    setState(() {
+      _urgency = newUrgency;
+      _selectedDate = newDueDate;
+    });
+  }
+
   void _setDueDate() {
-    final now = DateTime.now();
+    final anchor = widget.task?.createdAt ?? DateTime.now();
 
     if (!widget.isEditing) {
       switch (_urgency.toLowerCase()) {
         case 'low':
-          _selectedDate = now.add(const Duration(days: 10));
+          _selectedDate = anchor.add(const Duration(days: 7));
           break;
 
         case 'medium':
-          _selectedDate = now.add(const Duration(days: 6));
+          _selectedDate = anchor.add(const Duration(days: 4));
           break;
 
         case 'high':
-          _selectedDate = now.add(const Duration(days: 3));
+          _selectedDate = anchor.add(const Duration(days: 2));
           break;
 
         default:
-          _selectedDate = now;
+          _selectedDate = anchor.add(const Duration(days: 2));
       }
     }
   }
@@ -89,26 +117,6 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
     if (!widget.isEditing) {
       _setDueDate();
     }
-
-    // if (_selectedDate == null) {
-    //   ScaffoldMessenger.of(
-    //     context,
-    //   ).showSnackBar(const SnackBar(content: Text('Please select a due date')));
-    //   return;
-    // }
-
-    //will change it
-
-    // final libraries = ref.read(libraryProvider);
-    // if (libraries.isEmpty) {
-    //   debugPrint('No library found in provider');
-    //   return;
-    // }
-    //final library = libraries[0];
-
-    //if (library.id == null) return;
-
-    //print(library.id!);
 
     try {
       if (widget.isEditing) {
@@ -126,6 +134,20 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
         final libraryId = ref.read(currentLibraryProvider);
         if (libraryId == null) return;
 
+        final activeMode = ref.read(appModeProvider);
+        final isReceptionMode = activeMode == AppMode.reception;
+
+        String assignedRole = 'admin';
+        if (_selected == 'Self') {
+          assignedRole = isReceptionMode ? 'reception' : 'admin';
+        } else if (_selected == 'Admin') {
+          assignedRole = 'admin';
+        } else if (_selected == 'Reception' || _selected == 'Receptionist') {
+          assignedRole = 'reception';
+        } else {
+          assignedRole = isReceptionMode ? 'reception' : 'admin';
+        }
+
         await _taskController.addTask(
           context: context,
           ref: ref,
@@ -134,6 +156,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
           description: _descriptionController.text.trim(),
           dueDate: _selectedDate!,
           urgency: _urgency,
+          assignedToRole: assignedRole,
         );
       }
     } finally {
@@ -222,9 +245,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                 onSubmit: _addTask,
                 selectedUrgency: _urgency,
                 onChange: (value) {
-                  setState(() {
-                    _urgency = value;
-                  });
+                  _updateUrgencyAndDate(value);
                 },
                 //date: _selectedDate,
                 isLoading: _isLoading,
@@ -244,7 +265,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
   }
 }
 
-class _TaskForm extends StatelessWidget {
+class _TaskForm extends ConsumerWidget {
   const _TaskForm({
     required this.titleController,
     required this.descriptionController,
@@ -253,7 +274,6 @@ class _TaskForm extends StatelessWidget {
     required this.selectedUrgency,
     required this.onChange,
     required this.isEditing,
-    //this.date,
     required this.scale,
     required this.selected,
     required this.assignTo,
@@ -267,7 +287,6 @@ class _TaskForm extends StatelessWidget {
   final String selectedUrgency;
   final ValueChanged<String> onChange;
   final bool isEditing;
-  //final DateTime? date;
 
   final String selected;
   final ValueChanged<String> assignTo;
@@ -276,7 +295,10 @@ class _TaskForm extends StatelessWidget {
   final bool isLoading;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isReceptionMode = ref.watch(appModeProvider) == AppMode.reception;
+    final rightTitle = isReceptionMode ? 'Admin' : 'Reception';
+
     return ListView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -333,18 +355,6 @@ class _TaskForm extends StatelessWidget {
 
         SizedBox(height: 20 * scale),
 
-        // TitleText(
-        //   title: 'Due date',
-        //   fontSize: 12 * scale,
-        //   weight: FontWeight.w400,
-        //   fontColor: AppColors.formLabel,
-        // ),
-        // SizedBox(height: 8 * scale),
-
-        // isEditing
-        //     ? DateField(onDateChanged: onDateChanged, selectedDate: date)
-        //     : DateField(onDateChanged: onDateChanged),
-        // const SizedBox(height: 20),
         TitleText(
           title: 'Urgency',
           fontSize: 12 * scale,
@@ -366,7 +376,7 @@ class _TaskForm extends StatelessWidget {
         SizedBox(height: 8 * scale),
         TaskAssignToggle(
           leftTitle: 'Self',
-          rightTitle: 'Reception',
+          rightTitle: rightTitle,
           selected: selected,
           onChanged: assignTo,
         ),

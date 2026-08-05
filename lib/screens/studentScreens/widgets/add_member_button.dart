@@ -3,12 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/components/create_library_required_dialog.dart';
 import 'package:library_management/provider/current_library_provider.dart';
+import 'package:library_management/provider/user_provider.dart';
 import 'package:library_management/screens/studentScreens/add_student_screens/book_slot_and_seat.dart';
+import 'package:library_management/services/subscription_guard.dart';
 
 class AddMemberButton extends ConsumerStatefulWidget {
-  const AddMemberButton({super.key, required this.scale});
+  const AddMemberButton({
+    super.key,
+    required this.scale,
+    this.height,
+  });
 
   final double scale;
+  final double? height;
 
   @override
   ConsumerState<AddMemberButton> createState() => _AddMemberButtonState();
@@ -30,11 +37,18 @@ class _AddMemberButtonState extends ConsumerState<AddMemberButton> {
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userProvider);
+    final isExpired = SubscriptionGuard.isExpired(user);
+    final buttonColor = isExpired ? const Color(0xFF94A3B8) : AppColors.primary;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        //borderRadius: BorderRadius.circular(12 * scale),
         onTap: () {
+          if (isExpired) {
+            SubscriptionGuard.showExpiredSheet(context);
+            return;
+          }
           if (ref.read(currentLibraryProvider) == null) {
             showCreateLibraryRequiredDialog(context);
             return;
@@ -46,9 +60,9 @@ class _AddMemberButtonState extends ConsumerState<AddMemberButton> {
           );
         },
         child: Container(
-          height: 55 * widget.scale,
+          height: widget.height ?? (55 * widget.scale),
           decoration: BoxDecoration(
-            color: AppColors.primary,
+            color: buttonColor,
             borderRadius: BorderRadius.circular(14 * widget.scale),
             boxShadow: [
               BoxShadow(
@@ -73,7 +87,7 @@ class _AddMemberButtonState extends ConsumerState<AddMemberButton> {
                 ),
               ),
 
-              /// Bottom Right Plus Icon
+              /// Bottom Right Icon (lock when expired, plus when active)
               Positioned(
                 right: 12 * widget.scale,
                 top: 10 * widget.scale,
@@ -85,7 +99,7 @@ class _AddMemberButtonState extends ConsumerState<AddMemberButton> {
                     return Transform.scale(scale: value, child: child);
                   },
                   child: Icon(
-                    Icons.add,
+                    isExpired ? Icons.lock_rounded : Icons.add,
                     color: Colors.white,
                     size: 14 * widget.scale,
                   ),

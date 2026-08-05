@@ -10,6 +10,8 @@ import 'package:library_management/drawer/drawer_screen/seat_management/seat_lay
 import 'package:library_management/drawer/drawer_screen/seat_management/seat_stats_overview.dart';
 import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/provider/seat_config_provider.dart';
+import 'package:library_management/provider/user_provider.dart';
+import 'package:library_management/services/subscription_guard.dart';
 
 class SeatManagementScreen extends ConsumerStatefulWidget {
   const SeatManagementScreen({super.key});
@@ -116,15 +118,16 @@ class _SeatManagementScreenState extends ConsumerState<SeatManagementScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 Container(
-                  width: 40,
-                  height: 4,
+                  width: 42,
+                  height: 5,
                   decoration: BoxDecoration(
                     color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(3),
                   ),
                 ),
+                const SizedBox(height: 4),
                 SeatLayoutControls(
                   initialConfig: config,
                   onSave: _handleSaveConfig,
@@ -140,6 +143,8 @@ class _SeatManagementScreenState extends ConsumerState<SeatManagementScreen> {
   @override
   Widget build(BuildContext context) {
     final config = ref.watch(seatConfigProvider);
+    final user = ref.watch(userProvider);
+    final isExpired = SubscriptionGuard.isExpired(user);
 
     return Scaffold(
       appBar: const AppBarWidget(title: 'Seat Management'),
@@ -162,44 +167,35 @@ class _SeatManagementScreenState extends ConsumerState<SeatManagementScreen> {
                       const SizedBox(height: 16),
 
                       // Action bar: Manage Seats Button
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Seat Grid',
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: ElevatedButton(
+                          onPressed: isExpired
+                              ? () => SubscriptionGuard.showExpiredSheet(context)
+                              : _openManageSeatsModal,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isExpired
+                                ? const Color(0xFF94A3B8)
+                                : AppColors.primary,
+                            foregroundColor: Colors.white,
+                            elevation: 2,
+                            shadowColor: AppColors.primary.withValues(alpha: 0.3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 10,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Manage Seats',
                             style: TextStyle(
-                              fontSize: 17,
+                              fontSize: 13,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.heading,
                             ),
                           ),
-                          ElevatedButton.icon(
-                            onPressed: _openManageSeatsModal,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: AppColors.primary,
-                              elevation: 0,
-                              side: BorderSide(
-                                color: AppColors.primary.withValues(alpha: 0.3),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 10,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            icon: const Icon(Icons.tune_rounded, size: 18),
-                            label: const Text(
-                              'Manage Seats',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                       const SizedBox(height: 14),
 

@@ -14,6 +14,8 @@ class TaskCard extends StatefulWidget {
     required this.onDelete,
     this.scale = 1,
     required this.urgency,
+    this.assignFrom = 'ADMIN',
+    this.assignTo = 'RECEPTION',
   });
 
   final String title;
@@ -21,6 +23,8 @@ class TaskCard extends StatefulWidget {
   final DateTime dueDate;
   final bool isCompleted;
   final String urgency;
+  final String assignFrom;
+  final String assignTo;
 
   final ValueChanged<bool?> onChanged;
   final VoidCallback onEdit;
@@ -88,8 +92,8 @@ class _TaskCardState extends State<TaskCard> {
                 children: [
                   _AssignTask(
                     scale: widget.scale,
-                    assignFrom: 'ADMIN',
-                    assignTo: 'RECEPTION',
+                    assignFrom: widget.assignFrom,
+                    assignTo: widget.assignTo,
                   ),
                   // Actions remain fixed at top
                   Row(
@@ -320,13 +324,21 @@ class _AssignTask extends StatelessWidget {
 
   final String assignFrom;
   final String assignTo;
-
   final double scale;
+
+  String _formatRoleLabel(String role) {
+    final r = role.trim().toUpperCase();
+    if (r == 'RECEPTION' || r == 'RECEPTIONIST') return 'RECEPTIONIST';
+    return 'ADMIN';
+  }
 
   @override
   Widget build(BuildContext context) {
+    final from = _formatRoleLabel(assignFrom);
+    final to = _formatRoleLabel(assignTo);
+
     return AnimatedContainer(
-      margin: EdgeInsets.fromLTRB(28, 0, 0, 0),
+      margin: const EdgeInsets.fromLTRB(28, 0, 0, 0),
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
@@ -338,43 +350,40 @@ class _AssignTask extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            assignFrom,
+            from,
             style: TextStyle(
               fontSize: 8 * scale,
               fontWeight: FontWeight.w500,
               color: AppColors.buttonPrimary,
             ),
           ),
-          SizedBox(width: 10 * scale),
+          SizedBox(width: 8 * scale),
           Container(
             height: 4 * scale,
             width: 4 * scale,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.buttonPrimary,
               shape: BoxShape.circle,
             ),
           ),
           Container(
-            width: 28 * scale,
-            height: 0.7 * scale,
+            width: 24 * scale,
+            height: 1.2 * scale,
             decoration: BoxDecoration(
               color: AppColors.buttonPrimary,
               borderRadius: BorderRadius.circular(100),
             ),
           ),
-          Container(
-            height: 4 * scale,
-            width: 4 * scale,
-            decoration: BoxDecoration(
+          Transform.translate(
+            offset: Offset(-9 * scale, 0),
+            child: Icon(
+              Icons.arrow_right_rounded,
+              size: 18 * scale,
               color: AppColors.buttonPrimary,
-              shape: BoxShape.circle,
             ),
           ),
-
-          SizedBox(width: 7 * scale),
-
           Text(
-            assignTo,
+            to,
             style: TextStyle(
               fontSize: 8 * scale,
               fontWeight: FontWeight.w500,

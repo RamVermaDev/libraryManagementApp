@@ -147,9 +147,16 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
   }
 
   void finalAmount() {
-    final amount = roundUpToNext50((price / 30) * _selectedPlanDays);
+    double amount;
+    if (_selectedPlanDays % 30 == 0) {
+      final months = _selectedPlanDays ~/ 30;
+      amount = price * months;
+    } else {
+      final exactProrated = (price / 30.0) * _selectedPlanDays;
+      final cleanProrated = double.parse(exactProrated.toStringAsFixed(2));
+      amount = roundUpToNext50(cleanProrated);
+    }
     _amountController.text = amount.toStringAsFixed(0);
-    //_amountController.text = ((price / 30) * _selectedPlanDays).toString();
   }
 
   @override

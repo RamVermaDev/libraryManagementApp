@@ -5,11 +5,15 @@ import 'package:library_management/app_colors.dart';
 import 'package:library_management/components/create_library_required_dialog.dart';
 import 'package:library_management/controllers/task_controller.dart';
 import 'package:library_management/models/task_model.dart';
+import 'package:library_management/provider/app_mode_provider.dart';
 import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/provider/task_provider.dart';
+import 'package:library_management/provider/user_provider.dart';
 import 'package:library_management/screens/taskScreen/task_form_screen.dart';
 import 'package:library_management/screens/taskScreen/widgets/delete_task_dialog.dart';
 import 'package:library_management/screens/taskScreen/widgets/task_card.dart';
+import 'package:library_management/app_notification.dart';
+import 'package:library_management/services/subscription_guard.dart';
 
 class TaskScreen extends ConsumerStatefulWidget {
   const TaskScreen({super.key});
@@ -75,14 +79,19 @@ class _TaskScreenState extends ConsumerState<TaskScreen> {
     });
 
     final tasks = ref.watch(taskProvider);
+    final user = ref.watch(userProvider);
+    final isExpired = SubscriptionGuard.isExpired(user);
 
     final pendingTasks = tasks.where((task) => !task.isCompleted).toList();
-
     final completedTasks = tasks.where((task) => task.isCompleted).toList();
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
+          if (isExpired) {
+            SubscriptionGuard.showExpiredSheet(context);
+            return;
+          }
           if (ref.read(currentLibraryProvider) == null) {
             showCreateLibraryRequiredDialog(context);
             return;
@@ -96,13 +105,11 @@ class _TaskScreenState extends ConsumerState<TaskScreen> {
             builder: (_) => const TaskFormScreen(),
           );
         },
-        backgroundColor: AppColors.primary,
+        backgroundColor: isExpired ? const Color(0xFF94A3B8) : AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 6,
-        // shape: const CircleBorder(),
-        // child: const Icon(Icons.add_rounded, size: 30),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        icon: const Icon(Icons.add_rounded, size: 18),
+        icon: Icon(isExpired ? Icons.lock_rounded : Icons.add_rounded, size: 14),
         label: const Text(
           'Task',
           style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
@@ -115,6 +122,7 @@ class _TaskScreenState extends ConsumerState<TaskScreen> {
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             children: [
+
               // ---------------- PENDING TITLE ----------------
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -227,6 +235,8 @@ class _TaskScreenState extends ConsumerState<TaskScreen> {
       dueDate: task.dueDate,
       isCompleted: task.isCompleted,
       urgency: task.urgency,
+      assignFrom: task.createdByMode.toUpperCase(),
+      assignTo: task.assignedToRole.toUpperCase(),
       onChanged: (value) async {
         if (value != true) return;
 
@@ -238,6 +248,25 @@ class _TaskScreenState extends ConsumerState<TaskScreen> {
         );
       },
       onEdit: () {
+        final activeMode = ref.read(appModeProvider);
+        final creatorMode = task.createdByMode.toLowerCase();
+
+        if (creatorMode == 'admin' && activeMode == AppMode.reception) {
+          AppNotification.show(
+            context,
+            message: 'Only Admin can edit this task',
+          );
+          return;
+        }
+
+        if (creatorMode == 'reception' && activeMode != AppMode.reception) {
+          AppNotification.show(
+            context,
+            message: 'Only Receptionist can edit this task',
+          );
+          return;
+        }
+
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
@@ -246,6 +275,25 @@ class _TaskScreenState extends ConsumerState<TaskScreen> {
         );
       },
       onDelete: () {
+        final activeMode = ref.read(appModeProvider);
+        final creatorMode = task.createdByMode.toLowerCase();
+
+        if (creatorMode == 'admin' && activeMode == AppMode.reception) {
+          AppNotification.show(
+            context,
+            message: 'Only Admin can delete this task',
+          );
+          return;
+        }
+
+        if (creatorMode == 'reception' && activeMode != AppMode.reception) {
+          AppNotification.show(
+            context,
+            message: 'Only Receptionist can delete this task',
+          );
+          return;
+        }
+
         showDeleteTaskDialog(
           context: context,
           onDelete: () async {

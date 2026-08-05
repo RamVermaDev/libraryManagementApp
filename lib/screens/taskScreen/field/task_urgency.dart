@@ -20,7 +20,7 @@ class TaskUrgency extends StatelessWidget {
           children: [
             _UrgencyButton(
               title: 'High',
-              description: '3 Days',
+              description: '2 Days',
               isSelected: selectedUrgency == 'high',
               onTap: () => onChanged('high'),
               color: AppColors.grey600,
@@ -30,7 +30,7 @@ class TaskUrgency extends StatelessWidget {
 
             _UrgencyButton(
               title: 'Medium',
-              description: '6 Days',
+              description: '4 Days',
               isSelected: selectedUrgency == 'medium',
               onTap: () => onChanged('medium'),
               color: AppColors.grey500,
@@ -40,7 +40,7 @@ class TaskUrgency extends StatelessWidget {
 
             _UrgencyButton(
               title: 'Low',
-              description: '10 Days',
+              description: '7 Days',
               isSelected: selectedUrgency == 'low',
               onTap: () => onChanged('low'),
               color: AppColors.grey400,

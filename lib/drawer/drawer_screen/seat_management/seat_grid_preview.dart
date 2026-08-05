@@ -97,20 +97,23 @@ class _SeatGridPreviewState extends State<SeatGridPreview> {
           ),
           const SizedBox(height: 14),
 
-          // Legend Bar: ONLY Seat and Selected
+          // Legend Bar: Available, Booked, Selected
           Row(
             children: const [
-              _LegendBadge(
-                bgColor: Colors.white,
-                borderColor: AppColors.border,
-                dotColor: AppColors.body,
-                label: 'Seat',
+              _LegendItem(
+                boxColor: Colors.white,
+                borderColor: Color(0xFFD0D5DD),
+                label: 'Available',
               ),
-              SizedBox(width: 14),
-              _LegendBadge(
-                bgColor: AppColors.primarySoft,
-                borderColor: AppColors.primary,
-                dotColor: AppColors.primary,
+              SizedBox(width: 16),
+              _LegendItem(
+                boxColor: Color(0xFFF2F4F7),
+                borderColor: Color(0xFFEAECF0),
+                label: 'Booked',
+              ),
+              SizedBox(width: 16),
+              _LegendItem(
+                boxColor: AppColors.primary,
                 label: 'Selected',
               ),
             ],
@@ -169,30 +172,19 @@ class _SeatGridPreviewState extends State<SeatGridPreview> {
                         : null,
                   ),
                   alignment: Alignment.center,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.event_seat_rounded,
-                        size: 16,
-                        color: isSelected ? Colors.white : AppColors.primary,
-                      ),
-                      const SizedBox(height: 2),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 2),
-                          child: Text(
-                            label,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: isSelected ? Colors.white : AppColors.heading,
-                            ),
-                          ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: isSelected ? Colors.white : AppColors.heading,
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               );
@@ -204,50 +196,43 @@ class _SeatGridPreviewState extends State<SeatGridPreview> {
   }
 }
 
-class _LegendBadge extends StatelessWidget {
-  final Color bgColor;
-  final Color borderColor;
-  final Color dotColor;
+class _LegendItem extends StatelessWidget {
+  final Color boxColor;
+  final Color? borderColor;
   final String label;
 
-  const _LegendBadge({
-    required this.bgColor,
-    required this.borderColor,
-    required this.dotColor,
+  const _LegendItem({
+    required this.boxColor,
+    this.borderColor,
     required this.label,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: borderColor, width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: dotColor,
-              shape: BoxShape.circle,
-            ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 14,
+          height: 14,
+          decoration: BoxDecoration(
+            color: boxColor,
+            borderRadius: BorderRadius.circular(4),
+            border: borderColor != null
+                ? Border.all(color: borderColor!, width: 1.2)
+                : null,
           ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppColors.heading,
-            ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF667085),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

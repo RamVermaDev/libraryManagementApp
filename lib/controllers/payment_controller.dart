@@ -15,6 +15,8 @@ class PaymentController {
     required WidgetRef ref,
     required String libraryId,
     required int page,
+    int? month,
+    int? year,
   }) async {
     try {
       final token = ref.read(tokenProvider);
@@ -24,8 +26,13 @@ class PaymentController {
         return;
       }
 
+      var requestUrl = '$uri/api/$libraryId/getpayments?page=$page';
+      if (month != null && year != null) {
+        requestUrl += '&month=$month&year=$year';
+      }
+
       final response = await http.get(
-        Uri.parse('$uri/api/$libraryId/getpayments?page=$page'),
+        Uri.parse(requestUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',

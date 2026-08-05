@@ -9,6 +9,10 @@ class TaskModel {
   final String urgency;
   final bool isCompleted;
 
+  final String createdByMode;
+  final String assignedToRole;
+  final DateTime? createdAt;
+
   const TaskModel({
     this.id,
     required this.libraryId,
@@ -17,6 +21,9 @@ class TaskModel {
     required this.dueDate,
     this.urgency = 'high',
     this.isCompleted = false,
+    this.createdByMode = 'admin',
+    this.assignedToRole = 'admin',
+    this.createdAt,
   });
 
   Map<String, dynamic> toMap() {
@@ -26,6 +33,7 @@ class TaskModel {
       'description': description,
       'dueDate': _formatDateForApi(dueDate),
       'urgency': urgency,
+      'assignedToRole': assignedToRole,
     };
   }
 
@@ -46,6 +54,11 @@ class TaskModel {
       dueDate: DateTime.parse(map['dueDate'].toString()),
       urgency: map['urgency']?.toString() ?? 'medium',
       isCompleted: map['isCompleted'] as bool? ?? false,
+      createdByMode: map['createdByMode']?.toString() ?? 'admin',
+      assignedToRole: map['assignedToRole']?.toString() ?? 'admin',
+      createdAt: map['createdAt'] != null
+          ? DateTime.tryParse(map['createdAt'].toString())
+          : null,
     );
   }
 

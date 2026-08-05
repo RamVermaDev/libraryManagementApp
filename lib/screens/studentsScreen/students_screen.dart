@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/context_extension.dart';
 import 'package:library_management/controllers/student_summary_controller.dart';
+import 'package:library_management/provider/app_mode_provider.dart';
 import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/provider/student_summary_provider.dart';
 import 'package:library_management/screens/studentScreens/memberScrolable/member_screen.dart';
@@ -71,6 +72,23 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
       _getStudentSummary(next);
     });
 
+    final double scale = context.scale;
+    final isGeneralMode = ref.watch(appModeProvider) == AppMode.general;
+
+    if (isGeneralMode) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Center(
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.5,
+              child: AddMemberButton(scale: scale, height: 75),
+            ),
+          ),
+        ),
+      );
+    }
+
     final studentSummary = ref.watch(studentSummaryProvider);
     final activeStudent = studentSummary?.active ?? 0;
 
@@ -82,7 +100,6 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
     final expired4To7Days = studentSummary?.expired4To7Days ?? 0;
     final expired8To10Days = studentSummary?.expired8To10Days ?? 0;
 
-    final double scale = context.scale;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(

@@ -16,6 +16,7 @@ import 'package:library_management/context_extension.dart';
 import 'package:library_management/screens/studentScreens/add_student_screens/slot_card_avalibility.dart';
 import 'package:library_management/screens/studentScreens/bulk_import/widgets/bulk_import_banner.dart';
 import 'package:library_management/screens/seat_box.dart';
+import 'package:library_management/drawer/drawer_screen/slot/slot_setup_screen.dart';
 
 class BookSlotAndSeat extends ConsumerStatefulWidget {
   const BookSlotAndSeat({super.key});
@@ -174,7 +175,10 @@ class _BookSlotAndSeatState extends ConsumerState<BookSlotAndSeat> {
     }
 
     if (slots.isEmpty) {
-      return const SizedBox(height: 200, child: _EmptySlotsView());
+      return SizedBox(
+        height: 220,
+        child: _EmptySlotsView(onSlotCreated: _loadSlots),
+      );
     }
 
     return Column(
@@ -301,7 +305,9 @@ class _BookSlotAndSeatState extends ConsumerState<BookSlotAndSeat> {
 }
 
 class _EmptySlotsView extends StatelessWidget {
-  const _EmptySlotsView();
+  const _EmptySlotsView({this.onSlotCreated});
+
+  final VoidCallback? onSlotCreated;
 
   @override
   Widget build(BuildContext context) {
@@ -314,6 +320,31 @@ class _EmptySlotsView extends StatelessWidget {
           Text(
             'No slots have been created yet',
             style: TextStyle(color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+            ),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SlotSetupScreen(),
+                ),
+              );
+              onSlotCreated?.call();
+            },
+            child: const Text(
+              'Create Slot',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),

@@ -9,6 +9,8 @@ class ExpenseModel {
   final DateTime expenseDate;
   final String description;
 
+  final String addedBy;
+
   const ExpenseModel({
     this.id,
     required this.libraryId,
@@ -17,6 +19,7 @@ class ExpenseModel {
     required this.category,
     required this.expenseDate,
     this.description = '',
+    this.addedBy = 'admin',
   });
 
   Map<String, dynamic> toMap() {
@@ -27,6 +30,7 @@ class ExpenseModel {
       'category': category,
       'expenseDate': _formatDateForApi(expenseDate),
       'description': description,
+      'addedBy': addedBy,
     };
   }
 
@@ -47,6 +51,7 @@ class ExpenseModel {
       category: map['category']?.toString() ?? '',
       expenseDate: DateTime.parse(map['expenseDate'].toString()),
       description: map['description']?.toString() ?? '',
+      addedBy: map['addedBy']?.toString() ?? 'admin',
     );
   }
 

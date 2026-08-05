@@ -15,6 +15,8 @@ import 'package:library_management/provider/revenue_provider.dart';
 import 'package:library_management/provider/student_provider.dart';
 import 'package:library_management/provider/student_summary_provider.dart';
 import 'package:library_management/provider/task_provider.dart';
+import 'package:library_management/provider/user_provider.dart';
+import 'package:library_management/services/subscription_guard.dart';
 
 class MyLibraryScreen extends ConsumerStatefulWidget {
   const MyLibraryScreen({super.key});
@@ -63,10 +65,16 @@ class _MyLibraryScreenState extends ConsumerState<MyLibraryScreen> {
   Widget build(BuildContext context) {
     final libraries = ref.watch(libraryProvider);
     final currentLibrary = ref.watch(currentLibraryProvider);
+    final user = ref.watch(userProvider);
+    final isExpired = SubscriptionGuard.isExpired(user);
     final double scale = context.scale;
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
+          if (isExpired) {
+            SubscriptionGuard.showExpiredSheet(context);
+            return;
+          }
           Navigator.push<bool>(
             context,
             MaterialPageRoute(
@@ -78,13 +86,13 @@ class _MyLibraryScreenState extends ConsumerState<MyLibraryScreen> {
             }
           });
         },
-        backgroundColor: AppColors.primary,
+        backgroundColor: isExpired ? const Color(0xFF94A3B8) : AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 6,
         // shape: const CircleBorder(),
         // child: const Icon(Icons.add_rounded, size: 30),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        icon: const Icon(Icons.add_rounded, size: 18),
+        icon: Icon(isExpired ? Icons.lock_rounded : Icons.add_rounded, size: 14),
         label: const Text(
           'Library',
           style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),

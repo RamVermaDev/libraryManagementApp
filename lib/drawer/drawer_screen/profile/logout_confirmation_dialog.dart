@@ -18,6 +18,18 @@ Future<void> showLogoutConfirmationDialog({
   required BuildContext context,
   required WidgetRef ref,
 }) async {
+  final currentLibNotifier = ref.read(currentLibraryProvider.notifier);
+  final studentNotifier = ref.read(studentProvider.notifier);
+  final studentSummaryNotifier = ref.read(studentSummaryProvider.notifier);
+  final taskNotifier = ref.read(taskProvider.notifier);
+  final revenueNotifier = ref.read(revenueProvider.notifier);
+  final paymentNotifier = ref.read(paymentProvider.notifier);
+  final expenseNotifier = ref.read(expenseProvider.notifier);
+  final libraryNotifier = ref.read(libraryProvider.notifier);
+  final userNotifier = ref.read(userProvider.notifier);
+  final tokenNotifier = ref.read(tokenProvider.notifier);
+  final navigator = Navigator.of(context, rootNavigator: true);
+
   final shouldLogout = await showDialog<bool>(
     context: context,
     builder: (dialogContext) {
@@ -52,21 +64,18 @@ Future<void> showLogoutConfirmationDialog({
   if (shouldLogout != true || !context.mounted) return;
 
   await LocalStorage.clearLogin();
-  ref.read(currentLibraryProvider.notifier).clear();
-  ref.read(studentProvider.notifier).clearStudents();
-  ref.read(studentSummaryProvider.notifier).clearSummary();
-  ref.read(taskProvider.notifier).clearTasks();
-  ref.read(revenueProvider.notifier).clear();
-  ref.read(paymentProvider.notifier).clearPayments();
-  ref.read(expenseProvider.notifier).clearExpenses();
-  ref.read(libraryProvider.notifier).clearLibraries();
-  ref.read(userProvider.notifier).clearUser();
-  ref.read(tokenProvider.notifier).clearToken();
+  currentLibNotifier.clear();
+  studentNotifier.clearStudents();
+  studentSummaryNotifier.clearSummary();
+  taskNotifier.clearTasks();
+  revenueNotifier.clear();
+  paymentNotifier.clearPayments();
+  expenseNotifier.clearExpenses();
+  libraryNotifier.clearLibraries();
+  userNotifier.clearUser();
+  tokenNotifier.clearToken();
 
-  if (!context.mounted) return;
-
-  Navigator.pushAndRemoveUntil(
-    context,
+  navigator.pushAndRemoveUntil(
     MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
     (route) => false,
   );

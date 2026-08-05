@@ -316,7 +316,8 @@ class _SlotForm extends StatelessWidget {
         TaskTextField(
           hintText: 'e.g. 500',
           controller: slotPrice,
-          textInputAction: TextInputAction.next,
+          keyboardType: TextInputType.number,
+          textInputAction: TextInputAction.done,
           validator: (value) {
             final text = value?.trim() ?? '';
             if (text.isEmpty) {

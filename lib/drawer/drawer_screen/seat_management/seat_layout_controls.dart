@@ -73,11 +73,39 @@ class _SeatLayoutControlsState extends State<SeatLayoutControls> {
     super.dispose();
   }
 
+  void _onColumnChanged(String val) {
+    final cols = int.tryParse(val.trim());
+    final totalSeats = int.tryParse(_totalSeatsController.text.trim()) ?? 0;
+    if (cols != null && cols > 0 && totalSeats > 0) {
+      final calculatedRows = (totalSeats / cols).ceil();
+      _rowsController.text = calculatedRows.toString();
+    }
+  }
+
+  void _onRowChanged(String val) {
+    final rws = int.tryParse(val.trim());
+    final totalSeats = int.tryParse(_totalSeatsController.text.trim()) ?? 0;
+    if (rws != null && rws > 0 && totalSeats > 0) {
+      final calculatedCols = (totalSeats / rws).ceil();
+      _columnsController.text = calculatedCols.toString();
+    }
+  }
+
+  void _onTotalSeatsChanged(String val) {
+    final totalSeats = int.tryParse(val.trim());
+    final cols = int.tryParse(_columnsController.text.trim()) ?? 6;
+    if (totalSeats != null && totalSeats > 0 && cols > 0) {
+      final calculatedRows = (totalSeats / cols).ceil();
+      _rowsController.text = calculatedRows.toString();
+    }
+  }
+
   void _adjustSeats(int delta) {
     final current = int.tryParse(_totalSeatsController.text.trim()) ?? 0;
     final newValue = (current + delta).clamp(1, 999);
     setState(() {
       _totalSeatsController.text = newValue.toString();
+      _onTotalSeatsChanged(newValue.toString());
     });
   }
 
@@ -123,35 +151,19 @@ class _SeatLayoutControlsState extends State<SeatLayoutControls> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySoft,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.tune_rounded,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                const Text(
-                  'Manage Seat Layout',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.heading,
-                  ),
-                ),
-              ],
+            const Text(
+              'Manage Seat',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: AppColors.heading,
+              ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 30),
 
             // Prefix and Total Seats Row
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
                   width: 100,
@@ -159,7 +171,7 @@ class _SeatLayoutControlsState extends State<SeatLayoutControls> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Seat Prefix',
+                        'Seat Label',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -170,10 +182,29 @@ class _SeatLayoutControlsState extends State<SeatLayoutControls> {
                       TextFormField(
                         controller: _prefixController,
                         textAlign: TextAlign.center,
+                        textCapitalization: TextCapitalization.characters,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
+                        onChanged: (val) {
+                          if (val != val.toUpperCase()) {
+                            final upper = val.toUpperCase();
+                            _prefixController.value = TextEditingValue(
+                              text: upper,
+                              selection: TextSelection.collapsed(offset: upper.length),
+                            );
+                          }
+                        },
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Required';
+                          }
+                          if (!RegExp(r'[A-Za-z]').hasMatch(value)) {
+                            return 'Needs letter';
+                          }
+                          return null;
+                        },
                         decoration: InputDecoration(
                           hintText: 'S',
                           fillColor: AppColors.background,
@@ -192,6 +223,14 @@ class _SeatLayoutControlsState extends State<SeatLayoutControls> {
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(
                                 color: AppColors.primary, width: 2),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.red.shade400),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.red.shade600, width: 2),
                           ),
                         ),
                       ),
@@ -226,6 +265,7 @@ class _SeatLayoutControlsState extends State<SeatLayoutControls> {
                               controller: _totalSeatsController,
                               keyboardType: TextInputType.number,
                               textAlign: TextAlign.center,
+                              onChanged: _onTotalSeatsChanged,
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -296,9 +336,10 @@ class _SeatLayoutControlsState extends State<SeatLayoutControls> {
                       TextFormField(
                         controller: _rowsController,
                         keyboardType: TextInputType.number,
+                        onChanged: _onRowChanged,
                         style: const TextStyle(fontWeight: FontWeight.w600),
                         decoration: InputDecoration(
-                          hintText: '5',
+                          hintText: '1',
                           fillColor: AppColors.background,
                           filled: true,
                           border: OutlineInputBorder(
@@ -346,9 +387,10 @@ class _SeatLayoutControlsState extends State<SeatLayoutControls> {
                       TextFormField(
                         controller: _columnsController,
                         keyboardType: TextInputType.number,
+                        onChanged: _onColumnChanged,
                         style: const TextStyle(fontWeight: FontWeight.w600),
                         decoration: InputDecoration(
-                          hintText: '10',
+                          hintText: '6',
                           fillColor: AppColors.background,
                           filled: true,
                           border: OutlineInputBorder(
@@ -387,7 +429,7 @@ class _SeatLayoutControlsState extends State<SeatLayoutControls> {
             SizedBox(
               width: double.infinity,
               height: 48,
-              child: ElevatedButton.icon(
+              child: ElevatedButton(
                 onPressed: _isSaving ? null : _handleSave,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
@@ -397,13 +439,10 @@ class _SeatLayoutControlsState extends State<SeatLayoutControls> {
                   ),
                   elevation: 0,
                 ),
-                icon: _isSaving
-                    ? const SizedBox.shrink()
-                    : const Icon(Icons.check_rounded, size: 18),
-                label: _isSaving
+                child: _isSaving
                     ? const SpinKitThreeBounce(color: Colors.white, size: 20)
                     : const Text(
-                        'Save Configuration',
+                        'Save',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,

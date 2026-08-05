@@ -29,7 +29,6 @@ class DrawerFooter extends ConsumerWidget {
             ),
           ),
           onTap: () {
-            Navigator.pop(context); // Close drawer
             showLogoutConfirmationDialog(context: context, ref: ref);
           },
         ),

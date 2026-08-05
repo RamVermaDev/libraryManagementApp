@@ -5,23 +5,28 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:library_management/app_colors.dart';
 import 'package:library_management/controllers/user_controller.dart';
 
-Future<void> showEmailVerificationOtpDialogBox({
+Future<bool?> showEmailVerificationOtpDialogBox({
   required BuildContext context,
   required WidgetRef ref,
+  bool isAdminMode = false,
 }) async {
-  await showDialog<bool>(
+  return await showDialog<bool>(
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) {
-      return _EmailVerificationOtpDialog(ref: ref);
+      return _EmailVerificationOtpDialog(ref: ref, isAdminMode: isAdminMode);
     },
   );
 }
 
 class _EmailVerificationOtpDialog extends StatefulWidget {
-  const _EmailVerificationOtpDialog({required this.ref});
+  const _EmailVerificationOtpDialog({
+    required this.ref,
+    this.isAdminMode = false,
+  });
 
   final WidgetRef ref;
+  final bool isAdminMode;
 
   @override
   State<_EmailVerificationOtpDialog> createState() =>
@@ -48,11 +53,17 @@ class _EmailVerificationOtpDialogState
       _isLoading = true;
     });
 
-    final isVerified = await _userController.verifyEmailOtp(
-      context: context,
-      ref: widget.ref,
-      otp: otpText,
-    );
+    final isVerified = widget.isAdminMode
+        ? await _userController.verifyAdminModeOtp(
+            context: context,
+            ref: widget.ref,
+            otp: otpText,
+          )
+        : await _userController.verifyEmailOtp(
+            context: context,
+            ref: widget.ref,
+            otp: otpText,
+          );
 
     if (!mounted) return;
 
@@ -90,8 +101,10 @@ class _EmailVerificationOtpDialogState
                 color: AppColors.primarySoft,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.mark_email_read_outlined,
+              child: Icon(
+                widget.isAdminMode
+                    ? Icons.admin_panel_settings_rounded
+                    : Icons.mark_email_read_outlined,
                 color: AppColors.primary,
                 size: 26,
               ),
@@ -99,9 +112,9 @@ class _EmailVerificationOtpDialogState
 
             const SizedBox(height: 16),
 
-            const Text(
-              'Verify Email Address',
-              style: TextStyle(
+            Text(
+              widget.isAdminMode ? 'Admin Mode Access' : 'Verify Email Address',
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AppColors.heading,
@@ -110,10 +123,12 @@ class _EmailVerificationOtpDialogState
 
             const SizedBox(height: 6),
 
-            const Text(
-              'Enter the 6-digit OTP sent to your email',
+            Text(
+              widget.isAdminMode
+                  ? 'Enter 6-digit OTP sent to your email to switch to Admin mode'
+                  : 'Enter the 6-digit OTP sent to your email',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 13,
                 color: AppColors.caption,
               ),

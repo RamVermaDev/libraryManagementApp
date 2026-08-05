@@ -10,6 +10,8 @@ import 'package:library_management/drawer/drawer_screen/slot/slot_card.dart';
 import 'package:library_management/models/slot_model.dart';
 import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/provider/slot_provider.dart';
+import 'package:library_management/provider/user_provider.dart';
+import 'package:library_management/services/subscription_guard.dart';
 
 class SlotSetupScreen extends ConsumerStatefulWidget {
   const SlotSetupScreen({super.key});
@@ -82,22 +84,28 @@ class _SlotSetupScreenState extends ConsumerState<SlotSetupScreen> {
   @override
   Widget build(BuildContext context) {
     final slots = ref.watch(slotProvider);
+    final user = ref.watch(userProvider);
+    final isExpired = SubscriptionGuard.isExpired(user);
 
     return Scaffold(
       appBar: const AppBarWidget(title: 'Slot Management'),
       backgroundColor: AppColors.background,
 
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.primary,
+        backgroundColor: isExpired ? const Color(0xFF94A3B8) : AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 6,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        icon: const Icon(Icons.add_rounded, size: 18),
+        icon: Icon(isExpired ? Icons.lock_rounded : Icons.add_rounded, size: 14),
         label: const Text(
           'Slot',
           style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         ),
         onPressed: () {
+          if (isExpired) {
+            SubscriptionGuard.showExpiredSheet(context);
+            return;
+          }
           if (ref.read(currentLibraryProvider) == null) {
             showCreateLibraryRequiredDialog(context);
             return;

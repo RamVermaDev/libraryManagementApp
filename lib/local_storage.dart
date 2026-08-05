@@ -59,4 +59,16 @@ class LocalStorage {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('currentLibraryName');
   }
+
+  // App Mode Storage
+
+  static Future<void> saveAppMode(String modeKey) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('active_app_mode', modeKey);
+  }
+
+  static Future<String?> getAppMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('active_app_mode');
+  }
 }

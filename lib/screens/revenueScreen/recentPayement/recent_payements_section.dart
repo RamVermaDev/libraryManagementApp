@@ -11,10 +11,12 @@ class RecentPaymentsSection extends StatelessWidget {
     super.key,
     required this.payments,
     required this.scale,
+    this.hideViewAll = false,
   });
 
   final List<PaymentModel>? payments;
   final double scale;
+  final bool hideViewAll;
 
   @override
   Widget build(BuildContext context) {
@@ -27,32 +29,33 @@ class RecentPaymentsSection extends StatelessWidget {
           title: 'Recent Payments',
           fontSize: 18 * scale,
           scale: scale,
-
-          trailing: TextButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return AllPaymentScreen();
+          trailing: hideViewAll
+              ? null
+              : TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return AllPaymentScreen();
+                        },
+                      ),
+                    );
                   },
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size(60 * scale, 36 * scale),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    'View all',
+                    style: TextStyle(
+                      color: AppColors.info,
+                      fontSize: 14 * scale,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
                 ),
-              );
-            },
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: Size(60 * scale, 36 * scale),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              'View all',
-              style: TextStyle(
-                color: AppColors.info,
-                fontSize: 14 * scale,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
         ),
 
         SizedBox(height: 14 * scale),

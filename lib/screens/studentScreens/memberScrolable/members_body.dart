@@ -242,7 +242,7 @@ class MembersBody extends ConsumerWidget {
             name: member.name,
             plan: planDisplay,
             slotTiming: member.slotTiming,
-            seatNumber: member.seatId,
+            seatNumber: member.seatLabel ?? member.seatId,
             status: _statusForMember(member),
             rawStatus: member.status,
             message: message,

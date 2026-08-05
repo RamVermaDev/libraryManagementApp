@@ -4,6 +4,7 @@ import 'package:library_management/app_colors.dart';
 import 'package:library_management/controllers/payment_controller.dart';
 import 'package:library_management/provider/current_library_provider.dart';
 import 'package:library_management/provider/payment_provider.dart';
+import 'package:library_management/screens/revenueScreen/monthlyPerformance/month_selector.dart';
 import 'package:library_management/screens/revenueScreen/recentPayement/payement_tile.dart';
 
 class AllPaymentScreen extends ConsumerStatefulWidget {
@@ -18,6 +19,9 @@ class AllPaymentScreen extends ConsumerStatefulWidget {
 class _AllPaymentScreenState extends ConsumerState<AllPaymentScreen> {
   final PaymentController _paymentController = PaymentController();
   final ScrollController _scrollController = ScrollController();
+
+  DateTime _selectedMonth = DateTime.now();
+  String _paymentFilter = 'ALL';
 
   bool _isLoading = true;
   bool _isLoadingMore = false;
@@ -48,6 +52,8 @@ class _AllPaymentScreenState extends ConsumerState<AllPaymentScreen> {
       ref: ref,
       libraryId: libraryId,
       page: 1,
+      month: _selectedMonth.month,
+      year: _selectedMonth.year,
     );
 
     if (!mounted) return;
@@ -75,6 +81,8 @@ class _AllPaymentScreenState extends ConsumerState<AllPaymentScreen> {
       ref: ref,
       libraryId: libraryId,
       page: _page + 1,
+      month: _selectedMonth.month,
+      year: _selectedMonth.year,
     );
 
     if (!mounted) return;
@@ -99,6 +107,24 @@ class _AllPaymentScreenState extends ConsumerState<AllPaymentScreen> {
     }
   }
 
+  void _changeMonth(int delta) {
+    final newMonth =
+        DateTime(_selectedMonth.year, _selectedMonth.month + delta, 1);
+    final now = DateTime.now();
+    if (newMonth.isAfter(DateTime(now.year, now.month, 1))) return;
+    setState(() {
+      _selectedMonth = newMonth;
+      _hasMore = true;
+    });
+    _getPayments();
+  }
+
+  bool get _canGoNext {
+    final now = DateTime.now();
+    return _selectedMonth.year < now.year ||
+        (_selectedMonth.year == now.year && _selectedMonth.month < now.month);
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<String?>(currentLibraryProvider, (previous, next) {
@@ -106,46 +132,125 @@ class _AllPaymentScreenState extends ConsumerState<AllPaymentScreen> {
       _getPayments();
     });
 
-    final payments = ref.watch(paymentProvider);
+    final allPayments = ref.watch(paymentProvider);
+
+    final filteredPayments = allPayments.where((p) {
+      final mode = p.paymentMode.toLowerCase().trim();
+      if (_paymentFilter == 'ONLINE') {
+        return mode == 'online' || mode == 'upi';
+      } else if (_paymentFilter == 'CASH') {
+        return mode == 'cash';
+      }
+      return true;
+    }).toList();
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.heading,
         title: const Text(
-          'All Transactions',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          'Payment History',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
       body: RefreshIndicator(
         onRefresh: _getPayments,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : payments.isEmpty
-            ? const _EmptyState()
-            : ListView.separated(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                itemCount: payments.length + (_isLoadingMore ? 1 : 0),
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (_, index) {
-                  if (index == payments.length) {
-                    return const Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  }
-
-                  return PaymentTile(
-                    payment: payments[index],
-                    scale: widget.scale,
-                  );
-                },
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  PopupMenuButton<String>(
+                    onSelected: (val) {
+                      setState(() {
+                        _paymentFilter = val;
+                      });
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    itemBuilder: (context) => const [
+                      PopupMenuItem(value: 'ALL', child: Text('ALL')),
+                      PopupMenuItem(value: 'ONLINE', child: Text('ONLINE')),
+                      PopupMenuItem(value: 'CASH', child: Text('CASH')),
+                    ],
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _paymentFilter,
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.arrow_drop_down_rounded,
+                            size: 20,
+                            color: AppColors.primary,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  MonthSelector(
+                    selectedMonth: _selectedMonth,
+                    canGoPrevious: true,
+                    canGoNext: _canGoNext,
+                    onPrevious: () => _changeMonth(-1),
+                    onNext: () => _changeMonth(1),
+                  ),
+                ],
               ),
+            ),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : filteredPayments.isEmpty
+                  ? const _EmptyState()
+                  : ListView.separated(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                      itemCount:
+                          filteredPayments.length + (_isLoadingMore ? 1 : 0),
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (_, index) {
+                        if (index == filteredPayments.length) {
+                          return const Padding(
+                            padding: EdgeInsets.all(20),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+
+                        return PaymentTile(
+                          payment: filteredPayments[index],
+                          scale: widget.scale,
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

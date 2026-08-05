@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_notification.dart';
 import 'package:library_management/authScreens/login_screen.dart';
+import 'package:library_management/components/first_login_welcome_dialog.dart';
 import 'package:library_management/global_varaible.dart';
 
 import 'package:http/http.dart' as http;
@@ -99,7 +100,7 @@ class UserController {
         response: response,
         context: context,
         onSuccess: () async {
-          print(response.body);
+          //print(response.body);
 
           //getting data from backend
           final data = jsonDecode(response.body);
@@ -122,7 +123,8 @@ class UserController {
             String? currentLibraryName;
 
             if (firstLib is Map<String, dynamic>) {
-              currentLibraryId = firstLib['_id']?.toString() ?? firstLib['id']?.toString();
+              currentLibraryId =
+                  firstLib['_id']?.toString() ?? firstLib['id']?.toString();
               currentLibraryName = firstLib['libraryName']?.toString();
             } else {
               currentLibraryId = firstLib.toString();
@@ -150,21 +152,24 @@ class UserController {
           //final localdata = await LocalStorage.getUser();
           //print('data from localtorage $localdata');
 
-          print('LibrarID: ${ref.read(currentLibraryProvider)}');
+          //print('LibrarID: ${ref.read(currentLibraryProvider)}');
+
+          final isFirstLogin = data['isFirstLogin'] == true;
 
           if (!context.mounted) return;
 
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
-              builder: (context) {
-                return MainScreen();
-                // return libraries.isEmpty
-                //     ? LibraryProfileScreen()
-                //     : MainScreen();
-                //--------here i Have to check if already library or not
-                //---- count library number and if user select one then save that
-                //----if one library that directly to home page
+              builder: (mainContext) {
+                if (isFirstLogin) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    final userObj = ref.read(userProvider);
+                    final days = userObj?.subscription.daysRemaining ?? 90;
+                    showFirstLoginWelcomeDialog(mainContext, days);
+                  });
+                }
+                return const MainScreen();
               },
             ),
             (route) => false,
@@ -305,6 +310,81 @@ class UserController {
       debugPrintStack(stackTrace: stackTrace);
       if (context.mounted) {
         showSnackBar(context, "Unable to verify OTP");
+      }
+      return false;
+    }
+  }
+
+  Future<bool> sendAdminModeOtp({
+    required BuildContext context,
+    required WidgetRef ref,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+      if (token == null || token.isEmpty) {
+        showSnackBar(context, "Authentication required");
+        return false;
+      }
+
+      final response = await http.post(
+        Uri.parse('$uri/api/send-admin-otp'),
+        headers: <String, String>{
+          "Content-Type": 'application/json; charset=UTF-8',
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (!context.mounted) return false;
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        AppNotification.show(context, message: 'Admin OTP Sent to Email');
+        return true;
+      }
+
+      showSnackBar(context, getMessageFromResponse(response));
+      return false;
+    } catch (e) {
+      debugPrint("Send Admin OTP Error: $e");
+      if (context.mounted) {
+        showSnackBar(context, "Unable to send Admin OTP");
+      }
+      return false;
+    }
+  }
+
+  Future<bool> verifyAdminModeOtp({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String otp,
+  }) async {
+    try {
+      final token = ref.read(tokenProvider);
+      if (token == null || token.isEmpty) {
+        showSnackBar(context, "Authentication required");
+        return false;
+      }
+
+      final response = await http.post(
+        Uri.parse('$uri/api/verify-admin-otp'),
+        body: jsonEncode({'otp': otp.trim()}),
+        headers: <String, String>{
+          "Content-Type": 'application/json; charset=UTF-8',
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (!context.mounted) return false;
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      }
+
+      showSnackBar(context, getMessageFromResponse(response));
+      return false;
+    } catch (e) {
+      debugPrint("Verify Admin OTP Error: $e");
+      if (context.mounted) {
+        showSnackBar(context, "Unable to verify Admin OTP");
       }
       return false;
     }

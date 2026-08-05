@@ -123,16 +123,17 @@ class LibrarySummaryCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const PopupMenuItem<String>(
-                      value: 'edit_seat',
-                      child: Row(
-                        children: [
-                          Icon(Icons.event_seat_outlined, size: 18, color: AppColors.heading),
-                          SizedBox(width: 10),
-                          Text('Edit Seat', style: TextStyle(fontWeight: FontWeight.w500)),
-                        ],
+                    if (isCurrent)
+                      const PopupMenuItem<String>(
+                        value: 'edit_seat',
+                        child: Row(
+                          children: [
+                            Icon(Icons.event_seat_outlined, size: 18, color: AppColors.heading),
+                            SizedBox(width: 10),
+                            Text('Edit Seat', style: TextStyle(fontWeight: FontWeight.w500)),
+                          ],
+                        ),
                       ),
-                    ),
                     const PopupMenuItem<String>(
                       value: 'delete',
                       child: Row(

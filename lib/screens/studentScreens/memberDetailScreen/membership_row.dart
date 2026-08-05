@@ -26,7 +26,14 @@ class MembershipRow extends StatelessWidget {
             'assets/icons/$iconString.png',
             width: 19 * scale,
             height: 19 * scale,
-            color: AppColors.primary, // Optional: tints monochrome images
+            color: AppColors.primary,
+            errorBuilder: (context, error, stackTrace) {
+              return Icon(
+                Icons.event_seat_rounded,
+                size: 19 * scale,
+                color: AppColors.primary,
+              );
+            },
           ),
         ),
 

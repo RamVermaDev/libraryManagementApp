@@ -40,12 +40,6 @@ class EarningsTrendCard extends StatelessWidget {
           ),
           SizedBox(height: 24 * scale),
           EarningsLineChart(points: points, period: period, height: 250),
-          SizedBox(height: 16 * scale),
-          _SimpleLegend(
-            color: AppColors.primary,
-            label: 'Total Earnings',
-            scale: scale,
-          ),
         ],
       ),
     );
@@ -67,35 +61,37 @@ class _TrendHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final selector = TrendPeriodSelector(
-          selectedPeriod: period,
-          onChanged: onPeriodChanged,
-          scale: scale,
-        );
-        final summary = _TrendSummary(
+    final selector = TrendPeriodSelector(
+      selectedPeriod: period,
+      onChanged: onPeriodChanged,
+      scale: scale,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: SectionHeader(
+                title: 'Earnings Trend',
+                scale: scale,
+                fontSize: 16 * scale,
+              ),
+            ),
+            SizedBox(width: 8 * scale),
+            selector,
+          ],
+        ),
+        SizedBox(height: 4 * scale),
+        _TrendSummary(
           total: total,
           period: period,
           scale: scale,
-        );
-
-        if (constraints.maxWidth < 360) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [summary, const SizedBox(height: 16), selector],
-          );
-        }
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: summary),
-            SizedBox(width: 12 * scale),
-            selector,
-          ],
-        );
-      },
+        ),
+      ],
     );
   }
 }
@@ -116,13 +112,6 @@ class _TrendSummary extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionHeader(
-          title: 'Earnings Trend',
-          scale: scale,
-          fontSize: 16 * scale,
-        ),
-
-        SizedBox(height: 8 * scale),
         FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
@@ -143,43 +132,6 @@ class _TrendSummary extends StatelessWidget {
           style: TextStyle(
             color: AppColors.caption,
             fontSize: 9 * scale,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SimpleLegend extends StatelessWidget {
-  const _SimpleLegend({
-    required this.color,
-    required this.label,
-    required this.scale,
-  });
-
-  final Color color;
-  final String label;
-  final double scale;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 16 * scale,
-          height: 16 * scale,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        SizedBox(width: 12 * scale),
-        Text(
-          label,
-          style: TextStyle(
-            color: Color(0xFF747D93),
-            fontSize: 13 * scale,
             fontWeight: FontWeight.w500,
           ),
         ),

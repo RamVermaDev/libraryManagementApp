@@ -23,9 +23,7 @@ class PaymentTile extends StatelessWidget {
 
     final titleText = isRefund
         ? '${payment.paymentMode} (Refund)'
-        : (payment.studentName != null && payment.studentName!.isNotEmpty
-            ? '${payment.studentName} (${payment.paymentMode})'
-            : payment.paymentMode);
+        : payment.paymentMode;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),

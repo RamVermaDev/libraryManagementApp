@@ -8,6 +8,7 @@ class AppNotification {
     BuildContext context, {
     required String message,
     bool isSuccess = true,
+    bool showIcon = true,
     Duration duration = const Duration(seconds: 3),
   }) {
     if (_currentOverlay != null && _currentOverlay!.mounted) {
@@ -51,11 +52,13 @@ class AppNotification {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        isSuccess ? Icons.check_circle : Icons.error,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 12),
+                      if (showIcon) ...[
+                        Icon(
+                          isSuccess ? Icons.check_circle : Icons.error,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 12),
+                      ],
                       Flexible(
                         child: Text(
                           message,

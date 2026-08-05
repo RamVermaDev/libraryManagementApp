@@ -8,10 +8,6 @@ class PaymentModel {
   final String studentId;
   final String feeRecordId;
 
-  /// Revenue Screen (only available when backend populates student)
-  final String? studentName;
-  final String? memberId;
-
   /// Payment Details
   final double amount;
   final String paymentMode;
@@ -27,8 +23,6 @@ class PaymentModel {
     required this.libraryId,
     required this.studentId,
     required this.feeRecordId,
-    this.studentName,
-    this.memberId,
     required this.amount,
     required this.paymentMode,
     required this.paymentDate,
@@ -42,8 +36,6 @@ class PaymentModel {
     String? libraryId,
     String? studentId,
     String? feeRecordId,
-    String? studentName,
-    String? memberId,
     double? amount,
     String? paymentMode,
     DateTime? paymentDate,
@@ -56,8 +48,6 @@ class PaymentModel {
       libraryId: libraryId ?? this.libraryId,
       studentId: studentId ?? this.studentId,
       feeRecordId: feeRecordId ?? this.feeRecordId,
-      studentName: studentName ?? this.studentName,
-      memberId: memberId ?? this.memberId,
       amount: amount ?? this.amount,
       paymentMode: paymentMode ?? this.paymentMode,
       paymentDate: paymentDate ?? this.paymentDate,
@@ -100,10 +90,6 @@ class PaymentModel {
       feeRecordId: map['feeRecord'] is Map
           ? map['feeRecord']['_id'].toString()
           : map['feeRecord'].toString(),
-
-      studentName: student is Map ? student['name']?.toString() : null,
-
-      memberId: student is Map ? student['memberId']?.toString() : null,
 
       amount: (map['amount'] ?? 0).toDouble(),
 

@@ -88,11 +88,11 @@ class _RenewAdmissionScreenState extends ConsumerState<RenewAdmissionScreen> {
     final today = DateTime(now.year, now.month, now.day);
 
     if (expiry != null) {
-      final expiryLocal = expiry.toLocal();
+      final expiryUtc = expiry.toUtc();
       final expiryDateOnly = DateTime(
-        expiryLocal.year,
-        expiryLocal.month,
-        expiryLocal.day,
+        expiryUtc.year,
+        expiryUtc.month,
+        expiryUtc.day,
       );
 
       final daysSinceExpiry = today.difference(expiryDateOnly).inDays;
@@ -114,6 +114,9 @@ class _RenewAdmissionScreenState extends ConsumerState<RenewAdmissionScreen> {
 
     // Pre-select current slot
     _selectedSlotId = widget.member.slotTemplateId;
+    if (_selectedSlotId != null) {
+      _isLoadingSeat = true;
+    }
 
     Future.microtask(() async {
       // Clear providers from any previous screen visit
@@ -156,9 +159,17 @@ class _RenewAdmissionScreenState extends ConsumerState<RenewAdmissionScreen> {
   void _autoFillAmount() {
     final slot = _selectedSlotModel;
     if (slot == null) return;
-    final amount = _roundUpToNext50(
-      (slot.monthlyPrice / 30) * _selectedPlanDays,
-    );
+
+    double amount;
+    if (_selectedPlanDays % 30 == 0) {
+      final months = _selectedPlanDays ~/ 30;
+      amount = slot.monthlyPrice * months;
+    } else {
+      final exactProrated = (slot.monthlyPrice / 30.0) * _selectedPlanDays;
+      final cleanProrated = double.parse(exactProrated.toStringAsFixed(2));
+      amount = _roundUpToNext50(cleanProrated);
+    }
+
     _amountController.text = amount.toStringAsFixed(0);
   }
 

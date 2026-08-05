@@ -116,7 +116,7 @@ class _EarningsLineChartState extends State<EarningsLineChart> {
       isCurved: true,
       curveSmoothness: .35,
       isStrokeCapRound: true,
-      barWidth: 4,
+      barWidth: 2.5,
 
       color: AppColors.primary,
 
@@ -175,6 +175,9 @@ class _EarningsLineChartState extends State<EarningsLineChart> {
           reservedSize: 42,
           interval: _maxY / 4,
           getTitlesWidget: (value, meta) {
+            if (value < -0.1) {
+              return const SizedBox();
+            }
             return Text(
               ChartFormatter.compact(value),
               style: const TextStyle(

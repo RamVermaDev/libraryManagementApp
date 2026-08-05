@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
+import 'package:library_management/app_notification.dart';
 import 'package:library_management/controllers/user_controller.dart';
 import 'package:library_management/drawer/drawerWidgets/app_bar_widget.dart';
 import 'package:library_management/drawer/drawer_screen/library/my_library_screen.dart';
@@ -10,36 +11,150 @@ import 'package:library_management/drawer/drawer_screen/profile/email_verificati
 import 'package:library_management/drawer/drawer_screen/profile/privacy_policy_screen.dart';
 import 'package:library_management/drawer/drawer_screen/profile/terms_service_screen.dart';
 import 'package:library_management/drawer/drawer_screen/subscription_screen.dart';
+import 'package:library_management/provider/app_mode_provider.dart';
+import 'package:library_management/provider/current_library_provider.dart';
+import 'package:library_management/provider/library_provider.dart';
 import 'package:library_management/provider/user_provider.dart';
 import 'package:library_management/services/manage_http_response.dart';
 
 class MyProfileScreen extends ConsumerWidget {
   const MyProfileScreen({super.key});
 
-  String _formatRoleLabel(String? role) {
-    final r = (role ?? '').toLowerCase();
-    if (r == 'admin' || r == 'owner') return 'Admin';
-    if (r == 'librarian' || r == 'staff' || r == 'reception')
-      return 'Receptionist';
-    return 'General';
+  Color _roleColor(String label) {
+    if (label == 'ADMIN') return const Color(0xFF7C3AED); // Purple
+    if (label == 'RECEPTION') return const Color(0xFF2563EB); // Blue
+    return const Color(0xFF475569); // Slate Grey
   }
 
-  Color _roleColor(String label) {
-    if (label == 'Admin') return const Color(0xFF7C3AED); // Purple
-    if (label == 'Receptionist') return const Color(0xFF2563EB); // Blue
-    return const Color(0xFF475569); // Slate Grey
+  Future<void> _handleSwitchMode(
+    BuildContext context,
+    WidgetRef ref,
+    AppMode targetMode,
+  ) async {
+    final currentMode = ref.read(appModeProvider);
+    if (currentMode == targetMode) return;
+
+    final user = ref.read(userProvider);
+    final isEmailVerified = user?.isEmailVerified ?? false;
+
+    if (!isEmailVerified && targetMode != AppMode.admin) {
+      showSnackBar(
+        context,
+        'Please verify your email to access GENERAL and RECEPTION modes.',
+      );
+      return;
+    }
+
+    final hasLibrary =
+        (user?.libraries.isNotEmpty == true) ||
+        ref.read(libraryProvider).isNotEmpty ||
+        (ref.read(currentLibraryProvider) != null);
+
+    if (!hasLibrary && targetMode != AppMode.admin) {
+      showSnackBar(context, 'Locked to ADMIN mode until a library is created.');
+      return;
+    }
+
+    if ((currentMode == AppMode.admin && targetMode != AppMode.admin) ||
+        (currentMode == AppMode.reception && targetMode == AppMode.general)) {
+      final lockRoleText = currentMode == AppMode.admin ? 'ADMIN' : 'RECEPTION';
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            'Switch to ${targetMode.label}?',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.heading,
+            ),
+          ),
+          content: Text(
+            '$lockRoleText features will be locked. OTP required to switch back.',
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.body,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.caption),
+              ),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Proceed'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm != true || !context.mounted) return;
+    }
+
+    final needsOtp = (targetMode == AppMode.admin) ||
+        (currentMode == AppMode.general && targetMode == AppMode.reception);
+
+    if (needsOtp) {
+      final isSent = await UserController().sendAdminModeOtp(
+        context: context,
+        ref: ref,
+      );
+      if (!context.mounted || !isSent) return;
+
+      final isVerified = await showEmailVerificationOtpDialogBox(
+        context: context,
+        ref: ref,
+        isAdminMode: true,
+      );
+
+      if (!context.mounted) return;
+
+      if (isVerified == true) {
+        await ref.read(appModeProvider.notifier).setMode(targetMode);
+        if (context.mounted) {
+          AppNotification.show(
+            context,
+            message: 'Switched to ${targetMode.label} mode',
+          );
+        }
+      }
+    } else {
+      await ref.read(appModeProvider.notifier).setMode(targetMode);
+      if (context.mounted) {
+        AppNotification.show(
+          context,
+          message: 'Switched to ${targetMode.label} mode',
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
     final userController = UserController();
+    final activeMode = ref.watch(appModeProvider);
+    final isGeneralMode = activeMode == AppMode.general;
+    final isReceptionMode = activeMode == AppMode.reception;
+    final isRestrictedMode = isGeneralMode || isReceptionMode;
 
     final userName = user?.name.isNotEmpty == true
         ? user!.name
         : 'Library Owner';
     final userEmail = user?.email ?? 'owner@library.com';
-    final roleLabel = _formatRoleLabel(user?.role);
     final userIsVerified = user?.isEmailVerified ?? false;
 
     return Scaffold(
@@ -76,7 +191,10 @@ class MyProfileScreen extends ConsumerWidget {
                     padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.primary, width: 2.5),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        width: 2,
+                      ),
                     ),
                     child: CircleAvatar(
                       radius: 38,
@@ -114,7 +232,7 @@ class MyProfileScreen extends ConsumerWidget {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // ==========================================
             // CONTAINER 1: PERSONAL INFORMATION
@@ -123,12 +241,21 @@ class MyProfileScreen extends ConsumerWidget {
               title: 'Personal Information',
               titleIcon: Icons.person_outline_rounded,
               trailingWidget: IconButton(
-                icon: const Icon(
-                  Icons.edit_outlined,
+                icon: Icon(
+                  isGeneralMode ? Icons.lock_rounded : Icons.edit_outlined,
                   size: 20,
-                  color: AppColors.primary,
+                  color: isGeneralMode
+                      ? Colors.grey.shade400
+                      : AppColors.primary,
                 ),
                 onPressed: () {
+                  if (isGeneralMode) {
+                    AppNotification.show(
+                      context,
+                      message: 'Profile edit is locked in General mode',
+                    );
+                    return;
+                  }
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -166,7 +293,7 @@ class MyProfileScreen extends ConsumerWidget {
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // ==========================================
             // CONTAINER 2: ACCOUNT DETAILS & MEMBERSHIPS
@@ -178,10 +305,41 @@ class MyProfileScreen extends ConsumerWidget {
                 _buildStackedRow(
                   icon: Icons.admin_panel_settings_outlined,
                   label: 'Account Role',
-                  child: _buildStatusBadge(
-                    roleLabel,
-                    _roleColor(roleLabel),
-                    Icons.shield_outlined,
+                  child: PopupMenuButton<AppMode>(
+                    onSelected: (targetMode) =>
+                        _handleSwitchMode(context, ref, targetMode),
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: AppMode.admin,
+                        child: Text('ADMIN'),
+                      ),
+                      const PopupMenuItem(
+                        value: AppMode.reception,
+                        child: Text('RECEPTION'),
+                      ),
+                      const PopupMenuItem(
+                        value: AppMode.general,
+                        child: Text('GENERAL'),
+                      ),
+                    ],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          ref.watch(appModeProvider).label,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: _roleColor(ref.watch(appModeProvider).label),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.arrow_drop_down_rounded,
+                          color: AppColors.caption,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 _buildInsetDivider(),
@@ -220,6 +378,17 @@ class MyProfileScreen extends ConsumerWidget {
                   icon: Icons.other_houses_outlined,
                   label: 'My Libraries',
                   onTap: () {
+                    if (isRestrictedMode) {
+                      final modeLabel = isGeneralMode
+                          ? 'General'
+                          : 'Receptionist';
+                      AppNotification.show(
+                        context,
+                        message:
+                            'Library management is locked in $modeLabel mode',
+                      );
+                      return;
+                    }
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -232,15 +401,22 @@ class MyProfileScreen extends ConsumerWidget {
                     children: [
                       Text(
                         '${user?.libraries.length ?? 0} Libraries',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.heading,
+                          color: isRestrictedMode
+                              ? Colors.grey.shade400
+                              : AppColors.heading,
                         ),
                       ),
-                      const Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.caption,
+                      Icon(
+                        isRestrictedMode
+                            ? Icons.lock_rounded
+                            : Icons.chevron_right_rounded,
+                        color: isRestrictedMode
+                            ? Colors.grey.shade400
+                            : AppColors.caption,
+                        size: isRestrictedMode ? 18 : 22,
                       ),
                     ],
                   ),
@@ -250,6 +426,16 @@ class MyProfileScreen extends ConsumerWidget {
                   icon: Icons.card_membership_outlined,
                   label: 'Subscription',
                   onTap: () {
+                    if (isRestrictedMode) {
+                      final modeLabel = isGeneralMode
+                          ? 'General'
+                          : 'Receptionist';
+                      AppNotification.show(
+                        context,
+                        message: 'Subscription is locked in $modeLabel mode',
+                      );
+                      return;
+                    }
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -257,19 +443,49 @@ class MyProfileScreen extends ConsumerWidget {
                       ),
                     );
                   },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildStatusBadge(
-                        'Pro Plan',
-                        AppColors.primary,
-                        Icons.star_rounded,
-                      ),
-                      const Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.caption,
-                      ),
-                    ],
+                  child: Builder(
+                    builder: (context) {
+                      final sub = user?.subscription;
+                      final String planText;
+                      final Color planColor;
+                      if (sub == null || sub.endAt == null) {
+                        planText = 'Trial Active';
+                        planColor = const Color(0xFF64748B);
+                      } else if (sub.isActive && !sub.isExpired) {
+                        planText = 'Pro Plan Active';
+                        planColor = AppColors.primary;
+                      } else if (sub.isTrial && !sub.isExpired) {
+                        planText = 'Trial Active';
+                        planColor = const Color(0xFF64748B);
+                      } else {
+                        planText = 'Trial Expired';
+                        planColor = AppColors.error;
+                      }
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            isRestrictedMode ? 'Subscription' : planText,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: isRestrictedMode
+                                  ? Colors.grey.shade400
+                                  : planColor,
+                            ),
+                          ),
+                          Icon(
+                            isRestrictedMode
+                                ? Icons.lock_rounded
+                                : Icons.chevron_right_rounded,
+                            color: isRestrictedMode
+                                ? Colors.grey.shade400
+                                : AppColors.caption,
+                            size: isRestrictedMode ? 18 : 22,
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
                 _buildInsetDivider(),
@@ -288,7 +504,7 @@ class MyProfileScreen extends ConsumerWidget {
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // ==========================================
             // CONTAINER 3: SECURITY
@@ -301,11 +517,26 @@ class MyProfileScreen extends ConsumerWidget {
                   icon: Icons.devices_outlined,
                   label: 'Active Devices',
                   subtitle: 'Manage devices logged into your account',
-                  valueWidget: const Icon(
-                    Icons.chevron_right_rounded,
-                    color: AppColors.caption,
+                  valueWidget: Icon(
+                    isRestrictedMode
+                        ? Icons.lock_rounded
+                        : Icons.chevron_right_rounded,
+                    color: isRestrictedMode
+                        ? Colors.grey.shade400
+                        : AppColors.caption,
+                    size: isRestrictedMode ? 18 : 22,
                   ),
                   onTap: () {
+                    if (isRestrictedMode) {
+                      final modeLabel = isGeneralMode
+                          ? 'General'
+                          : 'Receptionist';
+                      AppNotification.show(
+                        context,
+                        message: 'Active Devices is locked in $modeLabel mode',
+                      );
+                      return;
+                    }
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -317,7 +548,7 @@ class MyProfileScreen extends ConsumerWidget {
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // ==========================================
             // CONTAINER 4: APP INFORMATION & SUPPORT
@@ -622,7 +853,7 @@ class MyProfileScreen extends ConsumerWidget {
     );
   }
 
-  static Widget _buildStatusBadge(String text, Color color, IconData icon) {
+  static Widget _buildStatusBadge(String text, Color color, [IconData? icon]) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -632,8 +863,10 @@ class MyProfileScreen extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: color),
-          const SizedBox(width: 4),
+          if (icon != null) ...[
+            Icon(icon, size: 13, color: color),
+            const SizedBox(width: 4),
+          ],
           Text(
             text,
             style: TextStyle(

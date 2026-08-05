@@ -22,9 +22,11 @@ class MonthlySummaryCard extends StatelessWidget {
     required this.onPreviousMonth,
     required this.onNextMonth,
     required this.scale,
+    this.isReceptionist = false,
   });
 
   final double scale;
+  final bool isReceptionist;
 
   final DateTime selectedMonth;
   final double? revenue;
@@ -54,7 +56,7 @@ class MonthlySummaryCard extends StatelessWidget {
             children: [
               Expanded(
                 child: SectionHeader(
-                  title: 'Monthly Profit',
+                  title: isReceptionist ? 'Monthly Expenses' : 'Monthly Profit',
                   fontSize: 18 * scale,
                   scale: scale,
                 ),
@@ -69,9 +71,10 @@ class MonthlySummaryCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 20),
-
-          MonthlyMetrics(revenue: revenue, expenses: expenses, scale: scale),
+          if (!isReceptionist) ...[
+            const SizedBox(height: 20),
+            MonthlyMetrics(revenue: revenue, expenses: expenses, scale: scale),
+          ],
 
           if (hasExpenses) ...[
             SizedBox(height: 20 * scale),
@@ -110,12 +113,9 @@ class MonthlySummaryCard extends StatelessWidget {
 
             Column(
               children: refundItems!.map((refund) {
-                final studentName = refund.studentName != null &&
-                        refund.studentName!.isNotEmpty
-                    ? refund.studentName!
-                    : 'Student';
+                final titleText = '${refund.paymentMode} (Refund)';
                 final subtitleText =
-                    '${refund.paymentMode} Refund • ${DateFormatter.shortDate(refund.paymentDate)}';
+                    DateFormatter.shortDate(refund.paymentDate);
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
@@ -141,7 +141,7 @@ class MonthlySummaryCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              studentName,
+                              titleText,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(

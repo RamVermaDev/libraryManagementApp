@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:library_management/app_colors.dart';
+import 'package:library_management/provider/app_mode_provider.dart';
 import 'package:library_management/provider/user_provider.dart';
 
 class DrawerHeading extends ConsumerWidget {
@@ -10,12 +11,7 @@ class DrawerHeading extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
     final userName = user?.name.isNotEmpty == true ? user!.name : 'Ramendra Verma';
-    final rawRole = user?.role ?? 'admin';
-    final roleLabel = (rawRole.toLowerCase() == 'admin' || rawRole.toLowerCase() == 'owner')
-        ? 'Admin'
-        : (rawRole.toLowerCase() == 'librarian' || rawRole.toLowerCase() == 'staff')
-            ? 'Receptionist'
-            : 'General';
+    final roleLabel = ref.watch(appModeProvider).label;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 20, 18, 16),

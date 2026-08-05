@@ -8,6 +8,7 @@ class StudentModel {
   final String slotTemplateId;
   final String? slotTiming;
   final String? seatId;
+  final String? seatLabel;
 
   // Personal details
   final String name;
@@ -49,6 +50,7 @@ class StudentModel {
     required this.slotTemplateId,
     this.slotTiming,
     this.seatId,
+    this.seatLabel,
     required this.name,
     required this.phone,
     this.gender,
@@ -74,13 +76,26 @@ class StudentModel {
   });
 
   factory StudentModel.fromMap(Map<String, dynamic> map) {
+    String? rawSeatId;
+    String? displaySeatLabel;
+
+    if (map['seatId'] is Map) {
+      final seatObj = map['seatId'] as Map<String, dynamic>;
+      rawSeatId = seatObj['_id']?.toString();
+      displaySeatLabel = seatObj['label']?.toString() ?? seatObj['seatNumber']?.toString();
+    } else {
+      rawSeatId = map['seatId']?.toString();
+      displaySeatLabel = map['seatLabel']?.toString();
+    }
+
     return StudentModel(
       id: map['_id']?.toString() ?? map['id']?.toString(),
 
       libraryId: _parseRefId(map['libraryId']) ?? '',
       slotTemplateId: _parseRefId(map['slotTemplateId']) ?? '',
       slotTiming: map['slotTiming']?.toString(),
-      seatId: _parseRefId(map['seatId']),
+      seatId: rawSeatId,
+      seatLabel: displaySeatLabel,
 
       name: map['name']?.toString() ?? '',
       phone: map['phone']?.toString() ?? '',
@@ -120,6 +135,7 @@ class StudentModel {
       'slotTemplateId': slotTemplateId,
       'slotTiming': slotTiming,
       'seatId': seatId,
+      'seatLabel': seatLabel,
       'name': name,
       'phone': phone,
       'gender': gender,
@@ -154,6 +170,7 @@ class StudentModel {
     String? libraryId,
     String? slotTemplateId,
     String? seatId,
+    String? seatLabel,
     String? name,
     String? phone,
     String? gender,
@@ -182,6 +199,7 @@ class StudentModel {
       libraryId: libraryId ?? this.libraryId,
       slotTemplateId: slotTemplateId ?? this.slotTemplateId,
       seatId: seatId ?? this.seatId,
+      seatLabel: seatLabel ?? this.seatLabel,
       name: name ?? this.name,
       phone: phone ?? this.phone,
       gender: gender ?? this.gender,

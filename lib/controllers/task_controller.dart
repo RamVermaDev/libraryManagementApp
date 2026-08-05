@@ -9,6 +9,7 @@ import 'package:library_management/models/task_model.dart';
 import 'package:library_management/provider/task_provider.dart';
 import 'package:library_management/provider/token_provider.dart';
 import 'package:library_management/services/manage_http_response.dart';
+import 'package:library_management/services/api_headers.dart';
 
 class TaskController {
   Future<void> addTask({
@@ -18,7 +19,8 @@ class TaskController {
     required String title,
     required String description,
     required DateTime dueDate,
-    required String urgency,
+    String urgency = 'low',
+    String assignedToRole = 'admin',
   }) async {
     try {
       final taskModel = TaskModel(
@@ -27,22 +29,13 @@ class TaskController {
         description: description,
         dueDate: dueDate,
         urgency: urgency,
+        assignedToRole: assignedToRole,
       );
-
-      final token = ref.read(tokenProvider);
-
-      if (token == null || token.isEmpty) {
-        showSnackBar(context, 'Authentication required');
-        return;
-      }
 
       final response = await http.post(
         Uri.parse('$uri/api/addtask'),
         body: taskModel.toJson(),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $token',
-        },
+        headers: getApiHeaders(ref),
       );
 
       if (!context.mounted) return;
